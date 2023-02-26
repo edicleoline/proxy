@@ -9,9 +9,7 @@ Perceba que não há um banco de dados instalado em cada equipamento. O banco de
 
 No diretório principal, o arquivo server-farm.py, preparado para gerenciar um modem específico - desde o ligamento/desligamento da porta USB, gerenciamento da interface, rotas, porta de proxy, teste de conexão, teste de conexão de proxy, identificação de problemas, solução de problemas e outros:
 
-
 usage: server-farm.py [-h] --modem MODEM_ID (--diagnose | --rotate | --usb-reboot | --info) [--hard-reset] [--user USER] [--match IP_MATCH]
-
 
 optional arguments:
   -h, --help        show this help message and exit
