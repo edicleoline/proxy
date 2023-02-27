@@ -3,7 +3,6 @@ import sys
 import time
 import socket
 
-
 CRED = '\033[91m'
 CGREEN = '\033[92m'
 CYELLOW = '\033[93m'

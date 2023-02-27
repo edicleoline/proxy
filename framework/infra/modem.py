@@ -1,4 +1,5 @@
 import sys, time
+import requests
 
 from framework.models.useriphistory import UserIpHistory
 
@@ -156,9 +157,18 @@ class Modem:
             print('\n')
             time.sleep(1)
 
-    def external_ip(self, silence_mode = False):
+    def external_ip_through_device(self, silence_mode = False):
         device_middleware = self.get_device_middleware()
         return device_middleware.wan.try_get_current_ip(retries=2, silence_mode=silence_mode)
+
+    def external_ip_through_proxy(self):
+        proxies = { 
+              "http" : 'http://{0}:{1}'.format('127.0.0.1', self.modemserver.proxy_port), 
+              "https": 'https://{0}:{1}'.format('127.0.0.1', self.modemserver.proxy_port), 
+        }
+
+        r = requests.get('https://ipecho.net/plain', headers=None, proxies=proxies)
+        print(r)
     
     def ussd(self):
         """Send USSD to SIM card.
@@ -167,6 +177,6 @@ class Modem:
 
     def install(self):
         pass
-    
+
     def uninstall(self):
         pass

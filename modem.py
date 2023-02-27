@@ -101,18 +101,21 @@ def main():
         sys.stdout.write('{0}[*] Device network provider: {1}{2}\n'.format(CBLUE, network_provider, CEND))
         sys.stdout.write('{0}[*] Device network signalbar: {1}{2}\n'.format(CBLUE, signalbar, CEND))
         sys.stdout.write('{0}[*] Proxy status: {1}{2}\n'.format(CBLUE, (CBLUE if proxy_alive else CRED), ('up' if proxy_alive else 'down'), CEND))
-        sys.stdout.write('{0}[*] External IP (device): {1}{2}\n'.format(CBLUE, inframodem.external_ip(silence_mode=True), CEND))
+        sys.stdout.write('{0}[*] External IP (through device): {1}{2}\n'.format(CBLUE, inframodem.external_ip_through_device(silence_mode=True), CEND))
 
         external_ip_proxy = None
-        sys.stdout.write('{0}[*] External IP (proxy): {1}{2}\n'.format(CBLUE, external_ip_proxy, CEND))
+        try:
+            inframodem.external_ip_through_proxy()
+        except requests.exceptions.ConnectionError as e:
+            print(e)
+
+        sys.stdout.write('{0}[*] External IP (through proxy): {1}{2}\n'.format(CBLUE, external_ip_proxy, CEND))
 
         proxy_dns = '8.8.8.8, 8.8.4.4'
         sys.stdout.write('{0}[*] Proxy DNS: {1}{2}\n'.format(CBLUE, proxy_dns, CEND))
 
-
         sys.stdout.flush()
         
-
     elif _args.rotate:
         inframodem.rotate(_args.ip_match, _args.user, _args.hard_reset)
 
