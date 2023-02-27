@@ -136,11 +136,11 @@ class Modem:
                         #/usr/local/3proxy/conf/3proxy.cfg
                         #sudo sh /etc/3proxy/conf/add3proxyuser.sh test 123                        
 
-                        # proxyService = ProxyService(ip=modem_ifaddress['addr'], port=self.modemserver.proxy_port)
-                        # proxyService.resolve_proxy()
+                        proxyService = ProxyService(ip=modem_ifaddress['addr'], port=self.modemserver.proxy_port)
+                        proxyService.resolve_proxy()
 
-                        # route = Route(gateway=modem_gateway, interface=inframodem_iface.interface, ip=modem_ifaddress['addr'], table=self.modem.id)
-                        # route.resolve_route()
+                        route = Route(gateway=modem_gateway, interface=inframodem_iface.interface, ip=modem_ifaddress['addr'], table=self.modem.id)
+                        route.resolve_route()
 
                         sys.exit(1)
                     else:
@@ -167,7 +167,7 @@ class Modem:
               "https": 'https://{0}:{1}'.format('127.0.0.1', self.modemserver.proxy_port), 
         }
 
-        r = requests.get('https://ipecho.net/plain', headers=None, proxies=proxies)
+        r = requests.get('https://ipecho.net/plain', headers=None, proxies=proxies, timeout=5)
         return r.text
     
     def ussd(self):
