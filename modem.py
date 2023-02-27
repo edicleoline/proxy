@@ -86,9 +86,7 @@ def main():
         inframodem_iface = inframodem.iface()
         modem_ifaddress = inframodem_iface.ifaddresses[0]
 
-        device = modem.get_device()
-
-        proxy_alive = False
+        device = modem.get_device()        
 
         sys.stdout.write('{0}[*] Device model: {1}{2}\n'.format(CBLUE, device.model, CEND))
         sys.stdout.write('{0}[*] Device type: {1}{2}\n'.format(CBLUE, device.type, CEND))
@@ -100,17 +98,19 @@ def main():
         sys.stdout.write('{0}[*] Device network type: {1}{2}\n'.format(CBLUE, network_type, CEND))
         sys.stdout.write('{0}[*] Device network provider: {1}{2}\n'.format(CBLUE, network_provider, CEND))
         sys.stdout.write('{0}[*] Device network signalbar: {1}{2}\n'.format(CBLUE, signalbar, CEND))
-        sys.stdout.write('{0}[*] Proxy status: {1}{2}\n'.format(CBLUE, (CBLUE if proxy_alive else CRED), ('up' if proxy_alive else 'down'), CEND))
-        sys.stdout.write('{0}[*] External IP (through device): {1}{2}\n'.format(CBLUE, inframodem.external_ip_through_device(silence_mode=True), CEND))
 
         external_ip_proxy = None
+        proxy_alive = False
         try:
             external_ip_proxy = inframodem.external_ip_through_proxy()
             sys.stdout.write('{0}[*] External IP (through proxy): {1}{2}\n'.format(CBLUE, external_ip_proxy, CEND))
+            proxy_alive = True
         except requests.exceptions.ConnectionError as e:
             external_ip_proxy = '[ERROR]: ' + str(e)
             sys.stdout.write('{0}[*] External IP (through proxy): {1}{2}\n'.format(CBLUE, CRED, external_ip_proxy, CEND))
-            # print(e)
+
+        sys.stdout.write('{0}[*] Proxy status: {1}{2}\n'.format(CBLUE, (CBLUE if proxy_alive else CRED), ('up' if proxy_alive else 'down'), CEND))
+        sys.stdout.write('{0}[*] External IP (through device): {1}{2}\n'.format(CBLUE, inframodem.external_ip_through_device(silence_mode=True), CEND))        
 
         proxy_dns = '8.8.8.8, 8.8.4.4'
         sys.stdout.write('{0}[*] Proxy DNS: {1}{2}\n'.format(CBLUE, proxy_dns, CEND))
