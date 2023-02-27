@@ -1,6 +1,7 @@
 import pymysql
 
 from framework.util.database import Database
+from framework.models.device import Device
 
 class Modem:
     def __init__(self, id = None, device_id = None, addr_id = None):
@@ -27,5 +28,11 @@ class Modem:
             addr_id = row[2]
         )
 
+    
+    def get_device(self):
+        if self.device_id == None:
+            return None
+
+        return Device.get_by_id(self.device_id)     
     
     

@@ -28,7 +28,7 @@ class MF79S:
         self.password = base64.b64encode(str(password).encode("utf-8"))
         self.retries = retries
         self.retries_ip = retries_ip
-        self.wan = Wan()
+        self.wan = Wan(interface=interface)
 
         self.session = requests.Session()
 
@@ -136,7 +136,7 @@ class MF79S:
             return False
 
     def release(self):        
-        ip = self.wan.try_get_current_ip(self.interface, 3)
+        ip = self.wan.try_get_current_ip(retries=3)
         if self.login() == False:
             sys.stdout.write('{0}[!] Our task ends here. Something went wrong with [LOGIN METHOD]{1}\n'.format(CRED, CEND))
             sys.stdout.flush()
@@ -164,7 +164,7 @@ class MF79S:
 
         time.sleep(5)
 
-        return self.wan.try_get_current_ip(self.interface, self.retries_ip)
+        return self.wan.try_get_current_ip(retries=self.retries_ip)
 
 
     def reboot(self):

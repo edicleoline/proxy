@@ -1,4 +1,5 @@
 from ast import Not
+from pickle import TRUE
 import requests
 import time
 import sys
@@ -76,8 +77,41 @@ def main():
 
     elif _args.info:
         device_middleware = inframodem.get_device_middleware()
-        details = device_middleware.details()
-        print(details)
+
+        device_details = device_middleware.details()
+        network_type = device_details['network_type'] if device_details else None
+        network_provider = device_details['network_provider'] if device_details else None
+        signalbar = device_details['signalbar'] if device_details else None
+
+        inframodem_iface = inframodem.iface()
+        modem_ifaddress = inframodem_iface.ifaddresses[0]
+
+        device = modem.get_device()
+
+        proxy_alive = False
+
+        sys.stdout.write('{0}[*] Device model: {1}{2}\n'.format(CBLUE, device.model, CEND))
+        sys.stdout.write('{0}[*] Device type: {1}{2}\n'.format(CBLUE, device.type, CEND))
+        sys.stdout.write('{0}[*] Addr id: {1}{2}\n'.format(CBLUE, modem.addr_id, CEND))
+        sys.stdout.write('{0}[*] USB port: {1}{2}\n'.format(CBLUE, modemserver.usb_port, CEND))
+        sys.stdout.write('{0}[*] Proxy port: {1}{2}\n'.format(CBLUE, modemserver.proxy_port, CEND))
+        sys.stdout.write('{0}[*] Interface: {1}{2}\n'.format(CBLUE, inframodem_iface.interface, CEND))
+        sys.stdout.write('{0}[*] Internal IP: {1}{2}\n'.format(CBLUE, modem_ifaddress['addr'], CEND))
+        sys.stdout.write('{0}[*] Device network type: {1}{2}\n'.format(CBLUE, network_type, CEND))
+        sys.stdout.write('{0}[*] Device network provider: {1}{2}\n'.format(CBLUE, network_provider, CEND))
+        sys.stdout.write('{0}[*] Device network signalbar: {1}{2}\n'.format(CBLUE, signalbar, CEND))
+        sys.stdout.write('{0}[*] Proxy status: {1}{2}\n'.format(CBLUE, (CBLUE if proxy_alive else CRED), ('up' if proxy_alive else 'down'), CEND))
+        sys.stdout.write('{0}[*] External IP (device): {1}{2}\n'.format(CBLUE, inframodem.external_ip(silence_mode=True), CEND))
+
+        external_ip_proxy = None
+        sys.stdout.write('{0}[*] External IP (proxy): {1}{2}\n'.format(CBLUE, external_ip_proxy, CEND))
+
+        proxy_dns = '8.8.8.8, 8.8.4.4'
+        sys.stdout.write('{0}[*] Proxy DNS: {1}{2}\n'.format(CBLUE, proxy_dns, CEND))
+
+
+        sys.stdout.flush()
+        
 
     elif _args.rotate:
         inframodem.rotate(_args.ip_match, _args.user, _args.hard_reset)

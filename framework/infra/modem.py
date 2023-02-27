@@ -10,8 +10,6 @@ from framework.infra.proxyservice import ProxyService
 from framework.device.zte.mf79s import MF79S
 from framework.device.zte.error.exception import ConnectException
 
-from framework.util.database import Database
-
 from framework.models.modemiphistory import ModemIpHistory
 
 CRED = '\033[91m'
@@ -30,10 +28,7 @@ class Modem:
 
     def iface(self):
         addr_id = self.modem.addr_id
-        return NetIface.get_iface_by_addr_id(addr_id)    
-
-    def install(self):
-        pass
+        return NetIface.get_iface_by_addr_id(addr_id)        
 
     def hard_reboot(self):
         """Reboot USB port by cut power.       
@@ -98,7 +93,7 @@ class Modem:
                 self.wait_until_modem_connection(True)
                 
                 device_middleware = self.get_device_middleware()
-                ip = device_middleware.wan.try_get_current_ip(device_middleware.interface, 30)
+                ip = device_middleware.wan.try_get_current_ip(retries=30)
 
             else:
                 self.wait_until_modem_connection(True)                                
@@ -161,18 +156,17 @@ class Modem:
             print('\n')
             time.sleep(1)
 
-    def details(self):
-        """Connection and SIM details like network provider, network type and signalbar.
-        """
-        pass
-
-    def external_ip(self):
-        pass
+    def external_ip(self, silence_mode = False):
+        device_middleware = self.get_device_middleware()
+        return device_middleware.wan.try_get_current_ip(retries=2, silence_mode=silence_mode)
     
     def ussd(self):
         """Send USSD to SIM card.
         """
         pass
 
+    def install(self):
+        pass
+    
     def uninstall(self):
         pass
