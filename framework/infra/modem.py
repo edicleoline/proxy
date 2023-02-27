@@ -168,7 +168,7 @@ class Modem:
         }
 
         r = requests.get('https://ipecho.net/plain', headers=None, proxies=proxies)
-        print(r)
+        return r.text
     
     def ussd(self):
         """Send USSD to SIM card.

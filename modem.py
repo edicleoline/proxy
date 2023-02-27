@@ -105,9 +105,9 @@ def main():
 
         external_ip_proxy = None
         try:
-            inframodem.external_ip_through_proxy()
+            external_ip_proxy = inframodem.external_ip_through_proxy()
         except requests.exceptions.ConnectionError as e:
-            print(e)
+            external_ip_proxy = '[ERROR]: ' + e
 
         sys.stdout.write('{0}[*] External IP (through proxy): {1}{2}\n'.format(CBLUE, external_ip_proxy, CEND))
 
