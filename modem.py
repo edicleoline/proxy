@@ -98,6 +98,7 @@ def main():
         sys.stdout.write('{0}[*] Device network type: {1}{2}\n'.format(CBLUE, network_type, CEND))
         sys.stdout.write('{0}[*] Device network provider: {1}{2}\n'.format(CBLUE, network_provider, CEND))
         sys.stdout.write('{0}[*] Device network signalbar: {1}{2}\n'.format(CBLUE, signalbar, CEND))
+        sys.stdout.write('{0}[*] External IP (through device): {1}{2}\n'.format(CBLUE, inframodem.external_ip_through_device(silence_mode=True), CEND))        
 
         external_ip_proxy = None
         proxy_alive = False
@@ -110,7 +111,7 @@ def main():
             sys.stdout.write('{0}[*] External IP (through proxy): {1}{2}\n'.format(CBLUE, CRED, external_ip_proxy, CEND))
 
         sys.stdout.write('{0}[*] Proxy status: {1}{2}\n'.format(CBLUE, (CBLUE if proxy_alive else CRED), ('up' if proxy_alive else 'down'), CEND))
-        sys.stdout.write('{0}[*] External IP (through device): {1}{2}\n'.format(CBLUE, inframodem.external_ip_through_device(silence_mode=True), CEND))        
+        
 
         proxy_dns = '8.8.8.8, 8.8.4.4'
         sys.stdout.write('{0}[*] Proxy DNS: {1}{2}\n'.format(CBLUE, proxy_dns, CEND))
