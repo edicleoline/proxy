@@ -34,14 +34,16 @@ class USB:
     def hard_reboot(self, usb_port: USBPort):
         self.preserve_others_ports_status()
 
-        self.hard_turn_off(usb_port)
+        self.hard_turn_off(usb_port, update_status=False)
         time.sleep(1)
         self.hard_turn_on(usb_port)
 
-    def hard_turn_off(self, usb_port: USBPort):
+    def hard_turn_off(self, usb_port: USBPort, update_status = True):
         self.write("p" + str(usb_port.real_port), IO_OFF)
-        usb_port.set_status(USB_STATUS_OFF)
+        if update_status == True:
+            usb_port.set_status(USB_STATUS_OFF)
 
-    def hard_turn_on(self, usb_port: USBPort):
+    def hard_turn_on(self, usb_port: USBPort, update_status = True):
         self.write("p" + str(usb_port.real_port), IO_ON)
-        usb_port.set_status(USB_STATUS_ON)
+        if update_status == True:
+            usb_port.set_status(USB_STATUS_ON)
