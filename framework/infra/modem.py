@@ -88,7 +88,7 @@ class Modem:
                 sys.stdout.flush()
         
         while True:
-            ip = None            
+            ip, done = None, False
         
             if hard_reset:
                 self.hard_reboot()
@@ -138,32 +138,25 @@ class Modem:
 
                 if ip_match:
                     if ip.startswith(ip_match):
-                        if user:
-                            user_ip_history.add(user, ip_history_id)
-
-                        #/usr/local/3proxy/conf/3proxy.cfg
-                        #sudo sh /etc/3proxy/conf/add3proxyuser.sh test 123                        
-
-                        proxyService = ProxyService(ip=modem_ifaddress['addr'], port=self.modemserver.proxy_port)
-                        proxyService.resolve_proxy()
-
-                        route = Route(gateway=modem_gateway, interface=inframodem_iface.interface, ip=modem_ifaddress['addr'], table=self.modem.id)
-                        route.resolve_route()
-
-                        break
+                        done = True
                     else:
                         sys.stdout.write('{0}[!] Lets rotate again because this IP does not match [{1}] {2}\n'.format(CBLUE, ip_match, CEND))
                         sys.stdout.flush()
                         time.sleep(1)
                         print('\n')
                         continue
+            
+                if done == True:
+                    if user:
+                        user_ip_history.add(user, ip_history_id)
 
-                if user:
-                    user_ip_history.add(user, ip_history_id)
+                    proxyService = ProxyService(ip=modem_ifaddress['addr'], port=self.modemserver.proxy_port)
+                    proxyService.resolve_proxy()
+
+                    route = Route(gateway=modem_gateway, interface=inframodem_iface.interface, ip=modem_ifaddress['addr'], table=self.modem.id)
+                    route.resolve_route()
+
                     break
-
-            if ip != None:
-                break
 
             print('\n')
             time.sleep(1)
