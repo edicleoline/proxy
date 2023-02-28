@@ -19,8 +19,8 @@ class Server(Base):
     name = Column(String(40))
     installation_id = Column(Integer)
     created_at = Column(DateTime, nullable=False, default=datetime.now())
-    modems = relationship("ServerModem", cascade="all, delete-orphan", order_by="ServerModem.id")
-    usb_ports = relationship("USBPort", cascade="all, delete-orphan", order_by="USBPort.id")
+    modems = relationship("ServerModem", back_populates="server", order_by="ServerModem.id")
+    usb_ports = relationship("USBPort", order_by="USBPort.id")
 
     def json(self):
         return {
