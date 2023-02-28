@@ -39,11 +39,11 @@ class USB:
         self.hard_turn_on(usb_port)
 
     def hard_turn_off(self, usb_port: USBPort, update_status = True):
-        self.write("p" + str(usb_port.real_port), IO_OFF)
+        self.write("p" + str(usb_port.get_real_port()), IO_OFF)
         if update_status == True:
             usb_port.set_status(USBPortStatus.OFF)
 
     def hard_turn_on(self, usb_port: USBPort, update_status = True):
-        self.write("p" + str(usb_port.real_port), IO_ON)
+        self.write("p" + str(usb_port.get_real_port()), IO_ON)
         if update_status == True:
             usb_port.set_status(USBPortStatus.ON)

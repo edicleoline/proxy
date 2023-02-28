@@ -86,7 +86,7 @@ class USBPort(Base):
     id = Column(Integer, primary_key=True)
     port = Column(Integer)
     status = Column(String)
-    server_id = Column(Integer, ForeignKey("server.id"), primary_key=False)        
+    server_id = Column(Integer, ForeignKey("server.id"), primary_key=False)      
 
     def json(self):
         return {
@@ -103,4 +103,7 @@ class USBPort(Base):
         session.commit()
 
     def get_status(self):
-        return USBPortStatus.ON if self.status == 'on' else USBPortStatus.OFF
+        return USBPortStatus.ON if self.status == 'on' else USBPortStatus.OFF    
+
+    def get_real_port(self):
+        return self.port - 1

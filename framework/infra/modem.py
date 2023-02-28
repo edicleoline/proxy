@@ -1,6 +1,5 @@
 import sys, time
 import requests
-from framework.models.server import Modem as ModemServer
 
 from framework.models.server_ import ServerModem as ServerModemModel
 
