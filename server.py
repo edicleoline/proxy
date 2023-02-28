@@ -2,6 +2,8 @@ import sys
 import os
 import argparse
 import requests
+import psutil
+from framework.util.wan import Wan
 
 from framework.models.server import Server
 from framework.infra.modem import Modem as InfraModem
@@ -43,7 +45,15 @@ def main():
     server = Server.get_by_id(1)
 
     if _args.status:    
-        print('status')
+        sys.stdout.write('{0}[*] CPU usage: {1}{2}\n'.format(CBLUE, psutil.cpu_percent(), CEND))
+        sys.stdout.write('{0}[*] Virtual memory: {1}{2}\n'.format(CBLUE, psutil.virtual_memory(), CEND))
+        sys.stdout.write('{0}[*] Virtual memory usage percent: {1}{2}\n'.format(CBLUE, psutil.virtual_memory().percent, CEND))
+        
+        external_ip = Wan('eth0').try_get_current_ip(retries=3, silence_mode=True)
+        sys.stdout.write('{0}[*] External IPv4: {1}{2}\n'.format(CBLUE, external_ip, CEND))
+        
+        
+        sys.stdout.flush()
 
     elif _args.modems:
         servermodems = server.get_modems()
