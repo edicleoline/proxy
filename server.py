@@ -2,11 +2,12 @@ import sys
 import os
 import argparse
 import requests
-import psutil
 from framework.util.wan import Wan
 
-from framework.models.server import Server
+# from framework.models.server import Server
 from framework.infra.modem import Modem as IModem
+
+from framework.models.server_ import Server
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
@@ -42,33 +43,35 @@ def main():
     
     _args = get_args()
 
-    server = Server.get_by_id(1)
+    server = Server.find_by_id(1)
 
     if _args.status:    
-        sys.stdout.write('{0}[*] CPU usage: {1}{2}\n'.format(CBLUE, psutil.cpu_percent(), CEND))
-        sys.stdout.write('{0}[*] Virtual memory: {1}{2}\n'.format(CBLUE, psutil.virtual_memory(), CEND))
-        sys.stdout.write('{0}[*] Virtual memory usage percent: {1}{2}\n'.format(CBLUE, psutil.virtual_memory().percent, CEND))
+        virtual_memory = Server.virtual_memory()
+        sys.stdout.write('{0}[*] CPU usage: {1}{2}\n'.format(CBLUE, Server.cpu_percent(), CEND))
+        sys.stdout.write('{0}[*] Virtual memory: {1}{2}\n'.format(CBLUE, virtual_memory, CEND))
+        sys.stdout.write('{0}[*] Virtual memory usage percent: {1}{2}\n'.format(CBLUE, virtual_memory.percent, CEND))
         
         external_ip = Wan('eth0').try_get_current_ip(retries=3, silence_mode=True)
-        sys.stdout.write('{0}[*] External IPv4: {1}{2}\n'.format(CBLUE, external_ip, CEND))
-        
+        sys.stdout.write('{0}[*] External IPv4: {1}{2}\n'.format(CBLUE, external_ip, CEND))        
         
         sys.stdout.flush()
 
     elif _args.modems:
-        servermodems = server.get_modems()
-        for modemserver in servermodems:
-            modem = modemserver.get_modem()
-            device = modem.get_device()
-            imodem = IModem(modemserver)
+        server_modems = server.modems
+        for server_modem in server_modems:
+            modem = server_modem.modem
+            device = modem.device
+            server_modem_usb_port = server_modem.usb_port
+            imodem = IModem(server_modem)
             is_connected = imodem.is_connected()
 
             sys.stdout.write('{0}[*] Modem id: {1}{2}\n'.format(CBLUE, modem.id, CEND))
             sys.stdout.write('{0}[*] Device model: {1}{2}\n'.format(CBLUE, device.model, CEND))
             sys.stdout.write('{0}[*] Device type: {1}{2}\n'.format(CBLUE, device.type, CEND))
             sys.stdout.write('{0}[*] Addr id: {1}{2}\n'.format(CBLUE, modem.addr_id, CEND))
-            sys.stdout.write('{0}[*] USB port: {1}{2}\n'.format(CBLUE, modemserver.get_usb_port().port, CEND))
-            sys.stdout.write('{0}[*] Proxy port: {1}{2}\n'.format(CBLUE, modemserver.proxy_port, CEND))
+            sys.stdout.write('{0}[*] USB port: {1}{2}\n'.format(CBLUE, server_modem_usb_port.port, CEND))
+            sys.stdout.write('{0}[*] USB port status: {1}{2}\n'.format(CBLUE, server_modem_usb_port.status, CEND))
+            sys.stdout.write('{0}[*] Proxy port: {1}{2}\n'.format(CBLUE, server_modem.proxy_port, CEND))
             sys.stdout.write('{0}[*] Status: {1}{2}\n'.format(CBLUE, CGREEN if is_connected else CRED, 'connected' if is_connected else 'disconnected', CEND))
 
             if is_connected == True:

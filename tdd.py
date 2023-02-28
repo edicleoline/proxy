@@ -10,11 +10,16 @@ from framework.util.database import Database
 from framework.models.installation import Installation
 from framework.models.server import Server
 from framework.models.modem import Modem
-from framework.models.modemserver import ModemServer
 
 from framework.infra.netiface import NetIface
 from framework.infra.modem import Modem as InfraModem
 from framework.infra.route import Route
+
+from db import engine
+# from sqlalchemy.orm import Session
+from sqlalchemy import select
+from framework.models.server_ import Server as ServerModel, ServerModem as ServerModemModel, USBPort as USBPortModel, USBPortStatus
+from framework.models.modem_ import Modem as ModemModel
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
@@ -25,6 +30,37 @@ CGREY = '\033[90m'
 CBLAC = '\033[90m'
 CEND = '\033[0m'
 
+
+# session = Session(engine)
+# stmt = select(ServerModel).where(ServerModel.name.in_(["raspberry-pi", "thifani"]))
+# for user in session.scalars(stmt):
+#     print(user.name)
+
+# server = ServerModel.find_by_name("thifani")
+# print(server.json())
+
+server = ServerModel.find_by_id(1)
+print(server.json())
+
+# modem = ServerModemModel.find_by_id(2)
+# print(modem.proxy_port)
+
+# modems = server.modems
+# for m in modems:
+#     print(str(m.proxy_port) + ' > ' + m.modem.addr_id + ' > ' + str(m.usb_port.port))
+
+# modem = ModemModel.find_by_id(2)
+# print(modem.addr_id)
+
+# usbport = USBPortModel.find_by_id(4)
+# print(usbport.get_status())
+# usbport.set_status(USBPortStatus.OFF)
+
+usb_ports = server.usb_ports
+for usb_port in usb_ports:
+    print(usb_port.get_status())
+
+sys.exit(0)
 # installation = Installation.get_by_name('barueri-test')
 # print(installation.id)
 

@@ -6,8 +6,10 @@ import sys
 import argparse
 
 from framework.models.installation import Installation
-from framework.models.server import Server, Modem
-from framework.models.modem import Modem as MModem
+# from framework.models.server import Server, Modem
+# from framework.models.modem import Modem as MModem
+from framework.models.server_ import Server, ServerModem
+from framework.models.modem_ import Modem
 
 from framework.infra.modem import Modem as IModem
 
@@ -46,11 +48,11 @@ def main():
     
     _args = get_args()
 
-    server = Server.get_by_id(1)
-    modem = MModem.get_by_id(_args.modem_id)
-    modemserver = Modem.get_by_server_and_modem(server, modem)
+    server = Server.find_by_id(1)
+    server_modem = ServerModem.find_by_modem_id(_args.modem_id)
+    modem = server_modem.modem
 
-    imodem = IModem(modemserver)
+    imodem = IModem(server_modem)
     
     if _args.diagnose:
         pass
@@ -63,13 +65,15 @@ def main():
 
     elif _args.info:        
         is_connected = imodem.is_connected()    
-        device = modem.get_device()        
+        device = modem.device
+        server_modem_usb_port = server_modem.usb_port  
 
         sys.stdout.write('{0}[*] Device model: {1}{2}\n'.format(CBLUE, device.model, CEND))
         sys.stdout.write('{0}[*] Device type: {1}{2}\n'.format(CBLUE, device.type, CEND))
         sys.stdout.write('{0}[*] Addr id: {1}{2}\n'.format(CBLUE, modem.addr_id, CEND))
-        sys.stdout.write('{0}[*] USB port: {1}{2}\n'.format(CBLUE, modemserver.get_usb_port().port, CEND))
-        sys.stdout.write('{0}[*] Proxy port: {1}{2}\n'.format(CBLUE, modemserver.proxy_port, CEND))
+        sys.stdout.write('{0}[*] USB port: {1}{2}\n'.format(CBLUE, server_modem_usb_port.port, CEND))
+        sys.stdout.write('{0}[*] USB port status: {1}{2}\n'.format(CBLUE, server_modem_usb_port.status, CEND))
+        sys.stdout.write('{0}[*] Proxy port: {1}{2}\n'.format(CBLUE, server_modem.proxy_port, CEND))
         sys.stdout.write('{0}[*] Status: {1}{2}\n'.format(CBLUE, CGREEN if is_connected else CRED, 'connected' if is_connected else 'disconnected', CEND))
 
         if is_connected == True:

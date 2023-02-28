@@ -2,7 +2,7 @@ import pcf8574_io
 import time
 import sys
 
-from framework.models.server import Server, USBPort, USB_STATUS_ON, USB_STATUS_OFF
+from framework.models.server_ import Server, USBPort, USBPortStatus
 
 IO_ON  = 'HIGH'
 IO_OFF = 'LOW'
@@ -24,9 +24,9 @@ class USB:
         return t
 
     def preserve_others_ports_status(self):
-        usb_ports = self.server.get_usb_ports()
+        usb_ports = self.server.usb_ports
         for usb_port in usb_ports:
-            if usb_port.status == USB_STATUS_ON:
+            if usb_port.get_status() == USBPortStatus.ON:
                 self.hard_turn_on(usb_port)
             else:
                 self.hard_turn_off(usb_port)
@@ -41,9 +41,9 @@ class USB:
     def hard_turn_off(self, usb_port: USBPort, update_status = True):
         self.write("p" + str(usb_port.real_port), IO_OFF)
         if update_status == True:
-            usb_port.set_status(USB_STATUS_OFF)
+            usb_port.set_status(USBPortStatus.OFF)
 
     def hard_turn_on(self, usb_port: USBPort, update_status = True):
         self.write("p" + str(usb_port.real_port), IO_ON)
         if update_status == True:
-            usb_port.set_status(USB_STATUS_ON)
+            usb_port.set_status(USBPortStatus.ON)

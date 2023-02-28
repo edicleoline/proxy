@@ -27,7 +27,6 @@ class Modem:
             device_id = row[1],
             addr_id = row[2]
         )
-
     
     def get_device(self):
         if self.device_id == None:

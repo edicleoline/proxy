@@ -2,6 +2,8 @@ import sys, time
 import requests
 from framework.models.server import Modem as ModemServer
 
+from framework.models.server_ import ServerModem as ServerModemModel
+
 from framework.models.useriphistory import UserIpHistory
 
 from framework.infra.netiface import NetIface
@@ -24,9 +26,9 @@ CBLAC = '\033[90m'
 CEND = '\033[0m'
 
 class Modem:
-    def __init__(self, modemserver: ModemServer):
-        self.modemserver = modemserver
-        self.modem = self.modemserver.get_modem()
+    def __init__(self, server_modem: ServerModemModel):
+        self.server_modem = server_modem
+        self.modem = self.server_modem.modem
 
     def iface(self):
         addr_id = self.modem.addr_id
@@ -34,21 +36,21 @@ class Modem:
 
     def hard_reboot(self):
         """Reboot USB port by cut power.       
-        """        
-        usb_port = self.modemserver.get_usb_port()
+        """                
+        usb_port = self.server_modem.usb_port
         sys.stdout.write('{0}[!] Let''s reboot USB port {1}...{2}'.format(CYELLOW, usb_port.port, CEND))
         sys.stdout.flush()
-        USB(server=self.modemserver.get_server()).hard_reboot(usb_port=usb_port)
+        USB(server=self.server_modem.server).hard_reboot(usb_port=usb_port)
         sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
         sys.stdout.flush()
 
     def hard_turn_off(self):
         """Turn off USB port.
         """        
-        usb_port = self.modemserver.get_usb_port()
+        usb_port = self.server_modem.get_usb_port()
         sys.stdout.write('{0}[!] Let''s turn off USB port {1}...{2}'.format(CYELLOW, usb_port.port, CEND))
         sys.stdout.flush()
-        USB(server=self.modemserver.get_server()).hard_turn_off(usb_port=usb_port)
+        USB(server=self.server_modem.server).hard_turn_off(usb_port=usb_port)
         sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
         sys.stdout.flush()
 
@@ -156,7 +158,7 @@ class Modem:
                     if user:
                         user_ip_history.add(user, ip_history_id)
 
-                    proxyService = ProxyService(ip=modem_ifaddress['addr'], port=self.modemserver.proxy_port)
+                    proxyService = ProxyService(ip=modem_ifaddress['addr'], port=self.server_modem.proxy_port)
                     proxyService.resolve_proxy()
 
                     route = Route(gateway=modem_gateway, interface=inframodem_iface.interface, ip=modem_ifaddress['addr'], table=self.modem.id)
@@ -173,8 +175,8 @@ class Modem:
 
     def external_ip_through_proxy(self):
         proxies = { 
-              "http" : 'http://{0}:{1}'.format('127.0.0.1', self.modemserver.proxy_port), 
-              "https": 'https://{0}:{1}'.format('127.0.0.1', self.modemserver.proxy_port), 
+              "http" : 'http://{0}:{1}'.format('127.0.0.1', self.server_modem.proxy_port), 
+              "https": 'https://{0}:{1}'.format('127.0.0.1', self.server_modem.proxy_port), 
         }
 
         r = requests.get('https://ipecho.net/plain', headers=None, proxies=proxies, timeout=5)
