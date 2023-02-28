@@ -15,7 +15,7 @@ class Route:
         self.gateway = gateway
         self.interface = interface
         self.ip = ip
-        self.table = str(table)
+        self.table = table
 
     def resolve_route(self):
         #check routes > ip route list
@@ -23,7 +23,7 @@ class Route:
         sys.stdout.write('{0}[+] Setting up the route...{1}\n'.format(CBLUE, CEND)) 
         sys.stdout.flush()
         
-        table = self.table
+        table = int(self.table)
         while True:
             expr = 'ip route add default via {0} dev {1} src {2} table {3}'.format(self.gateway, self.interface, self.ip, str(table))
 
@@ -34,7 +34,7 @@ class Route:
             o, e = proc.communicate()
 
             if proc.returncode != 0:
-                sys.stdout.write('{0}[!] Error: {1}{2}\n'.format(CRED, e.decode('ascii'), CEND))
+                sys.stdout.write('{0}[!] Error: {1}{2}\n'.format(CRED, e.decode('ascii').rstrip(), CEND))
                 sys.stdout.flush()
                 table = table + 1
                 continue        

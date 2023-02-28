@@ -15,13 +15,16 @@ class ProxyService:
         self.ip = ip
         self.port = port
 
-    def resolve_proxy(self):        
-        sys.stdout.write('{0}[+] Use "sudo nano /etc/3proxy/conf/p{1}.cfg{2}\n'.format(CBLUE, self.port, CEND))
-        sys.stdout.write('{0}[+] Use "proxy -p{1} -a -n -i0.0.0.0 -e{2}"{3}\n'.format(CBLUE, self.port, self.ip, CEND))
+    def resolve_proxy(self):   
+        sys.stdout.write('{0}[+] Setting up the proxy...{1}\n'.format(CBLUE, CEND)) 
         sys.stdout.flush()
 
+        # sys.stdout.write('{0}[+] Use "sudo nano /etc/3proxy/conf/p{1}.cfg{2}\n'.format(CBLUE, self.port, CEND))
+        # sys.stdout.write('{0}[+] Use "proxy -p{1} -a -n -i0.0.0.0 -e{2}"{3}\n'.format(CBLUE, self.port, self.ip, CEND))
+        # sys.stdout.flush()
+
         cfg = '/usr/local/3proxy/conf/3proxy.cfg'
-        print("sudo sed 's/proxy -p{0}.*/proxy -p{0} -a -n -i0.0.0.0 -e{1}/' {2} > {2}".format(self.port, self.ip, cfg))
+        # print("sudo sed 's/proxy -p{0}.*/proxy -p{0} -a -n -i0.0.0.0 -e{1}/' {2} > {2}".format(self.port, self.ip, cfg))
         # os.system("sudo sed 's/proxy -p{0}.*/proxy -p{0} -a -n -i0.0.0.0 -e{1}/' {2} > {2}".format(self.port, self.ip, cfg))
 
     

@@ -145,6 +145,9 @@ class Modem:
                         time.sleep(1)
                         print('\n')
                         continue
+
+                if not user and not ip_match:
+                    done = True
             
                 if done == True:
                     if user:
