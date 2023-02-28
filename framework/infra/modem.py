@@ -38,7 +38,7 @@ class Modem:
         usb_port = self.modemserver.get_usb_port()
         sys.stdout.write('{0}[!] Let''s reboot USB port {1}...{2}'.format(CYELLOW, usb_port.port, CEND))
         sys.stdout.flush()
-        USB(port=usb_port.port).hard_reboot()
+        USB(port=usb_port.port, server=self.modemserver.get_server()).hard_reboot()
         sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
         sys.stdout.flush()
 
@@ -48,7 +48,7 @@ class Modem:
         usb_port = self.modemserver.get_usb_port()
         sys.stdout.write('{0}[!] Let''s turn off USB port {1}...{2}'.format(CYELLOW, usb_port.port, CEND))
         sys.stdout.flush()
-        USB(port=usb_port.port).hard_turn_off()
+        USB(port=usb_port.port, server=self.modemserver.get_server()).hard_turn_off()
         sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
         sys.stdout.flush()
 

@@ -69,8 +69,8 @@ def main():
         sys.stdout.write('{0}[*] Device model: {1}{2}\n'.format(CBLUE, device.model, CEND))
         sys.stdout.write('{0}[*] Device type: {1}{2}\n'.format(CBLUE, device.type, CEND))
         sys.stdout.write('{0}[*] Addr id: {1}{2}\n'.format(CBLUE, modem.addr_id, CEND))
-        sys.stdout.write('{0}[*] USB port: {1}{2}\n'.format(CBLUE, modemserver.usb_port, CEND))
-        sys.stdout.write('{0}[*] Proxy port: {1}{2}\n'.format(CBLUE, modemserver.get_usb_port().port, CEND))
+        sys.stdout.write('{0}[*] USB port: {1}{2}\n'.format(CBLUE, modemserver.get_usb_port().port, CEND))
+        sys.stdout.write('{0}[*] Proxy port: {1}{2}\n'.format(CBLUE, modemserver.proxy_port, CEND))
         sys.stdout.write('{0}[*] Status: {1}{2}\n'.format(CBLUE, CGREEN if is_connected else CRED, 'connected' if is_connected else 'disconnected', CEND))
 
         if is_connected == True:
