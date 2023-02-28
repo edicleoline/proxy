@@ -1,29 +1,31 @@
-from signal import signal
-from socket import IP_TOS
-import pymysql
+from datetime import datetime
 
-from framework.util.database import Database
+from db import session, Base
 
-class ModemIpHistory:
-    def __init__(self, modem_id, ip, network_type, network_provider, signalbar):
-        self.database = Database.get_database()
-        self.modem_id = modem_id
-        self.ip = ip
-        self.network_type = network_type
-        self.network_provider = network_provider
-        self.signalbar = signalbar
+from sqlalchemy import Column
+from sqlalchemy import Integer
+from sqlalchemy import String
+from sqlalchemy import DateTime
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
-    @staticmethod
-    def add(modem_id, ip, network_type, network_provider, signalbar):        
-        connection = Database.get_database().get_db_connection()
-        cursor = connection.cursor()
-        cursor.execute('INSERT INTO modem_ip_history (modem_id, ip, network_type, network_provider, signalbar) VALUES (%s, %s, %s, %s, %s)', (modem_id, ip, network_type, network_provider, signalbar))
-        id = cursor.lastrowid
-        connection.commit()
-        connection.close()
-        return id
-        
-        
+class ModemIPHistory(Base):
+    __tablename__ = 'modem_ip_history'
 
+    id = Column(Integer, primary_key=True)
+    modem_id = Column(Integer, ForeignKey("modem.id"), primary_key=False)
+    ip = Column(String(15))
+    network_type = Column(String(90))
+    network_provider = Column(String(90))
+    signalbar = Column(String(5))
+    created_at = Column(DateTime, nullable=False, default=datetime.now())
     
-    
+    def json(self):
+        return {
+            'id': self.id,
+            'created_at': self.created_at
+        }        
+
+    def save_to_db(self):
+        session.add(self)
+        session.commit()

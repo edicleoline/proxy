@@ -13,7 +13,7 @@ from framework.infra.proxyservice import ProxyService
 from framework.device.zte.mf79s import MF79S
 from framework.device.zte.error.exception import ConnectException
 
-from framework.models.modemiphistory import ModemIpHistory
+from framework.models.modemiphistory import ModemIPHistory
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
@@ -125,7 +125,11 @@ class Modem:
                 network_type = modem_details['network_type'] if modem_details else None
                 network_provider = modem_details['network_provider'] if modem_details else None
                 signalbar = modem_details['signalbar'] if modem_details else None
-                ip_history_id = ModemIpHistory.add(self.modem.id, ip, network_type, network_provider, signalbar)
+                # ip_history_id = ModemIpHistory.add(self.modem.id, ip, network_type, network_provider, signalbar)
+
+                modem_ip_history = ModemIPHistory(modem_id = self.modem.id, ip = ip, network_type = network_type, network_provider = network_provider, signalbar = signalbar)
+                modem_ip_history.save_to_db()
+                print(modem_ip_history.id)
 
                 inframodem_iface = self.iface()
                 modem_ifaddress = inframodem_iface.ifaddresses[0]
@@ -155,7 +159,8 @@ class Modem:
             
                 if done == True:
                     if user:
-                        user_ip_history.add(user, ip_history_id)
+                        pass
+                        # user_ip_history.add(user, ip_history_id)
 
                     proxyService = ProxyService(ip=modem_ifaddress['addr'], port=self.server_modem.proxy_port)
                     proxyService.resolve_proxy()
