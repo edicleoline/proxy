@@ -1,6 +1,6 @@
 import sys, time
 import requests
-from framework.models.modemserver import ModemServer
+from framework.models.server import Modem as ModemServer
 
 from framework.models.useriphistory import UserIpHistory
 
@@ -38,7 +38,7 @@ class Modem:
         usb_port = self.modemserver.get_usb_port()
         sys.stdout.write('{0}[!] Let''s reboot USB port {1}...{2}'.format(CYELLOW, usb_port.port, CEND))
         sys.stdout.flush()
-        USB(port=usb_port.port, server=self.modemserver.get_server()).hard_reboot()
+        USB(server=self.modemserver.get_server()).hard_reboot(usb_port=usb_port)
         sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
         sys.stdout.flush()
 
@@ -48,7 +48,7 @@ class Modem:
         usb_port = self.modemserver.get_usb_port()
         sys.stdout.write('{0}[!] Let''s turn off USB port {1}...{2}'.format(CYELLOW, usb_port.port, CEND))
         sys.stdout.flush()
-        USB(port=usb_port.port, server=self.modemserver.get_server()).hard_turn_off()
+        USB(server=self.modemserver.get_server()).hard_turn_off(usb_port=usb_port)
         sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
         sys.stdout.flush()
 

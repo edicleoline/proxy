@@ -2,12 +2,14 @@ import pcf8574_io
 import time
 import sys
 
-from framework.models.server import Server
+from framework.models.server import Server, USBPort, USB_STATUS_ON, USB_STATUS_OFF
+
+IO_ON  = 'HIGH'
+IO_OFF = 'LOW'
 
 class USB:
-    def __init__(self, port: int, server: Server):
+    def __init__(self, server: Server):
         self.p1 = pcf8574_io.PCF(0x22)
-        self.port = port - 1
         self.server = server
 
     def write(self, id, mode):
@@ -21,19 +23,25 @@ class USB:
         print(t)
         return t
 
-    def hard_reboot(self):
-        # for i in range(0, 8):
-        #     self.write("p" + str(i), "HIGH")
+    def preserve_others_ports_status(self):
+        usb_ports = self.server.get_usb_ports()
+        for usb_port in usb_ports:
+            if usb_port.status == USB_STATUS_ON:
+                self.hard_turn_on(usb_port)
+            else:
+                self.hard_turn_off(usb_port)
 
-        self.write("p" + str(self.port), "LOW")
+    def hard_reboot(self, usb_port: USBPort):
+        self.preserve_others_ports_status()
+
+        self.hard_turn_off(usb_port)
         time.sleep(1)
-        self.write("p" + str(self.port), "HIGH")
+        self.hard_turn_on(usb_port)
 
-    def hard_turn_off(self):
-        # for i in range(0, 8):
-        #     self.write("p" + str(i), "HIGH")
+    def hard_turn_off(self, usb_port: USBPort):
+        self.write("p" + str(usb_port.real_port), IO_OFF)
+        usb_port.set_status(USB_STATUS_OFF)
 
-        self.write("p" + str(self.port), "LOW")
-
-
-# USB().hard_reboot(1)
+    def hard_turn_on(self, usb_port: USBPort):
+        self.write("p" + str(usb_port.real_port), IO_ON)
+        usb_port.set_status(USB_STATUS_ON)

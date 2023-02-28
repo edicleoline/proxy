@@ -6,7 +6,7 @@ import psutil
 from framework.util.wan import Wan
 
 from framework.models.server import Server
-from framework.infra.modem import Modem as InfraModem
+from framework.infra.modem import Modem as IModem
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
@@ -60,8 +60,8 @@ def main():
         for modemserver in servermodems:
             modem = modemserver.get_modem()
             device = modem.get_device()
-            inframodem = InfraModem(modemserver)
-            is_connected = inframodem.is_connected()
+            imodem = IModem(modemserver)
+            is_connected = imodem.is_connected()
 
             sys.stdout.write('{0}[*] Modem id: {1}{2}\n'.format(CBLUE, modem.id, CEND))
             sys.stdout.write('{0}[*] Device model: {1}{2}\n'.format(CBLUE, device.model, CEND))
@@ -72,10 +72,10 @@ def main():
             sys.stdout.write('{0}[*] Status: {1}{2}\n'.format(CBLUE, CGREEN if is_connected else CRED, 'connected' if is_connected else 'disconnected', CEND))
 
             if is_connected == True:
-                inframodem_iface = inframodem.iface()
-                modem_ifaddress = inframodem_iface.ifaddresses[0]
+                imodem_iface = imodem.iface()
+                modem_ifaddress = imodem_iface.ifaddresses[0]
 
-                device_middleware = inframodem.get_device_middleware()
+                device_middleware = imodem.get_device_middleware()
                 device_details = device_middleware.details()
                 network_type = device_details['network_type'] if device_details else None
                 network_provider = device_details['network_provider'] if device_details else None
@@ -85,12 +85,12 @@ def main():
                 sys.stdout.write('{0}[*] Device network type: {1}{2}\n'.format(CBLUE, network_type, CEND))
                 sys.stdout.write('{0}[*] Device network provider: {1}{2}\n'.format(CBLUE, network_provider, CEND))
                 sys.stdout.write('{0}[*] Device network signalbar: {1}{2}\n'.format(CBLUE, signalbar, CEND))
-                sys.stdout.write('{0}[*] External IP (through device): {1}{2}\n'.format(CBLUE, inframodem.external_ip_through_device(silence_mode=True), CEND))  
+                sys.stdout.write('{0}[*] External IP (through device): {1}{2}\n'.format(CBLUE, imodem.external_ip_through_device(silence_mode=True), CEND))  
 
                 external_ip_proxy = None
                 proxy_alive = False
                 try:
-                    external_ip_proxy = inframodem.external_ip_through_proxy()
+                    external_ip_proxy = imodem.external_ip_through_proxy()
                     sys.stdout.write('{0}[*] External IP (through proxy): {1}{2}\n'.format(CBLUE, external_ip_proxy, CEND))
                     proxy_alive = True
                 except requests.exceptions.ConnectionError as e:
