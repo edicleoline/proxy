@@ -150,7 +150,7 @@ class Modem:
                         route = Route(gateway=modem_gateway, interface=inframodem_iface.interface, ip=modem_ifaddress['addr'], table=self.modem.id)
                         route.resolve_route()
 
-                        sys.exit(1)
+                        break
                     else:
                         sys.stdout.write('{0}[!] Lets rotate again because this IP does not match [{1}] {2}\n'.format(CBLUE, ip_match, CEND))
                         sys.stdout.flush()
@@ -161,6 +161,9 @@ class Modem:
                 if user:
                     user_ip_history.add(user, ip_history_id)
                     break
+
+            if ip != None:
+                break
 
             print('\n')
             time.sleep(1)

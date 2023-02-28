@@ -18,24 +18,28 @@ class Route:
         self.table = str(table)
 
     def resolve_route(self):
-        sys.stdout.write('{0}[+] Use "sudo ip route add default via {1} dev {2} src {3} table {4}"{5}\n'.format(CBLUE, self.gateway, self.interface, self.ip, self.table, CEND))
-        sys.stdout.write('{0}[+] Use "sudo ip rule add from {1} table {2}"{3}\n'.format(CBLUE, self.ip, self.table, CEND)) 
-        sys.stdout.flush()
-
         #check routes > ip route list
 
-        #TODO
-        #loop table until no error 
+        sys.stdout.write('{0}[+] Setting up the route...{1}\n'.format(CBLUE, CEND)) 
+        sys.stdout.flush()
         
-        proc = subprocess.Popen(['sudo', 'ip', 'route', 'add', 'default', 'via', self.gateway, 'dev', self.interface, 'src', self.ip, 'table', str(self.table)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        o, e = proc.communicate()
-        print('Output: ' + o.decode('ascii'))
-        print('Error: '  + e.decode('ascii'))
-        print('code: ' + str(proc.returncode))
+        table = self.table
+        while True:
+            expr = 'ip route add default via {0} dev {1} src {2} table {3}'.format(self.gateway, self.interface, self.ip, str(table))
 
-        proc = subprocess.Popen(['sudo', 'ip', 'rule', 'add', 'from', self.ip, 'table', str(self.table)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        o, e = proc.communicate()
-        print('Output: ' + o.decode('ascii'))
-        print('Error: '  + e.decode('ascii'))
-        print('code: ' + str(proc.returncode))
+            sys.stdout.write('{0}[+] Executing "{1}"...{2}\n'.format(CBLUE, expr, CEND))
+            sys.stdout.flush()
+
+            proc = subprocess.Popen(['sudo', 'ip', 'route', 'add', 'default', 'via', self.gateway, 'dev', self.interface, 'src', self.ip, 'table', str(table)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            o, e = proc.communicate()
+
+            if proc.returncode != 0:
+                sys.stdout.write('{0}[!] Error: {1}{2}\n'.format(CRED, e.decode('ascii'), CEND))
+                sys.stdout.flush()
+                table = table + 1
+                continue        
+
+            proc = subprocess.Popen(['sudo', 'ip', 'rule', 'add', 'from', self.ip, 'table', str(table)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            o, e = proc.communicate()
+            break
 

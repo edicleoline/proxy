@@ -2,6 +2,7 @@ from weakref import proxy
 import netifaces
 import sys
 import os
+import subprocess
 
 from framework.util.config import Config
 from framework.util.database import Database
@@ -34,7 +35,20 @@ CEND = '\033[0m'
 # route = Route(gateway='10.56.74.1', interface='eth3', ip='10.56.74.157', table=5)
 # route.resolve_route()
 
-os.system("sudo sed 's/proxy -p1028.*/proxy -p1028 -a -n -i0.0.0.0 -e10.56.74.1570000/' /usr/local/3proxy/conf/3proxy.cfg")
+# os.system("sudo sed 's/proxy -p1028.*/proxy -p1028 -a -n -i0.0.0.0 -e10.56.74.1570000/' /usr/local/3proxy/conf/3proxy.cfg")
+
+table = 1
+while True:
+    print('testing ' + str(table))
+    proc = subprocess.Popen(['sudo', 'ip', 'route', 'add', 'default', 'via', '10.56.71.1', 'dev', 'eth2', 'src', '10.56.71.5', 'table', str(table)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    o, e = proc.communicate()
+    if proc.returncode != 0: #or not empty e.decode('ascii')
+        print('error! ' + e.decode('ascii'))
+        table = table + 1
+        continue        
+
+    print('executing second exp')
+    break
 
 sys.exit(0)
 
