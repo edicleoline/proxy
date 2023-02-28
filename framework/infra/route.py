@@ -23,6 +23,9 @@ class Route:
         sys.stdout.flush()
 
         #check routes > ip route list
+
+        #TODO
+        #loop table until no error 
         
         proc = subprocess.Popen(['sudo', 'ip', 'route', 'add', 'default', 'via', self.gateway, 'dev', self.interface, 'src', self.ip, 'table', str(self.table)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         o, e = proc.communicate()

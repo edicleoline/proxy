@@ -1,33 +1,16 @@
 from ast import Not
 from pickle import TRUE
 import requests
-import time
 import sys
-import base64
-import os
-import pymysql
-import configparser
-import fcntl, sys
+import sys
 import argparse
-
-from framework.util.config import Config
-from framework.util.database import Database
 
 from framework.models.installation import Installation
 from framework.models.server import Server
 from framework.models.modem import Modem
 from framework.models.modemserver import ModemServer
-from framework.models.modemiphistory import ModemIpHistory
 
-from framework.infra.netiface import NetIface
 from framework.infra.modem import Modem as InfraModem
-from framework.infra.usb import USB
-from framework.infra.route import Route
-from framework.infra.proxyservice import ProxyService
-
-from framework.device.zte.mf79s import MF79S
-from framework.device.zte.error.exception import ConnectException
-from framework.util.lan import Lan
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
