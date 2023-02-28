@@ -75,14 +75,19 @@ def main():
     elif _args.usb_reboot:
         inframodem.hard_reboot()
 
-    elif _args.info:
+    elif _args.info:        
+        if inframodem.is_connected() == False:
+            sys.stdout.write('{0}[!] This modem is offline. Exiting...{1}\n'.format(CRED, CEND))
+            sys.stdout.flush()
+            sys.exit(1)
+
         device_middleware = inframodem.get_device_middleware()
 
         device_details = device_middleware.details()
         network_type = device_details['network_type'] if device_details else None
         network_provider = device_details['network_provider'] if device_details else None
         signalbar = device_details['signalbar'] if device_details else None
-
+        
         inframodem_iface = inframodem.iface()
         modem_ifaddress = inframodem_iface.ifaddresses[0]
 
@@ -112,7 +117,6 @@ def main():
 
         sys.stdout.write('{0}[*] Proxy status: {1}{2}\n'.format(CBLUE, (CBLUE if proxy_alive else CRED), ('up' if proxy_alive else 'down'), CEND))
         
-
         proxy_dns = '8.8.8.8, 8.8.4.4'
         sys.stdout.write('{0}[*] Proxy DNS: {1}{2}\n'.format(CBLUE, proxy_dns, CEND))
 

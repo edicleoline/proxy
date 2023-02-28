@@ -170,6 +170,10 @@ class Modem:
         r = requests.get('https://ipecho.net/plain', headers=None, proxies=proxies, timeout=5)
         return r.text
     
+    def is_connected(self):
+        inframodem_iface = self.iface()
+        return True if inframodem_iface != None else False
+
     def ussd(self):
         """Send USSD to SIM card.
         """
