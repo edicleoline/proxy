@@ -28,5 +28,12 @@ class USB:
         time.sleep(1)
         self.write("p" + real_port, "HIGH")
 
+    def hard_turn_off(self, port):
+        for i in range(0, 8):
+            self.write("p" + str(i), "HIGH")
+
+        real_port = str(port - 1)
+        self.write("p" + real_port, "LOW")
+
 
 # USB().hard_reboot(1)

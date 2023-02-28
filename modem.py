@@ -29,6 +29,7 @@ def get_args():
     group2.add_argument('--diagnose', dest='diagnose', help='Execute diagnose', action='store_true')
     group2.add_argument('--rotate', dest='rotate', help='Rotate IPv4', action='store_true')
     group2.add_argument('--usb-reboot', dest='usb_reboot', help='Reboot USB', action='store_true')
+    group2.add_argument('--usb-turn-off', dest='usb_turn_off', help='Turn off USB', action='store_true')
     group2.add_argument('--info', dest='info', help='Show details about modem, connection and proxy', action='store_true')
 
     parser.add_argument('--hard-reset', dest='hard_reset', help='Use USB hard reset', action='store_true')
@@ -57,6 +58,9 @@ def main():
 
     elif _args.usb_reboot:
         inframodem.hard_reboot()
+
+    elif _args.usb_turn_off:
+        inframodem.hard_turn_off()
 
     elif _args.info:        
         is_connected = inframodem.is_connected()    

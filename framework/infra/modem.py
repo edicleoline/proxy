@@ -40,6 +40,15 @@ class Modem:
         sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
         sys.stdout.flush()
 
+    def hard_turn_off(self):
+        """Turn off USB port.       
+        """        
+        sys.stdout.write('{0}[!] Let''s turn off USB port {1}...{2}'.format(CYELLOW, self.modemserver.usb_port, CEND))
+        sys.stdout.flush()
+        USB().hard_turn_off(self.modemserver.usb_port)
+        sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
+        sys.stdout.flush()
+
     def get_device_middleware(self):
         middleware = None
 
@@ -85,7 +94,6 @@ class Modem:
                 self.hard_reboot()
                 sys.stdout.write('{0}[!] Reboot signal sent. Now, let''s wait modem reboot (about 1 minute)...{1}\n'.format(CBLUE, CEND))
                 sys.stdout.flush()
-
                 self.wait_until_modem_connection(False)
                 sys.stdout.write('{0}[!] Modem rebooted. Wait until to get external IP...{1}\n'.format(CBLUE, CEND))
                 sys.stdout.flush()
