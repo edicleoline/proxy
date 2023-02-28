@@ -1,5 +1,6 @@
 import sys, time
 import requests
+from framework.models.modemserver import ModemServer
 
 from framework.models.useriphistory import UserIpHistory
 
@@ -23,7 +24,7 @@ CBLAC = '\033[90m'
 CEND = '\033[0m'
 
 class Modem:
-    def __init__(self, modemserver):
+    def __init__(self, modemserver: ModemServer):
         self.modemserver = modemserver
         self.modem = self.modemserver.get_modem()
 
@@ -34,18 +35,20 @@ class Modem:
     def hard_reboot(self):
         """Reboot USB port by cut power.       
         """        
-        sys.stdout.write('{0}[!] Let''s reboot USB port {1}...{2}'.format(CYELLOW, self.modemserver.usb_port, CEND))
+        usb_port = self.modemserver.get_usb_port()
+        sys.stdout.write('{0}[!] Let''s reboot USB port {1}...{2}'.format(CYELLOW, usb_port.port, CEND))
         sys.stdout.flush()
-        USB().hard_reboot(self.modemserver.usb_port)
+        USB(port=usb_port.port).hard_reboot()
         sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
         sys.stdout.flush()
 
     def hard_turn_off(self):
-        """Turn off USB port.       
+        """Turn off USB port.
         """        
-        sys.stdout.write('{0}[!] Let''s turn off USB port {1}...{2}'.format(CYELLOW, self.modemserver.usb_port, CEND))
+        usb_port = self.modemserver.get_usb_port()
+        sys.stdout.write('{0}[!] Let''s turn off USB port {1}...{2}'.format(CYELLOW, usb_port.port, CEND))
         sys.stdout.flush()
-        USB().hard_turn_off(self.modemserver.usb_port)
+        USB(port=usb_port.port).hard_turn_off()
         sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
         sys.stdout.flush()
 

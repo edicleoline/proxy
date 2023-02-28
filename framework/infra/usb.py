@@ -3,8 +3,9 @@ import time
 import sys
 
 class USB:
-    def __init__(self):
+    def __init__(self, port: int):
         self.p1 = pcf8574_io.PCF(0x22)
+        self.port = port - 1
 
     def write(self, id, mode):
         self.p1.pin_mode(id, "OUTPUT")
@@ -19,21 +20,19 @@ class USB:
         return t
 
 
-    def hard_reboot(self, port):
+    def hard_reboot(self):
         # for i in range(0, 8):
         #     self.write("p" + str(i), "HIGH")
 
-        real_port = str(port - 1)
-        self.write("p" + real_port, "LOW")
+        self.write("p" + str(self.port), "LOW")
         time.sleep(1)
-        self.write("p" + real_port, "HIGH")
+        self.write("p" + str(self.port), "HIGH")
 
     def hard_turn_off(self, port):
         # for i in range(0, 8):
         #     self.write("p" + str(i), "HIGH")
 
-        real_port = str(port - 1)
-        self.write("p" + real_port, "LOW")
+        self.write("p" + str(self.port), "LOW")
 
 
 # USB().hard_reboot(1)

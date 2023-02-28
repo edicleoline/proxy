@@ -30,7 +30,7 @@ def get_args():
     group2.add_argument('--rotate', dest='rotate', help='Rotate IPv4', action='store_true')
     group2.add_argument('--usb-reboot', dest='usb_reboot', help='Reboot USB', action='store_true')
     group2.add_argument('--usb-turn-off', dest='usb_turn_off', help='Turn off USB', action='store_true')
-    group2.add_argument('--info', dest='info', help='Show details about modem, connection and proxy', action='store_true')
+    group2.add_argument('--info', dest='info', help='Show details about modem status, connection and proxy', action='store_true')
 
     parser.add_argument('--hard-reset', dest='hard_reset', help='Use USB hard reset', action='store_true')
     parser.add_argument('--user', dest='user', help='User email')
@@ -70,7 +70,7 @@ def main():
         sys.stdout.write('{0}[*] Device type: {1}{2}\n'.format(CBLUE, device.type, CEND))
         sys.stdout.write('{0}[*] Addr id: {1}{2}\n'.format(CBLUE, modem.addr_id, CEND))
         sys.stdout.write('{0}[*] USB port: {1}{2}\n'.format(CBLUE, modemserver.usb_port, CEND))
-        sys.stdout.write('{0}[*] Proxy port: {1}{2}\n'.format(CBLUE, modemserver.proxy_port, CEND))
+        sys.stdout.write('{0}[*] Proxy port: {1}{2}\n'.format(CBLUE, modemserver.get_usb_port().port, CEND))
         sys.stdout.write('{0}[*] Status: {1}{2}\n'.format(CBLUE, CGREEN if is_connected else CRED, 'connected' if is_connected else 'disconnected', CEND))
 
         if is_connected == True:
