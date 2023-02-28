@@ -20,8 +20,8 @@ class USB:
 
 
     def hard_reboot(self, port):
-        for i in range(0, 8):
-            self.write("p" + str(i), "HIGH")
+        # for i in range(0, 8):
+        #     self.write("p" + str(i), "HIGH")
 
         real_port = str(port - 1)
         self.write("p" + real_port, "LOW")
@@ -29,8 +29,8 @@ class USB:
         self.write("p" + real_port, "HIGH")
 
     def hard_turn_off(self, port):
-        for i in range(0, 8):
-            self.write("p" + str(i), "HIGH")
+        # for i in range(0, 8):
+        #     self.write("p" + str(i), "HIGH")
 
         real_port = str(port - 1)
         self.write("p" + real_port, "LOW")
