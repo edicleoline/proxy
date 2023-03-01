@@ -36,18 +36,14 @@ class Wan:
             session.mount("http://", adapter)
             session.mount("https://", adapter)
             resp = session.get('https://ipecho.net/plain', timeout=5).text
-            if True:
-                if silence_mode == False:
-                    sys.stdout.write('{0}{1}{2}\n'.format(CGREEN, resp, CEND))
-                    sys.stdout.flush()
-                return resp
-            else:
+            if silence_mode == False:
+                sys.stdout.write('{0}{1}{2}\n'.format(CGREEN, resp, CEND))
+                sys.stdout.flush()
+            return resp
+        except:
+            if silence_mode == False:
                 sys.stdout.write('{0}FAIL{1}\n'.format(CRED, CEND))
                 sys.stdout.flush()
-                return None
-        except:
-            sys.stdout.write('{0}FAIL{1}\n'.format(CRED, CEND))
-            sys.stdout.flush()
 
 
     def try_get_current_ip(self, retries = 3, silence_mode = False):
