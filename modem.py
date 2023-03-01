@@ -119,5 +119,4 @@ def main():
 if __name__ == '__main__':
 	main()
 
-
 #SELECT uip.*, iih.* FROM user_ip_history uip JOIN modem_ip_history iih ON (iih.id = uip.modem_ip_history_id)
