@@ -1,41 +1,28 @@
-import pymysql
+from datetime import datetime
 
-from framework.util.database import Database
+from sqlalchemy import Column
+from sqlalchemy import Integer
+from sqlalchemy import String
+from sqlalchemy import DateTime
 
-class Installation:
-    def __init__(self, id = None, name = None):
-        self.database = Database.get_database()
-        self.id = id
-        self.name = name
+from db import session, Base
 
-    @staticmethod
-    def get_by_id(id):
-        installation = Installation(id=id)
-        connection = installation.database.get_db_connection()
-        cursor = connection.cursor()
-        cursor.execute('select id, name from installation where id = %s', (id))
-        row = cursor.fetchone()
-        connection.close()
-        
-        if row == None:
-            return None
+class Installation(Base):
+    __tablename__ = 'installation'
 
-        return Installation(
-            id = row[0],
-            name = row[1]
-        )
-
-    @staticmethod
-    def get_by_name(name):
-        installation = Installation(name=name)
-        connection = installation.database.get_db_connection()
-        cursor = connection.cursor()
-        cursor.execute('select id from installation where name = %s', (name))
-        row = cursor.fetchone()
-        connection.close()
-
-        if row == None:
-            return None
-
-        return Installation.get_by_id(row[0])
+    id = Column(Integer, primary_key=True)
+    name = Column(String(40))
+    created_at = Column(DateTime, nullable=False, default=datetime.now())
     
+    def json(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'created_at': self.created_at
+        }
+
+    @classmethod
+    def find_by_id(cls, id: int):
+        return session.query(Installation).filter(Installation.id == id).first()
+    
+

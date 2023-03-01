@@ -7,7 +7,7 @@ from framework.util.wan import Wan
 # from framework.models.server import Server
 from framework.infra.modem import Modem as IModem
 
-from framework.models.server_ import Server
+from framework.models.server import Server
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'

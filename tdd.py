@@ -1,3 +1,4 @@
+import string
 from weakref import proxy
 import netifaces
 import sys
@@ -8,8 +9,8 @@ from framework.util.config import Config
 from framework.util.database import Database
 
 from framework.models.installation import Installation
-from framework.models.server import Server
-from framework.models.modem import Modem
+# from framework.models.server import Server
+# from framework.models.modem import Modem
 
 from framework.infra.netiface import NetIface
 from framework.infra.modem import Modem as InfraModem
@@ -18,8 +19,11 @@ from framework.infra.route import Route
 from db import engine
 # from sqlalchemy.orm import Session
 from sqlalchemy import select
-from framework.models.server_ import Server as ServerModel, ServerModem as ServerModemModel, USBPort as USBPortModel, USBPortStatus
-from framework.models.modem_ import Modem as ModemModel
+from framework.models.server import Server as ServerModel, ServerModem as ServerModemModel, USBPort as USBPortModel, USBPortStatus
+from framework.models.modem import Modem as ModemModel
+
+from framework.models.useriphistory import UserIPHistory
+from framework.models.installation import Installation
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
@@ -38,6 +42,23 @@ CEND = '\033[0m'
 
 # server = ServerModel.find_by_name("thifani")
 # print(server.json())
+
+# t = UserIPHistory.is_ip_reserved_for_other(ip="187.119.228.144", user="carlos_antonio_santos")
+# print(t)
+
+# test = ['test1', 'test2']
+# test = 'test'
+test = '10.1.1.1, 10.2.2.2 '
+test = test.split(',')
+print('|' + test[1].strip() + '|')
+# print(test.split(','))
+
+t = type(test) in (tuple, list)
+print(t)
+
+# print(Installation.find_by_id(2).name)
+
+sys.exit(0)
 
 server = ServerModel.find_by_id(1)
 print(server.json())

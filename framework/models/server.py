@@ -2,15 +2,15 @@ from datetime import datetime
 from enum import Enum
 import psutil
 
-from db import session, Base
-from framework.models.modem_ import Modem
-
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
+
+from db import session, Base
+from framework.models.modem import Modem
 
 class Server(Base):
     __tablename__ = 'server'

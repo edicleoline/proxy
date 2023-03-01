@@ -2,7 +2,7 @@ import pcf8574_io
 import time
 import sys
 
-from framework.models.server_ import Server, USBPort, USBPortStatus
+from framework.models.server import Server, USBPort, USBPortStatus
 
 IO_ON  = 'HIGH'
 IO_OFF = 'LOW'

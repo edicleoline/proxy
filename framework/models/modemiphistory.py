@@ -1,13 +1,12 @@
 from datetime import datetime
 
-from db import session, Base
-
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
+
+from db import session, Base
 
 class ModemIPHistory(Base):
     __tablename__ = 'modem_ip_history'

@@ -8,8 +8,8 @@ import argparse
 from framework.models.installation import Installation
 # from framework.models.server import Server, Modem
 # from framework.models.modem import Modem as MModem
-from framework.models.server_ import Server, ServerModem
-from framework.models.modem_ import Modem
+from framework.models.server import Server, ServerModem
+from framework.models.modem import Modem
 
 from framework.infra.modem import Modem as IModem
 

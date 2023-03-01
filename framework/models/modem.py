@@ -1,14 +1,14 @@
 from datetime import datetime
 
-from db import session, Base
-from framework.models.device_ import Device
-
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
+
+from db import session, Base
+from framework.models.device import Device
 
 class Modem(Base):
     __tablename__ = 'modem'
