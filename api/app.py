@@ -20,7 +20,7 @@ JWT related configuration. The following functions includes:
 1) add claims to each jwt
 2) customize the token expired error message
 """
-app.config["JWT_SECRET_KEY"] = "jose"
+app.config["JWT_SECRET_KEY"] = "berners"
 jwt = JWTManager(app)
 
 """
