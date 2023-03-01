@@ -27,7 +27,7 @@ class Server(Base):
             'id': self.id,
             'installation_id': self.installation_id,
             'name': self.name,
-            'created_at': self.created_at
+            # 'created_at': self.created_at
         }
 
     @classmethod
@@ -63,8 +63,25 @@ class ServerModem(Base):
     def json(self):
         return {
             'id': self.id,
-            'server_id': self.server_id,
-            'created_at': self.created_at
+            # 'server_id': self.server_id,
+            'usb': {
+                'id': self.usb_port.id,
+                'port': self.usb_port.port,
+                'status': self.usb_port.status
+            },
+            'proxy': {
+                'port': self.proxy_port
+            },
+            'modem': {
+                'id': self.modem.id,
+                'addr_id': self.modem.addr_id,
+                'device': {
+                    'id': self.modem.device.id,
+                    'model': self.modem.device.model,
+                    'type': self.modem.device.type
+                },
+            }
+            # 'created_at': self.created_at            
         }
 
     @classmethod

@@ -2,18 +2,22 @@ from flask import Flask, jsonify
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 
-from db import db
+# from db import db
 from blocklist import BLOCKLIST
-from resources.user import UserRegister, UserLogin, User, TokenRefresh, UserLogout
-from resources.item import Item, ItemList
-from resources.store import Store, StoreList
-from resources.tag import Tag
+# from resources.user import UserRegister, UserLogin, User, TokenRefresh, UserLogout
+# from resources.item import Item, ItemList
+# from resources.store import Store, StoreList
+# from resources.tag import Tag
+
+from resources.server import Server
+from resources.serverstatus import ServerStatus
+from resources.servermodems import ServerModems
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
+# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["PROPAGATE_EXCEPTIONS"] = True
-db.init_app(app)
+# db.init_app(app)
 api = Api(app)
 
 """
@@ -95,19 +99,23 @@ def revoked_token_callback(jwt_header, jwt_payload):
 # JWT configuration ends
 
 
-with app.app_context():
-    import models  # noqa: F401
+# with app.app_context():
+    # import models  # noqa: F401
 
-    db.create_all()
+    # db.create_all()
 
 
-api.add_resource(UserRegister, "/register")
-api.add_resource(UserLogin, "/login")
-api.add_resource(UserLogout, "/logout")
-api.add_resource(User, "/user/<int:user_id>")
-api.add_resource(TokenRefresh, "/refresh")
-api.add_resource(Store, "/store/<string:name>")
-api.add_resource(StoreList, "/store")
-api.add_resource(Item, "/item/<string:name>")
-api.add_resource(ItemList, "/item")
-api.add_resource(Tag, "/tag/<string:name>")
+# api.add_resource(UserRegister, "/register")
+# api.add_resource(UserLogin, "/login")
+# api.add_resource(UserLogout, "/logout")
+# api.add_resource(User, "/user/<int:user_id>")
+# api.add_resource(TokenRefresh, "/refresh")
+# api.add_resource(Store, "/store/<string:name>")
+# api.add_resource(StoreList, "/store")
+# api.add_resource(Item, "/item/<string:name>")
+# api.add_resource(ItemList, "/item")
+# api.add_resource(Tag, "/tag/<string:name>")
+
+api.add_resource(Server, "/server")
+api.add_resource(ServerStatus, "/server/status")
+api.add_resource(ServerModems, "/server/modem")

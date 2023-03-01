@@ -1,7 +1,7 @@
 import sys, time
 import requests
 
-from framework.models.server import ServerModem as ServerModemModel
+from framework.models.server import ServerModem
 from framework.models.modemiphistory import ModemIPHistory
 from framework.models.useriphistory import UserIPHistory
 
@@ -23,7 +23,7 @@ CBLAC = '\033[90m'
 CEND = '\033[0m'
 
 class Modem:
-    def __init__(self, server_modem: ServerModemModel):
+    def __init__(self, server_modem: ServerModem):
         self.server_modem = server_modem
         self.modem = self.server_modem.modem
 
