@@ -94,12 +94,6 @@ def revoked_token_callback(jwt_header, jwt_payload):
 # JWT configuration ends
 
 
-# with app.app_context():
-    # import models  # noqa: F401
-
-    # db.create_all()
-
-
 api.add_resource(UserRegister, "/register")
 api.add_resource(UserLogin, "/login")
 api.add_resource(UserLogout, "/logout")
