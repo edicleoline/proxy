@@ -20,7 +20,7 @@ optional arguments:
   --info            Show details about modem, connection and proxy
   --hard-reset      Use USB hard reset
   --user USER       User email
-  --match IP_MATCH  IPv4 match
+  --match IP_MATCH  IPv4 match 
 
 --modem: Recebe obrigatoriamente o ID do modem
 --diagnose: Realiza um diagnóstico e resolve problemas de conexão, interface, rotas, proxy e outros problemas
