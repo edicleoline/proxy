@@ -5,7 +5,7 @@ from framework.models.server import Server as ServerModel
 from models.serverstatus import ServerStatus as ServerStatusModel
 
 class ServerStatus(Resource):
-    # @jwt_required()
+    @jwt_required()
     def get(self):
         server = ServerModel.find_by_id(1)
 

@@ -5,7 +5,7 @@ from framework.models.server import Server as ServerModel
 
 
 class Server(Resource):
-    # @jwt_required()
+    @jwt_required()
     def get(self):
         server = ServerModel.find_by_id(1)
 

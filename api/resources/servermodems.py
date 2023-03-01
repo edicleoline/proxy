@@ -7,7 +7,7 @@ from models.serverstatus import ServerStatus as ServerStatusModel
 from framework.infra.modem import Modem as IModem
 
 class ServerModems(Resource):
-    # @jwt_required()
+    @jwt_required()
     def get(self):
         server = ServerModel.find_by_id(1)
 

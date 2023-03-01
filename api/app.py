@@ -4,7 +4,7 @@ from flask_jwt_extended import JWTManager
 
 # from db import db
 from blocklist import BLOCKLIST
-# from resources.user import UserRegister, UserLogin, User, TokenRefresh, UserLogout
+from resources.user import UserRegister, UserLogin, User, TokenRefresh, UserLogout
 # from resources.item import Item, ItemList
 # from resources.store import Store, StoreList
 # from resources.tag import Tag
@@ -106,11 +106,11 @@ def revoked_token_callback(jwt_header, jwt_payload):
     # db.create_all()
 
 
-# api.add_resource(UserRegister, "/register")
-# api.add_resource(UserLogin, "/login")
-# api.add_resource(UserLogout, "/logout")
+api.add_resource(UserRegister, "/register")
+api.add_resource(UserLogin, "/login")
+api.add_resource(UserLogout, "/logout")
 # api.add_resource(User, "/user/<int:user_id>")
-# api.add_resource(TokenRefresh, "/refresh")
+api.add_resource(TokenRefresh, "/refresh")
 # api.add_resource(Store, "/store/<string:name>")
 # api.add_resource(StoreList, "/store")
 # api.add_resource(Item, "/item/<string:name>")

@@ -24,6 +24,7 @@ from framework.models.modem import Modem as ModemModel
 
 from framework.models.useriphistory import UserIPHistory
 from framework.models.installation import Installation
+from framework.models.user import UserModel
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
@@ -48,13 +49,18 @@ CEND = '\033[0m'
 
 # test = ['test1', 'test2']
 # test = 'test'
-test = '10.1.1.1, 10.2.2.2 '
-test = test.split(',')
-print('|' + test[1].strip() + '|')
-# print(test.split(','))
+# test = '10.1.1.1, 10.2.2.2 '
+# test = test.split(',')
+# print('|' + test[1].strip() + '|')
+# # print(test.split(','))
 
-t = type(test) in (tuple, list)
-print(t)
+# t = type(test) in (tuple, list)
+# print(t)
+
+user_model = UserModel()
+user_model.username = 'berners'
+user_model.password = '123'
+user_model.save_to_db()
 
 # print(Installation.find_by_id(2).name)
 
