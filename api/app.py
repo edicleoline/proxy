@@ -2,12 +2,8 @@ from flask import Flask, jsonify
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 
-# from db import db
 from blocklist import BLOCKLIST
-from resources.user import UserRegister, UserLogin, User, TokenRefresh, UserLogout
-# from resources.item import Item, ItemList
-# from resources.store import Store, StoreList
-# from resources.tag import Tag
+from resources.user import UserRegister, UserLogin, TokenRefresh, UserLogout
 
 from resources.server import Server
 from resources.serverstatus import ServerStatus
@@ -15,10 +11,8 @@ from resources.servermodems import ServerModems
 from resources.servermodem import ServerModem
 
 app = Flask(__name__)
-# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["PROPAGATE_EXCEPTIONS"] = True
-# db.init_app(app)
 api = Api(app)
 
 """
