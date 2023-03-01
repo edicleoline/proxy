@@ -3,7 +3,6 @@ from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
 
 from framework.models.server import Server as ServerModel
 
-
 class Server(Resource):
     @jwt_required()
     def get(self):
