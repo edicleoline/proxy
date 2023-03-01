@@ -6,8 +6,6 @@ import sys
 import argparse
 
 from framework.models.installation import Installation
-# from framework.models.server import Server, Modem
-# from framework.models.modem import Modem as MModem
 from framework.models.server import Server, ServerModem
 from framework.models.modem import Modem
 
