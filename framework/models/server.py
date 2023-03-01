@@ -81,7 +81,7 @@ class ServerModem(Base):
                     'type': self.modem.device.type
                 },
             }
-            # 'created_at': self.created_at            
+            # 'created_at': self.created_at
         }
 
     @classmethod

@@ -12,6 +12,7 @@ from blocklist import BLOCKLIST
 from resources.server import Server
 from resources.serverstatus import ServerStatus
 from resources.servermodems import ServerModems
+from resources.servermodem import ServerModem
 
 app = Flask(__name__)
 # app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
@@ -119,3 +120,4 @@ def revoked_token_callback(jwt_header, jwt_payload):
 api.add_resource(Server, "/server")
 api.add_resource(ServerStatus, "/server/status")
 api.add_resource(ServerModems, "/server/modem")
+api.add_resource(ServerModem, "/server/modem/<int:modem_id>")

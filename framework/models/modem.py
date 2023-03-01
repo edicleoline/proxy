@@ -22,7 +22,7 @@ class Modem(Base):
     def json(self):
         return {
             'id': self.id,
-            'created_at': self.created_at
+            # 'created_at': self.created_at
         }
 
     @classmethod
