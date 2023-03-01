@@ -3,7 +3,7 @@ import requests
 
 from framework.models.server_ import ServerModem as ServerModemModel
 
-from framework.models.useriphistory import UserIpHistory
+from framework.models.useriphistory import UserIPHistory
 
 from framework.infra.netiface import NetIface
 from framework.infra.usb import USB
@@ -82,12 +82,12 @@ class Modem:
             time.sleep(1)
 
     def rotate(self, ip_match, user, hard_reset = False):
-        device_middleware, user_ip_history = None, UserIpHistory()
+        device_middleware, user_ip_history = None, UserIPHistory()
 
         if ip_match == None and user:
             user_last_ip = user_ip_history.get_last_ip(user)
             if user_last_ip:
-                ip_match = ".".join(user_last_ip.split(".", 2)[:2])  
+                ip_match = ".".join(user_last_ip.modem_ip_history.ip.split(".", 2)[:2])  
                 sys.stdout.write('{0}[!] IPv4 match auto enabled for [{1}]{2}\n\n'.format(CGREEN, ip_match, CEND))
                 sys.stdout.flush()
         
@@ -136,7 +136,8 @@ class Modem:
                 modem_gateway = NetIface.get_gateway_from_ipv4(ipv4 = modem_ifaddress['addr'])
 
                 if user:
-                    is_ip_reserved_for_other = user_ip_history.is_ip_reserved_for_other(ip, user)
+                    # is_ip_reserved_for_other = user_ip_history.is_ip_reserved_for_other(ip, user)
+                    is_ip_reserved_for_other = False
                     if is_ip_reserved_for_other:
                         sys.stdout.write('{0}[!] Lets rotate again because this IP is reserved for another user{1}\n'.format(CBLUE, CEND))
                         sys.stdout.flush()
