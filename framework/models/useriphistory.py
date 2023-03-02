@@ -8,9 +8,9 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import desc
 
 from framework.models.modemiphistory import ModemIPHistory
-from db import session, Base
+from db import db
 
-class UserIPHistory(Base):
+class UserIPHistory(db.Model):
     __tablename__ = 'user_ip_history'
 
     id = Column(Integer, primary_key=True)
@@ -26,7 +26,7 @@ class UserIPHistory(Base):
 
     @classmethod
     def is_ip_reserved_for_other(cls, ip, user):
-        t = session.query(UserIPHistory)\
+        t = db.s.query(UserIPHistory)\
             .join(ModemIPHistory)\
             .filter(UserIPHistory.user != user)\
             .filter(ModemIPHistory.ip == ip)\
@@ -35,8 +35,8 @@ class UserIPHistory(Base):
 
     @classmethod
     def get_last_ip(cls, user):
-        return session.query(UserIPHistory).filter(UserIPHistory.user == user).order_by(desc(UserIPHistory.id)).limit(1).first()    
+        return db.s.query(UserIPHistory).filter(UserIPHistory.user == user).order_by(desc(UserIPHistory.id)).limit(1).first()    
 
     def save_to_db(self):
-        session.add(self)
-        session.commit()
+        db.s.add(self)
+        db.s.commit()

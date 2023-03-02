@@ -9,7 +9,7 @@ import { gridSpacing } from 'store/constant';
 
 import { useEffect, useState } from 'react';
 
-import { getModem } from 'services/api/server/modem';
+import { getModem, getModems } from 'services/api/server/modem';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -24,12 +24,40 @@ const Modems = () => {
     const [modems, setModems] = useState([]);
 
     useEffect(() => {
-        getModem().then(
+        getModems().then(
             (items) => {
                 console.log(items);
                 setModems(items);
+
+                // window.setTimeout(function () {
+                //     const t = items.map(function (item) {
+                //         item.external_ip = '123.123.123.123';
+                //         return item;
+                //     });
+                //     setModems(t);
+                //     console.log(t);
+                // }, 1000);
+                items.map(function (item) {
+                    if (item.id == 2 || item.id == 5) {
+                        getModem(item.modem.id).then(
+                            (modem) => {
+                                const _modems = items.map(function (m) {
+                                    if (m.modem.id == modem.modem.id) {
+                                        m.external_ip = modem.external_ip_through_device;
+                                    }
+                                    return m;
+                                });
+                                console.log('map modems', _modems);
+                                setModems(_modems);
+                                // console.log('asd23');
+                                // console.log(modem);
+                            },
+                            (error) => console.log('modem error', error)
+                        );
+                    }
+                });
             },
-            (error) => console.log('modem error', error)
+            (error) => console.log('modems error', error)
         );
     }, []);
 
@@ -47,9 +75,15 @@ const Modems = () => {
                                                 <TableCell>Modem</TableCell>
                                                 <TableCell align="right">Status</TableCell>
                                                 <TableCell align="right">IP externo</TableCell>
+                                                <TableCell align="right">Rede</TableCell>
+                                                <TableCell align="right">Provedor</TableCell>
+                                                <TableCell align="right">Sinal</TableCell>
                                                 <TableCell align="right">Porta proxy</TableCell>
+                                                <TableCell align="right">Status proxy</TableCell>
                                                 <TableCell align="right">Porta USB</TableCell>
                                                 <TableCell align="right">Status porta USB</TableCell>
+                                                <TableCell align="right">Tipo</TableCell>
+                                                <TableCell align="right">Modelo</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -59,10 +93,16 @@ const Modems = () => {
                                                         {row.modem.id}
                                                     </TableCell>
                                                     <TableCell align="right">{row.is_connected ? 'ON' : 'OFF'}</TableCell>
+                                                    <TableCell align="right">{row.external_ip ? row.external_ip : '-'}</TableCell>
+                                                    <TableCell align="right"></TableCell>
+                                                    <TableCell align="right"></TableCell>
+                                                    <TableCell align="right"></TableCell>
                                                     <TableCell align="right">{row.proxy.port}</TableCell>
-                                                    <TableCell align="right">{row.proxy.port}</TableCell>
+                                                    <TableCell align="right"></TableCell>
                                                     <TableCell align="right">{row.usb.port}</TableCell>
                                                     <TableCell align="right">{row.usb.status}</TableCell>
+                                                    <TableCell align="right">{row.modem.device.type}</TableCell>
+                                                    <TableCell align="right">{row.modem.device.model}</TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>

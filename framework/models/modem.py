@@ -7,10 +7,10 @@ from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
-from db import session, Base
+from db import db
 from framework.models.device import Device
 
-class Modem(Base):
+class Modem(db.Model):
     __tablename__ = 'modem'
 
     id = Column(Integer, primary_key=True)
@@ -27,6 +27,6 @@ class Modem(Base):
 
     @classmethod
     def find_by_id(cls, id: int):
-        return session.query(Modem).filter(Modem.id == id).first()
+        return db.s.query(Modem).filter(Modem.id == id).first()
     
 

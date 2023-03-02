@@ -6,9 +6,9 @@ from sqlalchemy import String
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
-from db import session, Base
+from db import db
 
-class UserModel(Base):
+class UserModel(db.Model):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
@@ -23,16 +23,16 @@ class UserModel(Base):
 
     @classmethod
     def find_by_username(cls, username):
-        return session.query(UserModel).filter(UserModel.username == username).first()
+        return db.s.query(UserModel).filter(UserModel.username == username).first()
 
     @classmethod
     def find_by_id(cls, _id):
-        return session.query(UserModel).filter(UserModel.id == id).first()
+        return db.s.query(UserModel).filter(UserModel.id == id).first()
 
     def save_to_db(self):
-        session.add(self)
-        session.commit()
+        db.s.add(self)
+        db.s.commit()
 
     def delete_from_db(self):
-        session.delete(self)
-        session.commit()
+        db.s.delete(self)
+        db.s.commit()

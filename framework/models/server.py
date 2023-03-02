@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-import psutil
+# import psutil
 
 from sqlalchemy import Column
 from sqlalchemy import Integer
@@ -9,10 +9,10 @@ from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
-from db import session, Base
+from db import db
 from framework.models.modem import Modem
 
-class Server(Base):
+class Server(db.Model):
     __tablename__ = 'server'
 
     id = Column(Integer, primary_key=True)
@@ -32,22 +32,24 @@ class Server(Base):
 
     @classmethod
     def find_by_id(cls, id: int):
-        return session.query(Server).filter(Server.id == id).first()
+        return db.s.query(Server).filter(Server.id == id).first()
 
     @classmethod
     def find_by_name(cls, name):
-        return session.query(Server).filter(Server.name == name).first()    
+        return db.s.query(Server).filter(Server.name == name).first()    
 
     @staticmethod
     def cpu_percent():
-        return psutil.cpu_percent()
+        # return psutil.cpu_percent()
+        return 1
 
     @staticmethod
     def virtual_memory():
-        return psutil.virtual_memory()
+        # return psutil.virtual_memory()
+        return 1
 
 
-class ServerModem(Base):
+class ServerModem(db.Model):
     __tablename__ = 'modem_server'
 
     id = Column(Integer, primary_key=True)
@@ -86,18 +88,18 @@ class ServerModem(Base):
 
     @classmethod
     def find_by_id(cls, id: int):
-        return session.query(ServerModem).filter(ServerModem.id == id).first()
+        return db.s.query(ServerModem).filter(ServerModem.id == id).first()
 
     @classmethod
     def find_by_modem_id(cls, id: int):
-        return session.query(ServerModem).filter(ServerModem.modem_id == id).first()
+        return db.s.query(ServerModem).filter(ServerModem.modem_id == id).first()
 
 
 class USBPortStatus(Enum):
     ON  = 'on'
     OFF = 'off'
 
-class USBPort(Base):
+class USBPort(db.Model):
     __tablename__ = 'usb_port'
 
     id = Column(Integer, primary_key=True)
@@ -113,11 +115,11 @@ class USBPort(Base):
 
     @classmethod
     def find_by_id(cls, id: int):
-        return session.query(USBPort).filter(USBPort.id == id).first()
+        return db.s.query(USBPort).filter(USBPort.id == id).first()
 
     def set_status(self, status:USBPortStatus):
         self.status = status.value
-        session.commit()
+        db.s.commit()
 
     def get_status(self):
         return USBPortStatus.ON if self.status == 'on' else USBPortStatus.OFF    

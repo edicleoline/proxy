@@ -5,9 +5,9 @@ from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import DateTime
 
-from db import session, Base
+from db import db
 
-class Installation(Base):
+class Installation(db.Model):
     __tablename__ = 'installation'
 
     id = Column(Integer, primary_key=True)
@@ -23,6 +23,6 @@ class Installation(Base):
 
     @classmethod
     def find_by_id(cls, id: int):
-        return session.query(Installation).filter(Installation.id == id).first()
+        return db.s.query(Installation).filter(Installation.id == id).first()
     
 

@@ -6,9 +6,9 @@ from sqlalchemy import String
 from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
 
-from db import session, Base
+from db import db
 
-class ModemIPHistory(Base):
+class ModemIPHistory(db.Model):
     __tablename__ = 'modem_ip_history'
 
     id = Column(Integer, primary_key=True)
@@ -26,5 +26,5 @@ class ModemIPHistory(Base):
         }        
 
     def save_to_db(self):
-        session.add(self)
-        session.commit()
+        db.s.add(self)
+        db.s.commit()
