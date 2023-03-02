@@ -9,116 +9,65 @@ import { gridSpacing } from 'store/constant';
 
 import { useEffect, useState } from 'react';
 
-import api from 'services/api';
+import { getModem } from 'services/api/server/modem';
+
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
 const Modems = () => {
     // const [isLoading, setLoading] = useState(true);
+    const [modems, setModems] = useState([]);
+
     useEffect(() => {
-        api.get('server/modem').then((response) => console.log(response.data));
+        getModem().then(
+            (items) => {
+                console.log(items);
+                setModems(items);
+            },
+            (error) => console.log('modem error', error)
+        );
     }, []);
 
     return (
-        <MainCard title="Basic Typography 0" secondary={<SecondaryAction link="https://next.material-ui.com/system/typography/" />}>
+        <MainCard title="Modems" secondary={<SecondaryAction link="https://next.material-ui.com/system/typography/" />}>
             <Grid container spacing={gridSpacing}>
-                <Grid item xs={12} sm={6}>
-                    <SubCard title="Heading">
+                <Grid item xs={12} sm={12}>
+                    <SubCard>
                         <Grid container direction="column" spacing={1}>
                             <Grid item>
-                                <MuiTypography variant="h1" gutterBottom>
-                                    h1. Heading
-                                </MuiTypography>
-                            </Grid>
-                            <Grid item>
-                                <MuiTypography variant="h2" gutterBottom>
-                                    h2. Heading
-                                </MuiTypography>
-                            </Grid>
-                            <Grid item>
-                                <MuiTypography variant="h3" gutterBottom>
-                                    h3. Heading
-                                </MuiTypography>
-                            </Grid>
-                            <Grid item>
-                                <MuiTypography variant="h4" gutterBottom>
-                                    h4. Heading
-                                </MuiTypography>
-                            </Grid>
-                            <Grid item>
-                                <MuiTypography variant="h5" gutterBottom>
-                                    h5. Heading
-                                </MuiTypography>
-                            </Grid>
-                            <Grid item>
-                                <MuiTypography variant="h6" gutterBottom>
-                                    h6. Heading
-                                </MuiTypography>
-                            </Grid>
-                        </Grid>
-                    </SubCard>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                    <SubCard title="Sub title">
-                        <Grid container direction="column" spacing={1}>
-                            <Grid item>
-                                <MuiTypography variant="subtitle1" gutterBottom>
-                                    subtitle1. Lorem ipsum dolor sit connecter adieu siccing eliot. Quos blanditiis tenetur
-                                </MuiTypography>
-                            </Grid>
-                            <Grid item>
-                                <MuiTypography variant="subtitle2" gutterBottom>
-                                    subtitle2. Lorem ipsum dolor sit connecter adieu siccing eliot. Quos blanditiis tenetur
-                                </MuiTypography>
-                            </Grid>
-                        </Grid>
-                    </SubCard>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                    <SubCard title="Body">
-                        <Grid container direction="column" spacing={1}>
-                            <Grid item>
-                                <MuiTypography variant="body1" gutterBottom>
-                                    asd
-                                </MuiTypography>
-                            </Grid>
-                            <Grid item>
-                                <MuiTypography variant="body2" gutterBottom>
-                                    asd
-                                </MuiTypography>
-                            </Grid>
-                        </Grid>
-                    </SubCard>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                    <SubCard title="Extra">
-                        <Grid container direction="column" spacing={1}>
-                            <Grid item>
-                                <MuiTypography variant="button" display="block" gutterBottom>
-                                    button text
-                                </MuiTypography>
-                            </Grid>
-                            <Grid item>
-                                <MuiTypography variant="caption" display="block" gutterBottom>
-                                    caption text
-                                </MuiTypography>
-                            </Grid>
-                            <Grid item>
-                                <MuiTypography variant="overline" display="block" gutterBottom>
-                                    overline text
-                                </MuiTypography>
-                            </Grid>
-                            <Grid item>
-                                <MuiTypography
-                                    variant="body2"
-                                    color="primary"
-                                    component={Link}
-                                    href="https://berrydashboard.io"
-                                    target="_blank"
-                                    display="block"
-                                    underline="hover"
-                                    gutterBottom
-                                >
-                                    https://berrydashboard.io
-                                </MuiTypography>
+                                <TableContainer component={Paper}>
+                                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Modem</TableCell>
+                                                <TableCell align="right">Status</TableCell>
+                                                <TableCell align="right">IP externo</TableCell>
+                                                <TableCell align="right">Porta proxy</TableCell>
+                                                <TableCell align="right">Porta USB</TableCell>
+                                                <TableCell align="right">Status porta USB</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {modems.map((row) => (
+                                                <TableRow key={row.modem.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                                    <TableCell component="th" scope="row">
+                                                        {row.modem.id}
+                                                    </TableCell>
+                                                    <TableCell align="right">{row.is_connected ? 'ON' : 'OFF'}</TableCell>
+                                                    <TableCell align="right">{row.proxy.port}</TableCell>
+                                                    <TableCell align="right">{row.proxy.port}</TableCell>
+                                                    <TableCell align="right">{row.usb.port}</TableCell>
+                                                    <TableCell align="right">{row.usb.status}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
                             </Grid>
                         </Grid>
                     </SubCard>
