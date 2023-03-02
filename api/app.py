@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 
@@ -11,6 +12,7 @@ from resources.servermodems import ServerModems
 from resources.servermodem import ServerModem
 
 app = Flask(__name__)
+CORS(app)
 # app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["PROPAGATE_EXCEPTIONS"] = True
 api = Api(app)
