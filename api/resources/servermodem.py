@@ -1,14 +1,11 @@
 import requests
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
-
-from framework.models.server import Server as ServerModel, ServerModem as ServerModemModel
-from models.serverstatus import ServerStatus as ServerStatusModel
-
+from framework.models.server import ServerModel, ServerModemModel
 from framework.infra.modem import Modem as IModem
 
 class ServerModem(Resource):
-    @jwt_required()
+    # @jwt_required()
     def get(self, modem_id):
         
         server = ServerModel.find_by_id(1)

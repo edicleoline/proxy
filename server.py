@@ -4,10 +4,8 @@ import argparse
 import requests
 from framework.util.wan import Wan
 
-# from framework.models.server import Server
 from framework.infra.modem import Modem as IModem
-
-from framework.models.server import Server
+from framework.models.server import ServerModel
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
@@ -43,13 +41,13 @@ def main():
     
     _args = get_args()
 
-    server = Server.find_by_id(1)
+    server = ServerModel.find_by_id(1)
 
     if _args.status:    
-        virtual_memory = Server.virtual_memory()
-        sys.stdout.write('{0}[*] CPU usage: {1}{2}\n'.format(CBLUE, Server.cpu_percent(), CEND))
+        virtual_memory = ServerModel.virtual_memory()
+        sys.stdout.write('{0}[*] CPU usage: {1}{2}\n'.format(CBLUE, ServerModel.cpu_percent(), CEND))
         sys.stdout.write('{0}[*] Virtual memory: {1}{2}\n'.format(CBLUE, virtual_memory, CEND))
-        sys.stdout.write('{0}[*] Virtual memory usage percent: {1}{2}\n'.format(CBLUE, virtual_memory.percent, CEND))
+        # sys.stdout.write('{0}[*] Virtual memory usage percent: {1}{2}\n'.format(CBLUE, virtual_memory.percent, CEND))
         
         external_ip = Wan('eth0').try_get_current_ip(retries=3, silence_mode=True)
         sys.stdout.write('{0}[*] External IPv4: {1}{2}\n'.format(CBLUE, external_ip, CEND))        
@@ -57,11 +55,11 @@ def main():
         sys.stdout.flush()
 
     elif _args.modems:
-        server_modems = server.modems
+        server_modems = server.modems()
         for server_modem in server_modems:
-            modem = server_modem.modem
-            device = modem.device
-            server_modem_usb_port = server_modem.usb_port
+            modem = server_modem.modem()
+            device = modem.device()
+            server_modem_usb_port = server_modem.usb_port()
             imodem = IModem(server_modem)
             is_connected = imodem.is_connected()
 

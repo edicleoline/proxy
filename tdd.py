@@ -5,10 +5,7 @@ import sys
 import os
 import subprocess
 
-from framework.util.config import Config
-from framework.util.database import Database
-
-from framework.models.installation import Installation
+from framework.models.installation import InstallationModel
 # from framework.models.server import Server
 # from framework.models.modem import Modem
 
@@ -16,14 +13,11 @@ from framework.infra.netiface import NetIface
 from framework.infra.modem import Modem as InfraModem
 from framework.infra.route import Route
 
-from db import engine
-# from sqlalchemy.orm import Session
-from sqlalchemy import select
-from framework.models.server import Server as ServerModel, ServerModem as ServerModemModel, USBPort as USBPortModel, USBPortStatus
-from framework.models.modem import Modem as ModemModel
+from framework.models.server import ServerModel, ServerModemModel, USBPortModel, USBPortStatus
+from framework.models.modem import ModemModel
 
 from framework.models.useriphistory import UserIPHistory
-from framework.models.installation import Installation
+from framework.models.installation import InstallationModel
 from framework.models.user import UserModel
 
 CRED = '\033[91m'
@@ -41,8 +35,27 @@ CEND = '\033[0m'
 # for user in session.scalars(stmt):
 #     print(user.name)
 
-# server = ServerModel.find_by_name("thifani")
-# print(server.json())
+server = ServerModel.find_by_id(1)
+print(server.json())
+
+# usb_port = USBPortModel.find_by_id(2)
+# print(usb_port.json())
+
+# for port in server.usb_ports():
+#     print(port.server_id)
+
+# server_modem = ServerModemModel.find_by_id(5)
+# # server_modem = ServerModemModel.find_by_modem_id(6)
+# print(server_modem.server().name)
+
+# installation = USBPortModel.find_by_id(1)
+# print(installation.json())
+
+for modem in server.modems():
+    print(modem.modem().addr_id)
+
+
+sys.exit()
 
 # t = UserIPHistory.is_ip_reserved_for_other(ip="187.119.228.144", user="carlos_antonio_santos")
 # print(t)

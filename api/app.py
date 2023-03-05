@@ -11,15 +11,9 @@ from resources.serverstatus import ServerStatus
 from resources.servermodems import ServerModems
 from resources.servermodem import ServerModem
 
-# import sys
-# sys.path.append("../")
-# from db import db
-
 app = Flask(__name__)
 CORS(app)
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["PROPAGATE_EXCEPTIONS"] = True
-# db.init_app(app)
 api = Api(app)
 
 """

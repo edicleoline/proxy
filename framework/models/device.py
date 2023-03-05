@@ -1,28 +1,31 @@
-from datetime import datetime
+from db import connection
 
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import DateTime
-
-from db import db
-
-class Device(db.Model):
-    __tablename__ = 'device'
-
-    id = Column(Integer, primary_key=True)
-    model = Column(String(40))
-    type = Column(String(80))
-    created_at = Column(DateTime, nullable=False, default=datetime.now())
+class DeviceModel():
+    def __init__(self, id, model, type, created_at):
+        self.id = id
+        self.model = model
+        self.type = type
+        self.created_at = created_at    
     
     def json(self):
         return {
             'id': self.id,
-            'created_at': self.created_at
+            'model': self.model,
+            'type': self.type
         }
 
     @classmethod
     def find_by_id(cls, id: int):
-        return db.s.query(Device).filter(Device.id == id).first()
+        conn = connection()
+        row = conn.execute("select id, model, type, created_at from device where id=?", (id, )).fetchone()
+        conn.close(True)
+
+        if row == None:
+            return None
+
+        return DeviceModel(id = row[0], model = row[1], type = row[2], created_at = row[3])
+
+    def save_to_db(self):
+        pass
     
 

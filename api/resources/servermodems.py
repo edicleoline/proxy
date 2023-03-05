@@ -1,20 +1,17 @@
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
-
-from framework.models.server import Server as ServerModel
-from models.serverstatus import ServerStatus as ServerStatusModel
-
+from framework.models.server import ServerModel
 from framework.infra.modem import Modem as IModem
 
 class ServerModems(Resource):
-    @jwt_required()
+    # @jwt_required()
     def get(self):
         server = ServerModel.find_by_id(1)
 
         if not server:
             return {"message": "Item not found"}, 404
 
-        modems = server.modems
+        modems = server.modems()
         
         items = [item.json() for item in modems]
 

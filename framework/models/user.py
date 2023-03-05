@@ -1,19 +1,10 @@
-from datetime import datetime
+from db import connection
 
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
-
-from db import db
-
-class UserModel(db.Model):
-    __tablename__ = 'user'
-
-    id = Column(Integer, primary_key=True)
-    username = Column(String(80), unique=True, nullable=False)
-    password = Column(String(240), nullable=False)
+class UserModel():
+    def __init__(self, id, username, password):
+        self.id = id
+        self.username = username
+        self.password = password    
     
     def json(self):
         return {
@@ -22,17 +13,32 @@ class UserModel(db.Model):
         }
 
     @classmethod
-    def find_by_username(cls, username):
-        return db.s.query(UserModel).filter(UserModel.username == username).first()
+    def find_by_id(cls, id):
+        conn = connection()
+        row = conn.execute("select id, username, password from user where id=?", (id, )).fetchone()
+        conn.close(True)
+
+        if row == None:
+            return None
+
+        return UserModel(id = row[0], username = row[1], password = row[2])
 
     @classmethod
-    def find_by_id(cls, _id):
-        return db.s.query(UserModel).filter(UserModel.id == id).first()
+    def find_by_username(cls, username):
+        conn = connection()
+        row = conn.execute("select id from user where username=?", (username, )).fetchone()
+        conn.close(True)
+
+        if row == None:
+            return None
+
+        return cls.find_by_id(row[0])
 
     def save_to_db(self):
-        db.s.add(self)
-        db.s.commit()
+        pass
 
     def delete_from_db(self):
-        db.s.delete(self)
-        db.s.commit()
+        pass
+
+    def crypt_password(cls, password):
+        pass

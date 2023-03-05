@@ -1,7 +1,7 @@
 import sys, time
 import requests
 
-from framework.models.server import ServerModem
+from framework.models.server import ServerModemModel
 from framework.models.modemiphistory import ModemIPHistory
 from framework.models.useriphistory import UserIPHistory
 
@@ -23,9 +23,9 @@ CBLAC = '\033[90m'
 CEND = '\033[0m'
 
 class Modem:
-    def __init__(self, server_modem: ServerModem):
-        self.server_modem = server_modem
-        self.modem = self.server_modem.modem
+    def __init__(self, server_modem_model: ServerModemModel):
+        self.server_modem_model = server_modem_model
+        self.modem = self.server_modem_model.modem()
 
     def iface(self):
         addr_id = self.modem.addr_id
@@ -34,20 +34,20 @@ class Modem:
     def hard_reboot(self):
         """Reboot USB port by cut power.       
         """                
-        usb_port = self.server_modem.usb_port
+        usb_port = self.server_modem_model.usb_port()
         sys.stdout.write('{0}[!] Let''s reboot USB port {1}...{2}'.format(CYELLOW, usb_port.port, CEND))
         sys.stdout.flush()
-        USB(server=self.server_modem.server).hard_reboot(usb_port=usb_port)
+        USB(server=self.server_modem_model.server()).hard_reboot(usb_port=usb_port)
         sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
         sys.stdout.flush()
 
     def hard_turn_off(self):
         """Turn off USB port.
         """        
-        usb_port = self.server_modem.get_usb_port()
+        usb_port = self.server_modem_model.usb_port()
         sys.stdout.write('{0}[!] Let''s turn off USB port {1}...{2}'.format(CYELLOW, usb_port.port, CEND))
         sys.stdout.flush()
-        USB(server=self.server_modem.server).hard_turn_off(usb_port=usb_port)
+        USB(server=self.server_modem_model.server()).hard_turn_off(usb_port=usb_port)
         sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
         sys.stdout.flush()
 
@@ -186,8 +186,8 @@ class Modem:
 
     def external_ip_through_proxy(self):
         proxies = { 
-              "http" : 'http://{0}:{1}'.format('127.0.0.1', self.server_modem.proxy_port), 
-              "https": 'https://{0}:{1}'.format('127.0.0.1', self.server_modem.proxy_port), 
+              "http" : 'http://{0}:{1}'.format('127.0.0.1', self.server_modem_model.proxy_port), 
+              "https": 'https://{0}:{1}'.format('127.0.0.1', self.server_modem_model.proxy_port), 
         }
 
         r = requests.get('https://ipecho.net/plain', headers=None, proxies=proxies, timeout=5)

@@ -1,7 +1,7 @@
-from framework.models.server import Server
+from framework.models.server import ServerModel
 
 class ServerStatus:
-    def __init__(self, server: Server):
+    def __init__(self, server: ServerModel):
         self.server = server
 
     def json(self):
@@ -11,5 +11,5 @@ class ServerStatus:
         }
 
     @classmethod
-    def get_status(self, server: Server):
+    def get_status(self, server: ServerModel):
         return ServerStatus(server = server)

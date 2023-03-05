@@ -1,32 +1,35 @@
-from datetime import datetime
+from framework.models.device import DeviceModel
+from db import connection
 
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import DateTime
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
-
-from db import db
-from framework.models.device import Device
-
-class Modem(db.Model):
-    __tablename__ = 'modem'
-
-    id = Column(Integer, primary_key=True)
-    device_id = Column(Integer, ForeignKey("device.id"), primary_key=False)
-    addr_id = Column(String(15))
-    created_at = Column(DateTime, nullable=False, default=datetime.now())
-    device = relationship(Device, lazy="joined")
+class ModemModel():
+    def __init__(self, id, device_id, addr_id, created_at):
+        self.id = id
+        self.device_id = device_id
+        self.addr_id = addr_id
+        self.created_at = created_at
     
     def json(self):
         return {
             'id': self.id,
-            # 'created_at': self.created_at
+            'device_id': self.device_id,
+            'addr_id': self.addr_id
         }
 
     @classmethod
     def find_by_id(cls, id: int):
-        return db.s.query(Modem).filter(Modem.id == id).first()
+        conn = connection()
+        row = conn.execute("select id, device_id, addr_id , created_at from modem where id=?", (id, )).fetchone()
+        conn.close(True)
+
+        if row == None:
+            return None
+
+        return ModemModel(id = row[0], device_id = row[1], addr_id = row[2], created_at = row[3])
+
+    def device(self):
+        return None if self.device_id == None else DeviceModel.find_by_id(self.device_id)
+
+    def save_to_db(self):
+        pass
     
 

@@ -38,12 +38,15 @@ const Modems = () => {
                 //     console.log(t);
                 // }, 1000);
                 items.map(function (item) {
-                    if (item.id == 2 || item.id == 5) {
+                    if (item.id == 2 || item.id == 5 || true) {
                         getModem(item.modem.id).then(
                             (modem) => {
                                 const _modems = items.map(function (m) {
                                     if (m.modem.id == modem.modem.id) {
                                         m.external_ip = modem.external_ip_through_device;
+                                        m.device_network_type = modem.device_network_type;
+                                        m.device_network_provider = modem.device_network_provider;
+                                        m.device_network_signalbar = modem.device_network_signalbar;
                                     }
                                     return m;
                                 });
@@ -94,9 +97,15 @@ const Modems = () => {
                                                     </TableCell>
                                                     <TableCell align="right">{row.is_connected ? 'ON' : 'OFF'}</TableCell>
                                                     <TableCell align="right">{row.external_ip ? row.external_ip : '-'}</TableCell>
-                                                    <TableCell align="right"></TableCell>
-                                                    <TableCell align="right"></TableCell>
-                                                    <TableCell align="right"></TableCell>
+                                                    <TableCell align="right">
+                                                        {row.device_network_type ? row.device_network_type : '-'}
+                                                    </TableCell>
+                                                    <TableCell align="right">
+                                                        {row.device_network_provider ? row.device_network_provider : '-'}
+                                                    </TableCell>
+                                                    <TableCell align="right">
+                                                        {row.device_network_signalbar ? row.device_network_signalbar : '-'}
+                                                    </TableCell>
                                                     <TableCell align="right">{row.proxy.port}</TableCell>
                                                     <TableCell align="right"></TableCell>
                                                     <TableCell align="right">{row.usb.port}</TableCell>
