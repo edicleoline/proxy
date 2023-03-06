@@ -1,170 +1,234 @@
 import sys
-# from flask import Flask, jsonify
-# from db import db
-# from framework.models.server import Server
-# from framework.models.user import UserModel
-# from framework.models.device import Device
-# from framework.models.installation import Installation
-# from framework.models.modem import Modem
-# from framework.models.server import USBPort
-# from framework.models.server import ServerModem
-# from passlib.hash import pbkdf2_sha256
+from framework.models.server import ServerModel
+from framework.models.user import UserModel
+from framework.models.device import DeviceModel
+from framework.models.installation import InstallationModel
+from framework.models.modem import ModemModel
+from framework.models.server import USBPortModel
+from framework.models.server import ServerModemModel
 from db import connection
+from apsw import SQLError, ConstraintError
 
 if __name__ == '__main__':    
 
     conn = connection()
 
-    conn.execute("""
-        CREATE TABLE user (
-        id INTEGER NOT NULL, 
-        username VARCHAR(80) NOT NULL, 
-        password VARCHAR(240) NOT NULL, 
-        PRIMARY KEY (id), 
-        UNIQUE (username)
-        )
-        """)
+    try:
+        conn.execute("""
+            CREATE TABLE user (
+            id INTEGER NOT NULL, 
+            username VARCHAR(80) NOT NULL, 
+            password VARCHAR(240) NOT NULL, 
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+            PRIMARY KEY (id), 
+            UNIQUE (username)
+            )
+            """)
+    except SQLError:
+        pass
 
-    conn.execute("""
-        CREATE TABLE installation (
-        id INTEGER NOT NULL, 
-        name VARCHAR(40), 
-        created_at DATETIME NOT NULL, 
-        PRIMARY KEY (id)
-        )
-        """)
+    try:
+        conn.execute("""
+            CREATE TABLE installation (
+            id INTEGER NOT NULL, 
+            name VARCHAR(80), 
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+            PRIMARY KEY (id),
+            UNIQUE (name)
+            )
+            """)
+    except SQLError:
+        pass
 
-    conn.execute("""
-        CREATE TABLE server (
-        id INTEGER NOT NULL, 
-        name VARCHAR(40), 
-        installation_id INTEGER, 
-        created_at DATETIME NOT NULL, 
-        PRIMARY KEY (id)
-        )
-        """)
+    try:
+        conn.execute("""
+            CREATE TABLE server (
+            id INTEGER NOT NULL, 
+            name VARCHAR(40), 
+            installation_id INTEGER NOT NULL, 
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+            PRIMARY KEY (id)
+            )
+            """)
+    except SQLError:
+        pass
 
-    conn.execute("""
-        CREATE TABLE usb_port (
-        id INTEGER NOT NULL, 
-        port INTEGER, 
-        status VARCHAR, 
-        server_id INTEGER, 
-        PRIMARY KEY (id), 
-        FOREIGN KEY(server_id) REFERENCES server (id)
-        )
-        """)
+    try:
+        conn.execute("""
+            CREATE TABLE usb_port (
+            id INTEGER NOT NULL, 
+            port INTEGER, 
+            status VARCHAR, 
+            server_id INTEGER, 
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+            PRIMARY KEY (id), 
+            FOREIGN KEY(server_id) REFERENCES server (id)
+            )
+            """)
+    except SQLError:
+        pass
 
-    conn.execute("""
-        CREATE TABLE device (
-        id INTEGER NOT NULL, 
-        model VARCHAR(40), 
-        type VARCHAR(80), 
-        created_at DATETIME NOT NULL, 
-        PRIMARY KEY (id)
-        )
-        """)
+    try:
+        conn.execute("""
+            CREATE TABLE device (
+            id INTEGER NOT NULL, 
+            model VARCHAR(40), 
+            type VARCHAR(80), 
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+            PRIMARY KEY (id),
+            UNIQUE (model, type)
+            )
+            """)
+    except SQLError:
+        pass
 
-    conn.execute("""
-        CREATE TABLE modem (
-        id INTEGER NOT NULL, 
-        device_id INTEGER, 
-        addr_id VARCHAR(15), 
-        created_at DATETIME NOT NULL, 
-        PRIMARY KEY (id), 
-        FOREIGN KEY(device_id) REFERENCES device (id)
-        )
-        """)
+    try:
+        conn.execute("""
+            CREATE TABLE modem (
+            id INTEGER NOT NULL, 
+            device_id INTEGER, 
+            addr_id VARCHAR(15), 
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+            PRIMARY KEY (id), 
+            UNIQUE (addr_id)
+            FOREIGN KEY(device_id) REFERENCES device (id)
+            )
+            """)
+    except SQLError:
+        pass
 
-    conn.execute("""
-        CREATE TABLE modem_server (
-        id INTEGER NOT NULL, 
-        server_id INTEGER, 
-        modem_id INTEGER, 
-        usb_port_id INTEGER, 
-        proxy_port INTEGER, 
-        created_at DATETIME, 
-        PRIMARY KEY (id), 
-        FOREIGN KEY(server_id) REFERENCES server (id), 
-        FOREIGN KEY(modem_id) REFERENCES modem (id), 
-        FOREIGN KEY(usb_port_id) REFERENCES usb_port (id)
-        )
-        """)
+    try:
+        conn.execute("""
+            CREATE TABLE modem_server (
+            id INTEGER NOT NULL, 
+            server_id INTEGER, 
+            modem_id INTEGER, 
+            usb_port_id INTEGER, 
+            proxy_port INTEGER, 
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+            PRIMARY KEY (id), 
+            FOREIGN KEY(server_id) REFERENCES server (id), 
+            FOREIGN KEY(modem_id) REFERENCES modem (id), 
+            FOREIGN KEY(usb_port_id) REFERENCES usb_port (id)
+            )
+            """)
+    except SQLError:
+        pass
+
+    try:
+        conn.execute("""
+            CREATE TABLE modem_ip_history (
+            id INTEGER NOT NULL, 
+            modem_id INTEGER NOT NULL, 
+            ip VARCHAR(15) NOT NULL, 
+            network_type VARCHAR(90),
+            network_provider VARCHAR(90),
+            signalbar VARCHAR(5),
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+            PRIMARY KEY (id), 
+            FOREIGN KEY(modem_id) REFERENCES modem (id)
+            )
+            """)
+    except SQLError:
+        pass
+
+    try:
+        conn.execute("""
+            CREATE TABLE user_ip_history (
+            id INTEGER NOT NULL, 
+            user VARCHAR(90) NOT NULL, 
+            modem_ip_history_id INTEGER NOT NULL,                         
+            PRIMARY KEY (id), 
+            FOREIGN KEY(modem_ip_history_id) REFERENCES modem_ip_history (id)
+            )
+            """)
+    except SQLError:
+        pass
+    
+    conn.close(True)
+    
+    try:        
+        user_model = UserModel(username = 'berners', password = UserModel.crypt_password('xzxz0909'))
+        user_model.save_to_db()
+        # print(user.id)
+    except ConstraintError:
+        pass
+
+    try:
+        installation_model = InstallationModel(name = 'Barueri-LAB')
+        installation_model.save_to_db()
+    except ConstraintError:
+        pass
+
+    try:
+        server_model = ServerModel(name = 'Raspberry-PI', installation_id = 1)
+        server_model.save_to_db()
+    except ConstraintError:
+        pass
+
+    try:
+        usb_ports = [
+            { 'port': 1, 'status': 'on', 'server_id': 1 },
+            { 'port': 2, 'status': 'on', 'server_id': 1 },
+            { 'port': 3, 'status': 'on', 'server_id': 1 },
+            { 'port': 4, 'status': 'on', 'server_id': 1 },
+            { 'port': 5, 'status': 'on', 'server_id': 1 },
+            { 'port': 6, 'status': 'on', 'server_id': 1 },
+            { 'port': 7, 'status': 'on', 'server_id': 1 },
+            { 'port': 8, 'status': 'on', 'server_id': 1 },       
+        ]
+        for u in usb_ports:
+            usb_port_model = USBPortModel(port = u['port'], status = u['status'], server_id = u['server_id'])
+            usb_port_model.save_to_db()
+    except ConstraintError:
+        pass
+
+    try:
+        devices = [
+            { 'model': 'MF79S', 'type': '4G_DONGLE' }            
+        ]
+        for d in devices:
+            device_model = DeviceModel(model = d['model'], type = d['type'])
+            device_model.save_to_db()
+    except ConstraintError:
+        pass
+
+    try:
+        modems = [
+            { 'device_id': 1, 'addr_id': '10.56.70' },
+            { 'device_id': 1, 'addr_id': '10.56.71' },
+            { 'device_id': 1, 'addr_id': '10.56.72' },
+            { 'device_id': 1, 'addr_id': '10.56.73' },
+            { 'device_id': 1, 'addr_id': '10.56.74' },
+            { 'device_id': 1, 'addr_id': '10.56.75' }        
+        ]
+
+        for m in modems:
+            modem = ModemModel(device_id = m['device_id'], addr_id = m['addr_id'])
+            modem.save_to_db()
+    except ConstraintError:
+        pass
+
+    try:
+        server_modems = [
+            { 'server_id': 1, 'modem_id': 1, 'usb_port_id': 7, 'proxy_port': 1025 },
+            { 'server_id': 1, 'modem_id': 2, 'usb_port_id': 8, 'proxy_port': 1026 },
+            { 'server_id': 1, 'modem_id': 3, 'usb_port_id': 7, 'proxy_port': 1027 },
+            { 'server_id': 1, 'modem_id': 4, 'usb_port_id': 5, 'proxy_port': 1028 },
+            { 'server_id': 1, 'modem_id': 5, 'usb_port_id': 6, 'proxy_port': 1029 },
+            { 'server_id': 1, 'modem_id': 6, 'usb_port_id': 5, 'proxy_port': 1030 },
+        ]
+        for s in server_modems:
+            server_modem_model = ServerModemModel(
+                server_id = s['server_id'], 
+                modem_id = s['modem_id'], 
+                usb_port_id = s['usb_port_id'], 
+                proxy_port = s['proxy_port']
+                )            
+            server_modem_model.save_to_db()
+
+    except ConstraintError:
+        pass
 
 
-    conn.close()
-
-
-    sys.exit(0)
-    # db.create_all()
-
-    # user = UserModel()
-    # user.username = 'berners'
-    # user.password = pbkdf2_sha256.hash('xzxz0909')
-    # user.save_to_db()
-
-    # installation = Installation()
-    # installation.name = 'barueri-lab'
-    # installation.save_to_db()
-
-    # server = Server()
-    # server.installation_id = 1
-    # server.name = 'raspberry-pi'
-    # server.save_to_db()
-
-    # device = Device()
-    # device.model = 'MF79S'
-    # device.type = '4G_DONGLE'
-    # device.save_to_db()
-
-    # usb_ports = [
-    #     { 'port': 1, 'status': 'on', 'server_id': 1 },
-    #     { 'port': 2, 'status': 'on', 'server_id': 1 },
-    #     { 'port': 3, 'status': 'on', 'server_id': 1 },
-    #     { 'port': 4, 'status': 'on', 'server_id': 1 },
-    #     { 'port': 5, 'status': 'on', 'server_id': 1 },
-    #     { 'port': 6, 'status': 'on', 'server_id': 1 },
-    #     { 'port': 7, 'status': 'on', 'server_id': 1 },
-    #     { 'port': 8, 'status': 'on', 'server_id': 1 },       
-    # ]
-    # for u in usb_ports:
-    #     usb_port = USBPort()
-    #     usb_port.port = u['port']
-    #     usb_port.status = u['status']
-    #     usb_port.server_id = u['server_id']
-    #     usb_port.save_to_db()
-
-    # modems = [
-    #     { 'device_id': 1, 'addr_id': '10.56.70' },
-    #     { 'device_id': 1, 'addr_id': '10.56.71' },
-    #     { 'device_id': 1, 'addr_id': '10.56.72' },
-    #     { 'device_id': 1, 'addr_id': '10.56.73' },
-    #     { 'device_id': 1, 'addr_id': '10.56.74' },
-    #     { 'device_id': 1, 'addr_id': '10.56.75' }        
-    # ]
-
-    # for m in modems:
-    #     modem = Modem()
-    #     modem.device_id = m['device_id']
-    #     modem.addr_id = m['addr_id']
-    #     modem.save_to_db()
-
-    # server_modems = [
-    #     { 'server_id': 1, 'modem_id': 1, 'usb_port_id': 7, 'proxy_port': 1025 },
-    #     { 'server_id': 1, 'modem_id': 2, 'usb_port_id': 8, 'proxy_port': 1026 },
-    #     { 'server_id': 1, 'modem_id': 3, 'usb_port_id': 7, 'proxy_port': 1027 },
-    #     { 'server_id': 1, 'modem_id': 4, 'usb_port_id': 5, 'proxy_port': 1028 },
-    #     { 'server_id': 1, 'modem_id': 5, 'usb_port_id': 6, 'proxy_port': 1029 },
-    #     { 'server_id': 1, 'modem_id': 6, 'usb_port_id': 5, 'proxy_port': 1030 },
-    # ]
-    # for s in server_modems:
-    #     server_modem = ServerModem()
-    #     server_modem.server_id = s['server_id']
-    #     server_modem.modem_id = s['modem_id']
-    #     server_modem.usb_port_id = s['usb_port_id']
-    #     server_modem.proxy_port = s['proxy_port']
-    #     server_modem.save_to_db()
-
-
-    # s = Server.find_by_id(1)
-    print('done')
+   

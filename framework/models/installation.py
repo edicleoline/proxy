@@ -1,10 +1,10 @@
 from db import connection
 
 class InstallationModel():
-    def __init__(self, id, name, created_at):
+    def __init__(self, id = None, name = None, created_at = None):
         self.id = id
         self.name = name
-        self.created_at = created_at    
+        self.created_at = created_at
     
     def json(self):
         return {
@@ -24,6 +24,18 @@ class InstallationModel():
         return InstallationModel(id = row[0], name = row[1], created_at = row[2])
 
     def save_to_db(self):
-        pass
+        conn = connection()
+
+        if self.id == None:
+            conn.execute("insert into installation (name) values (?)", (
+                self.name,
+                ))
+            self.id = conn.last_insert_rowid()
+        else:
+            conn.execute("update installation set name=? where id = ?", (
+                self.name, self.id
+                ))
+
+        conn.close(True)
     
 

@@ -1,7 +1,7 @@
 from db import connection
 
 class DeviceModel():
-    def __init__(self, id, model, type, created_at):
+    def __init__(self, id = None, model = None, type = None, created_at = None):
         self.id = id
         self.model = model
         self.type = type
@@ -26,6 +26,18 @@ class DeviceModel():
         return DeviceModel(id = row[0], model = row[1], type = row[2], created_at = row[3])
 
     def save_to_db(self):
-        pass
+        conn = connection()
+
+        if self.id == None:
+            conn.execute("insert into device (model, type) values (?, ?)", (
+                self.model, self.type
+                ))
+            self.id = conn.last_insert_rowid()
+        else:
+            conn.execute("update device set model=? where id = ?", (
+                self.model, self.id
+                ))
+
+        conn.close(True)
     
 

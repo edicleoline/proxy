@@ -2,7 +2,7 @@ from framework.models.device import DeviceModel
 from db import connection
 
 class ModemModel():
-    def __init__(self, id, device_id, addr_id, created_at):
+    def __init__(self, id = None, device_id = None, addr_id = None, created_at = None):
         self.id = id
         self.device_id = device_id
         self.addr_id = addr_id
@@ -30,6 +30,18 @@ class ModemModel():
         return None if self.device_id == None else DeviceModel.find_by_id(self.device_id)
 
     def save_to_db(self):
-        pass
+        conn = connection()
+
+        if self.id == None:
+            conn.execute("insert into modem (device_id, addr_id) values (?, ?)", (
+                self.device_id, self.addr_id
+                ))
+            self.id = conn.last_insert_rowid()
+        else:
+            conn.execute("update modem set addr_id=? where id = ?", (
+                self.addr_id, self.id
+                ))
+
+        conn.close(True)
     
 

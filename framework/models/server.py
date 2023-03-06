@@ -6,7 +6,7 @@ from framework.models.modem import ModemModel
 from db import connection
 
 class ServerModel():
-    def __init__(self, id, name, installation_id, created_at):
+    def __init__(self, id = None, name = None, installation_id = None, created_at = None):
         self.id = id
         self.name = name
         self.installation_id = installation_id
@@ -70,14 +70,28 @@ class ServerModel():
         return 1
 
     def save_to_db(self):
-        pass
+        conn = connection()
+
+        if self.id == None:
+            conn.execute("insert into server (installation_id, name) values (?, ?)", (
+                self.installation_id, self.name
+                ))
+            self.id = conn.last_insert_rowid()
+        else:
+            conn.execute("update server set name=? where id = ?", (
+                self.name, self.id
+                ))
+
+        conn.close(True)
+
 
 class USBPortStatus(Enum):
     ON  = 'on'
     OFF = 'off'
 
+
 class USBPortModel():
-    def __init__(self, id, port, status, server_id):
+    def __init__(self, id = None, port = None, status = None, server_id = None):
         self.id = id
         self.port = port
         self.status = status
@@ -112,10 +126,22 @@ class USBPortModel():
         return self.port - 1
 
     def save_to_db(self):
-        pass
+        conn = connection()
+
+        if self.id == None:
+            conn.execute("insert into usb_port (port, status, server_id) values (?, ?, ?)", (
+                self.port, self.status, self.server_id
+                ))
+            self.id = conn.last_insert_rowid()
+        else:
+            conn.execute("update usb_port set status=? where id = ?", (
+                self.status, self.id
+                ))
+
+        conn.close(True)
 
 class ServerModemModel():
-    def __init__(self, id, server_id, modem_id, usb_port_id, proxy_port, created_at):
+    def __init__(self, id = None, server_id = None, modem_id = None, usb_port_id = None, proxy_port = None, created_at = None):
         self.id = id
         self.server_id = server_id
         self.modem_id = modem_id
@@ -182,6 +208,18 @@ class ServerModemModel():
         return None if self.modem_id == None else ModemModel.find_by_id(self.modem_id)
 
     def save_to_db(self):
-        pass
+        conn = connection()
+
+        if self.id == None:
+            conn.execute("insert into modem_server (server_id, modem_id, usb_port_id, proxy_port) values (?, ?, ?, ?)", (
+                self.server_id, self.modem_id, self.usb_port_id, self.proxy_port
+                ))
+            self.id = conn.last_insert_rowid()
+        else:
+            conn.execute("update modem_server set usb_port_id=? where id = ?", (
+                self.usb_port_id, self.id
+                ))
+
+        conn.close(True)
 
 

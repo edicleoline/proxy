@@ -19,29 +19,27 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
+import Button from '@mui/material/Button';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import IconButton from '@mui/material/IconButton';
+
 const Modems = () => {
     // const [isLoading, setLoading] = useState(true);
     const [modems, setModems] = useState([]);
 
-    useEffect(() => {
+    const loadModems = () => {
         getModems().then(
             (items) => {
                 console.log(items);
                 setModems(items);
 
-                // window.setTimeout(function () {
-                //     const t = items.map(function (item) {
-                //         item.external_ip = '123.123.123.123';
-                //         return item;
-                //     });
-                //     setModems(t);
-                //     console.log(t);
-                // }, 1000);
                 items.map(function (item) {
                     if (item.id == 2 || item.id == 5 || true) {
                         getModem(item.modem.id).then(
                             (modem) => {
-                                const _modems = items.map(function (m) {
+                                const remodems = items.map(function (m) {
                                     if (m.modem.id == modem.modem.id) {
                                         m.external_ip = modem.external_ip_through_device;
                                         m.device_network_type = modem.device_network_type;
@@ -50,10 +48,7 @@ const Modems = () => {
                                     }
                                     return m;
                                 });
-                                console.log('map modems', _modems);
-                                setModems(_modems);
-                                // console.log('asd23');
-                                // console.log(modem);
+                                setModems(remodems);
                             },
                             (error) => console.log('modem error', error)
                         );
@@ -62,17 +57,30 @@ const Modems = () => {
             },
             (error) => console.log('modems error', error)
         );
+    };
+
+    useEffect(() => {
+        loadModems();
     }, []);
+
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
     return (
         <MainCard title="Modems" secondary={<SecondaryAction link="https://next.material-ui.com/system/typography/" />}>
-            <Grid container spacing={gridSpacing}>
+            <Grid container spacing={0}>
                 <Grid item xs={12} sm={12}>
                     <SubCard>
-                        <Grid container direction="column" spacing={1}>
+                        <Grid container direction="column" spacing={0}>
                             <Grid item>
                                 <TableContainer component={Paper}>
-                                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                                    <Table sx={{ minWidth: 650 }} aria-label="modems table">
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell>Modem</TableCell>
@@ -93,7 +101,31 @@ const Modems = () => {
                                             {modems.map((row) => (
                                                 <TableRow key={row.modem.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                                                     <TableCell component="th" scope="row">
-                                                        {row.modem.id}
+                                                        <IconButton
+                                                            id="basic-button"
+                                                            aria-label="expand row"
+                                                            size="small"
+                                                            aria-controls={open ? 'basic-menu' : undefined}
+                                                            aria-haspopup="true"
+                                                            aria-expanded={open ? 'true' : undefined}
+                                                            onClick={handleClick}
+                                                        >
+                                                            <KeyboardArrowDownIcon />
+                                                        </IconButton>
+                                                        <Menu
+                                                            id="basic-menu"
+                                                            anchorEl={anchorEl}
+                                                            open={open}
+                                                            onClose={handleClose}
+                                                            MenuListProps={{
+                                                                'aria-labelledby': 'basic-button'
+                                                            }}
+                                                        >
+                                                            <MenuItem onClick={handleClose}>Profile</MenuItem>
+                                                            <MenuItem onClick={handleClose}>My account</MenuItem>
+                                                            <MenuItem onClick={handleClose}>Logout</MenuItem>
+                                                        </Menu>
+                                                        &nbsp;{row.modem.id}
                                                     </TableCell>
                                                     <TableCell align="right">{row.is_connected ? 'ON' : 'OFF'}</TableCell>
                                                     <TableCell align="right">{row.external_ip ? row.external_ip : '-'}</TableCell>
