@@ -34,8 +34,8 @@ class DeviceModel():
                 ))
             self.id = conn.last_insert_rowid()
         else:
-            conn.execute("update device set model=? where id = ?", (
-                self.model, self.id
+            conn.execute("update device set model=?, type=? where id = ?", (
+                self.model, self.type, self.id
                 ))
 
         conn.close(True)

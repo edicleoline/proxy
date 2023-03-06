@@ -1,7 +1,7 @@
 from db import connection
 
 class UserIPHistory():
-    def __init__(self, user, modem_ip_history_id):
+    def __init__(self, user = None, modem_ip_history_id = None):
         self.user = user
         self.modem_ip_history_id = modem_ip_history_id
 
@@ -25,5 +25,5 @@ class UserIPHistory():
         conn.execute("INSERT INTO user_ip_history (user, modem_ip_history_id) VALUES (?, ?)", (
             self.user, self.modem_ip_history_id
             ))
-        self.id = conn.last_insert_rowid
+        self.id = conn.last_insert_rowid()
         conn.close(True)

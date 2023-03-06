@@ -38,8 +38,8 @@ class ModemModel():
                 ))
             self.id = conn.last_insert_rowid()
         else:
-            conn.execute("update modem set addr_id=? where id = ?", (
-                self.addr_id, self.id
+            conn.execute("update modem set device_id=?, addr_id=? where id = ?", (
+                self.device_id, self.addr_id, self.id
                 ))
 
         conn.close(True)

@@ -1,6 +1,6 @@
 from enum import Enum
 from framework.models.installation import InstallationModel
-# import psutil
+import psutil
 
 from framework.models.modem import ModemModel
 from db import connection
@@ -61,12 +61,12 @@ class ServerModel():
 
     @staticmethod
     def cpu_percent():
-        # return psutil.cpu_percent()
+        return psutil.cpu_percent()
         return 1
 
     @staticmethod
     def virtual_memory():
-        # return psutil.virtual_memory()
+        return psutil.virtual_memory()
         return 1
 
     def save_to_db(self):
@@ -78,8 +78,8 @@ class ServerModel():
                 ))
             self.id = conn.last_insert_rowid()
         else:
-            conn.execute("update server set name=? where id = ?", (
-                self.name, self.id
+            conn.execute("update server set installation_id=?, name=? where id = ?", (
+                self.installation_id, self.name, self.id
                 ))
 
         conn.close(True)
@@ -216,8 +216,8 @@ class ServerModemModel():
                 ))
             self.id = conn.last_insert_rowid()
         else:
-            conn.execute("update modem_server set usb_port_id=? where id = ?", (
-                self.usb_port_id, self.id
+            conn.execute("update modem_server set server_id=?, modem_id=?, usb_port_id=?, proxy_port=? where id = ?", (
+                self.server_id, self.modem_id, self.usb_port_id, self.proxy_port, self.id
                 ))
 
         conn.close(True)

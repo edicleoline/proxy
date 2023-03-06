@@ -5,9 +5,9 @@ import sys
 import sys
 import argparse
 
-from framework.models.installation import Installation
-from framework.models.server import Server, ServerModem
-from framework.models.modem import Modem
+from framework.models.installation import InstallationModel
+from framework.models.server import ServerModel, ServerModemModel
+from framework.models.modem import ModemModel
 
 from framework.infra.modem import Modem as IModem
 
@@ -46,8 +46,8 @@ def main():
     
     _args = get_args()
 
-    server = Server.find_by_id(1)
-    server_modem = ServerModem.find_by_modem_id(_args.modem_id)
+    server = ServerModel.find_by_id(1)
+    server_modem = ServerModemModel.find_by_modem_id(_args.modem_id)
     modem = server_modem.modem
 
     imodem = IModem(server_modem)
