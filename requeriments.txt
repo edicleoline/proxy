@@ -1,2 +1,6 @@
+requests
+psutil
+netifaces
 apsw
 pcf8574_io
+passlib

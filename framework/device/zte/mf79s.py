@@ -1,4 +1,3 @@
-from sqlite3 import connect
 import requests
 import time
 import sys

@@ -28,35 +28,40 @@ import IconButton from '@mui/material/IconButton';
 const Modems = () => {
     // const [isLoading, setLoading] = useState(true);
     const [modems, setModems] = useState([]);
+    const [modemsDetails, setModemsDetails] = useState([]);
 
     const loadModems = () => {
         getModems().then(
             (items) => {
                 console.log(items);
                 setModems(items);
-
-                items.map(function (item) {
-                    if (item.id == 2 || item.id == 5 || true) {
-                        getModem(item.modem.id).then(
-                            (modem) => {
-                                const remodems = items.map(function (m) {
-                                    if (m.modem.id == modem.modem.id) {
-                                        m.external_ip = modem.external_ip_through_device;
-                                        m.device_network_type = modem.device_network_type;
-                                        m.device_network_provider = modem.device_network_provider;
-                                        m.device_network_signalbar = modem.device_network_signalbar;
-                                    }
-                                    return m;
-                                });
-                                setModems(remodems);
-                            },
-                            (error) => console.log('modem error', error)
-                        );
-                    }
-                });
+                loadModemsDetails(items);
             },
             (error) => console.log('modems error', error)
         );
+    };
+
+    const loadModemsDetails = (items) => {
+        const modemsDetails = [];
+
+        items.map(function (item) {
+            getModem(item.modem.id).then(
+                (modem) => {
+                    const remodems = items.map(function (m) {
+                        if (m.modem.id == modem.modem.id) {
+                            m.external_ip = modem.external_ip_through_device;
+                            m.device_network_type = modem.device_network_type;
+                            m.device_network_provider = modem.device_network_provider;
+                            m.device_network_signalbar = modem.device_network_signalbar;
+                        }
+                        return m;
+                    });
+                    setModems(remodems);
+                    console.log(item.modem.id, remodems);
+                },
+                (error) => console.log('modem error', error)
+            );
+        });
     };
 
     useEffect(() => {
@@ -99,33 +104,13 @@ const Modems = () => {
                                         </TableHead>
                                         <TableBody>
                                             {modems.map((row) => (
-                                                <TableRow key={row.modem.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                                <TableRow
+                                                    hover
+                                                    key={row.modem.id}
+                                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                                >
                                                     <TableCell component="th" scope="row">
-                                                        <IconButton
-                                                            id="basic-button"
-                                                            aria-label="expand row"
-                                                            size="small"
-                                                            aria-controls={open ? 'basic-menu' : undefined}
-                                                            aria-haspopup="true"
-                                                            aria-expanded={open ? 'true' : undefined}
-                                                            onClick={handleClick}
-                                                        >
-                                                            <KeyboardArrowDownIcon />
-                                                        </IconButton>
-                                                        <Menu
-                                                            id="basic-menu"
-                                                            anchorEl={anchorEl}
-                                                            open={open}
-                                                            onClose={handleClose}
-                                                            MenuListProps={{
-                                                                'aria-labelledby': 'basic-button'
-                                                            }}
-                                                        >
-                                                            <MenuItem onClick={handleClose}>Profile</MenuItem>
-                                                            <MenuItem onClick={handleClose}>My account</MenuItem>
-                                                            <MenuItem onClick={handleClose}>Logout</MenuItem>
-                                                        </Menu>
-                                                        &nbsp;{row.modem.id}
+                                                        {row.modem.id}
                                                     </TableCell>
                                                     <TableCell align="right">{row.is_connected ? 'ON' : 'OFF'}</TableCell>
                                                     <TableCell align="right">{row.external_ip ? row.external_ip : '-'}</TableCell>

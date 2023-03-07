@@ -48,7 +48,7 @@ def main():
 
     server = ServerModel.find_by_id(1)
     server_modem = ServerModemModel.find_by_modem_id(_args.modem_id)
-    modem = server_modem.modem
+    modem = server_modem.modem()
 
     imodem = IModem(server_modem)
     
@@ -63,8 +63,8 @@ def main():
 
     elif _args.info:        
         is_connected = imodem.is_connected()    
-        device = modem.device
-        server_modem_usb_port = server_modem.usb_port  
+        device = modem.device()
+        server_modem_usb_port = server_modem.usb_port()  
 
         sys.stdout.write('{0}[*] Device model: {1}{2}\n'.format(CBLUE, device.model, CEND))
         sys.stdout.write('{0}[*] Device type: {1}{2}\n'.format(CBLUE, device.type, CEND))
