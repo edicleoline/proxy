@@ -10,6 +10,7 @@ from resources.server import Server
 from resources.serverstatus import ServerStatus
 from resources.servermodems import ServerModems
 from resources.servermodem import ServerModem
+from resources.servermodem import ServerModemReboot
 
 app = Flask(__name__)
 CORS(app)
@@ -104,3 +105,4 @@ api.add_resource(Server, "/server")
 api.add_resource(ServerStatus, "/server/status")
 api.add_resource(ServerModems, "/server/modem")
 api.add_resource(ServerModem, "/server/modem/<int:modem_id>")
+api.add_resource(ServerModemReboot, "/server/modem/<int:modem_id>/reboot")

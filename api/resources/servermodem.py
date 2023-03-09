@@ -69,6 +69,18 @@ class ServerModem(Resource):
         return json
 
 
-        
+class ServerModemReboot(Resource):
+    # @jwt_required()
+    def post(self, modem_id): 
+        server = ServerModel.find_by_id(1)
+
+        if not server:
+            return {"message": "Item not found"}, 404
+
+        server_modem = ServerModemModel.find_by_modem_id(modem_id)
+        imodem = IModem(server_modem)       
+        imodem.hard_reboot()
+
+        return {"message": "Successfully rebooted"}, 200
 
     
