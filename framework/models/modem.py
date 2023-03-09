@@ -2,8 +2,9 @@ from framework.models.device import DeviceModel
 from db import connection
 
 class ModemModel():
-    def __init__(self, id = None, device_id = None, addr_id = None, created_at = None):
+    def __init__(self, id = None, imei = None, device_id = None, addr_id = None, created_at = None):
         self.id = id
+        self.imei = imei
         self.device_id = device_id
         self.addr_id = addr_id
         self.created_at = created_at
@@ -11,6 +12,7 @@ class ModemModel():
     def json(self):
         return {
             'id': self.id,
+            'imei': self.imei,
             'device_id': self.device_id,
             'addr_id': self.addr_id
         }
@@ -18,13 +20,13 @@ class ModemModel():
     @classmethod
     def find_by_id(cls, id: int):
         conn = connection()
-        row = conn.execute("select id, device_id, addr_id , created_at from modem where id=?", (id, )).fetchone()
+        row = conn.execute("select id, imei, device_id, addr_id, created_at from modem where id=?", (id, )).fetchone()
         conn.close(True)
 
         if row == None:
             return None
 
-        return ModemModel(id = row[0], device_id = row[1], addr_id = row[2], created_at = row[3])
+        return ModemModel(id = row[0], imei = row[1], device_id = row[2], addr_id = row[3], created_at = row[4])
 
     def device(self):
         return None if self.device_id == None else DeviceModel.find_by_id(self.device_id)
@@ -33,13 +35,13 @@ class ModemModel():
         conn = connection()
 
         if self.id == None:
-            conn.execute("insert into modem (device_id, addr_id) values (?, ?)", (
-                self.device_id, self.addr_id
+            conn.execute("insert into modem (imei, device_id, addr_id) values (?, ?, ?)", (
+                self.imei, self.device_id, self.addr_id
                 ))
             self.id = conn.last_insert_rowid()
         else:
-            conn.execute("update modem set device_id=?, addr_id=? where id = ?", (
-                self.device_id, self.addr_id, self.id
+            conn.execute("update modem set imei=?, device_id=?, addr_id=? where id = ?", (
+                self.imei, self.device_id, self.addr_id, self.id
                 ))
 
         conn.close(True)

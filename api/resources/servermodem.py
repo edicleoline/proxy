@@ -37,9 +37,20 @@ class ServerModem(Resource):
             
         json['interface'] = imodem_iface.interface
         json['internal_ip'] = modem_ifaddress['addr']
+
         json['device_network_type'] = network_type
         json['device_network_provider'] = network_provider
         json['device_network_signalbar'] = signalbar
+
+        json['data'] = {
+            'receive': {
+                'bytes': 9123381                
+            },
+            'transmit': {
+                'bytes': 3790765
+            }
+        }
+
         json['external_ip_through_device'] = imodem.external_ip_through_device(silence_mode=True)
 
         proxy_is_alive = False

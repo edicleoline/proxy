@@ -4,3 +4,7 @@ netifaces
 apsw
 pcf8574_io
 passlib
+flask
+flask_cors
+flask_restful
+flask_jwt_extended

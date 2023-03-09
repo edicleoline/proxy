@@ -25,3 +25,16 @@ export function getModem(id) {
         );
     });
 }
+
+export function reboot(id) {
+    return new Promise((resolve, reject) => {
+        api.post('/server/modem/' + id + '/reboot').then(
+            (response) => {
+                resolve(response.data);
+            },
+            (error) => {
+                reject(error);
+            }
+        );
+    });
+}

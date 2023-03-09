@@ -186,11 +186,11 @@ class Modem:
 
     def external_ip_through_proxy(self):
         proxies = { 
-              "http" : 'http://{0}:{1}'.format('127.0.0.1', self.server_modem_model.proxy_port), 
-              "https": 'https://{0}:{1}'.format('127.0.0.1', self.server_modem_model.proxy_port), 
+              "http" : 'http://{0}:{1}'.format('127.0.0.1', self.server_modem_model.proxy_ipv4_http_port), 
+              "https": 'https://{0}:{1}'.format('127.0.0.1', self.server_modem_model.proxy_ipv4_http_port), 
         }
 
-        r = requests.get('https://ipecho.net/plain', headers=None, proxies=proxies, timeout=5)
+        r = requests.get('https://ipecho.net/plain', headers=None, proxies=proxies, timeout=3)
         return r.text
     
     def is_connected(self):

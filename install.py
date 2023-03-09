@@ -86,8 +86,9 @@ if __name__ == '__main__':
         conn.execute("""
             CREATE TABLE modem (
             id INTEGER NOT NULL, 
+            imei VARCHAR(40), 
             device_id INTEGER, 
-            addr_id VARCHAR(15), 
+            addr_id VARCHAR(15),             
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
             PRIMARY KEY (id), 
             UNIQUE (addr_id)
@@ -103,8 +104,11 @@ if __name__ == '__main__':
             id INTEGER NOT NULL, 
             server_id INTEGER, 
             modem_id INTEGER, 
-            usb_port_id INTEGER, 
-            proxy_port INTEGER, 
+            usb_port_id INTEGER,
+            proxy_ipv4_http_port INTEGER,
+            proxy_ipv4_socks_port INTEGER,
+            proxy_ipv6_http_port INTEGER,
+            proxy_ipv6_socks_port INTEGER,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
             PRIMARY KEY (id), 
             FOREIGN KEY(server_id) REFERENCES server (id), 
@@ -195,35 +199,38 @@ if __name__ == '__main__':
 
     try:
         modems = [
-            { 'device_id': 1, 'addr_id': '10.56.70' },
-            { 'device_id': 1, 'addr_id': '10.56.71' },
-            { 'device_id': 1, 'addr_id': '10.56.72' },
-            { 'device_id': 1, 'addr_id': '10.56.73' },
-            { 'device_id': 1, 'addr_id': '10.56.74' },
-            { 'device_id': 1, 'addr_id': '10.56.75' }        
+            { 'imei': '499981121636715', 'device_id': 1, 'addr_id': '10.56.70' },
+            { 'imei': '535189163974632', 'device_id': 1, 'addr_id': '10.56.71' },
+            { 'imei': '998381769962604', 'device_id': 1, 'addr_id': '10.56.72' },
+            { 'imei': '331972696716018', 'device_id': 1, 'addr_id': '10.56.73' },
+            { 'imei': '528107331157293', 'device_id': 1, 'addr_id': '10.56.74' },
+            { 'imei': '527534278422839', 'device_id': 1, 'addr_id': '10.56.75' }        
         ]
 
         for m in modems:
-            modem = ModemModel(device_id = m['device_id'], addr_id = m['addr_id'])
+            modem = ModemModel(imei = m['imei'], device_id = m['device_id'], addr_id = m['addr_id'])
             modem.save_to_db()
     except ConstraintError:
         pass
 
     try:
         server_modems = [
-            { 'server_id': 1, 'modem_id': 1, 'usb_port_id': 7, 'proxy_port': 1025 },
-            { 'server_id': 1, 'modem_id': 2, 'usb_port_id': 8, 'proxy_port': 1026 },
-            { 'server_id': 1, 'modem_id': 3, 'usb_port_id': 7, 'proxy_port': 1027 },
-            { 'server_id': 1, 'modem_id': 4, 'usb_port_id': 5, 'proxy_port': 1028 },
-            { 'server_id': 1, 'modem_id': 5, 'usb_port_id': 6, 'proxy_port': 1029 },
-            { 'server_id': 1, 'modem_id': 6, 'usb_port_id': 5, 'proxy_port': 1030 },
+            { 'server_id': 1, 'modem_id': 1, 'usb_port_id': 7, 'proxy_ipv4_http_port': 1025, 'proxy_ipv4_socks_port': 2025, 'proxy_ipv6_http_port': 3025, 'proxy_ipv6_socks_port': 4025 },
+            { 'server_id': 1, 'modem_id': 2, 'usb_port_id': 8, 'proxy_ipv4_http_port': 1026, 'proxy_ipv4_socks_port': 2026, 'proxy_ipv6_http_port': 3026, 'proxy_ipv6_socks_port': 4026 },
+            { 'server_id': 1, 'modem_id': 3, 'usb_port_id': 7, 'proxy_ipv4_http_port': 1027, 'proxy_ipv4_socks_port': 2027, 'proxy_ipv6_http_port': 3027, 'proxy_ipv6_socks_port': 4027 },
+            { 'server_id': 1, 'modem_id': 4, 'usb_port_id': 5, 'proxy_ipv4_http_port': 1028, 'proxy_ipv4_socks_port': 2028, 'proxy_ipv6_http_port': 3028, 'proxy_ipv6_socks_port': 4028 },
+            { 'server_id': 1, 'modem_id': 5, 'usb_port_id': 6, 'proxy_ipv4_http_port': 1029, 'proxy_ipv4_socks_port': 2029, 'proxy_ipv6_http_port': 3029, 'proxy_ipv6_socks_port': 4029 },
+            { 'server_id': 1, 'modem_id': 6, 'usb_port_id': 5, 'proxy_ipv4_http_port': 1030, 'proxy_ipv4_socks_port': 2030, 'proxy_ipv6_http_port': 3030, 'proxy_ipv6_socks_port': 4030 },
         ]
         for s in server_modems:
             server_modem_model = ServerModemModel(
                 server_id = s['server_id'], 
                 modem_id = s['modem_id'], 
                 usb_port_id = s['usb_port_id'], 
-                proxy_port = s['proxy_port']
+                proxy_ipv4_http_port = s['proxy_ipv4_http_port'],
+                proxy_ipv4_socks_port = s['proxy_ipv4_socks_port'],
+                proxy_ipv6_http_port = s['proxy_ipv6_http_port'],
+                proxy_ipv6_socks_port = s['proxy_ipv6_socks_port']
                 )            
             server_modem_model.save_to_db()
 

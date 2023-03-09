@@ -16,7 +16,9 @@ class ServerModel():
         return {
             'id': self.id,
             'name': self.name,
-            'installation_id': self.installation_id
+            'installation_id': self.installation_id,
+            'internal_ip': self.internal_ip(),
+            'external_ip': self.external_ip()
         }
 
     @classmethod
@@ -62,12 +64,18 @@ class ServerModel():
     @staticmethod
     def cpu_percent():
         return psutil.cpu_percent()
-        return 1
 
     @staticmethod
     def virtual_memory():
         return psutil.virtual_memory()
-        return 1
+
+    @classmethod
+    def external_ip(cls):
+        return '200.196.15.114'
+
+    @classmethod
+    def internal_ip(cls):
+        return '192.168.15.10'
 
     def save_to_db(self):
         conn = connection()
@@ -141,12 +149,25 @@ class USBPortModel():
         conn.close(True)
 
 class ServerModemModel():
-    def __init__(self, id = None, server_id = None, modem_id = None, usb_port_id = None, proxy_port = None, created_at = None):
+    def __init__(
+            self, id = None, 
+            server_id = None, 
+            modem_id = None, 
+            usb_port_id = None, 
+            proxy_ipv4_http_port = None, 
+            proxy_ipv4_socks_port = None, 
+            proxy_ipv6_http_port = None, 
+            proxy_ipv6_socks_port = None, 
+            created_at = None
+        ):
         self.id = id
         self.server_id = server_id
         self.modem_id = modem_id
         self.usb_port_id = usb_port_id
-        self.proxy_port = proxy_port
+        self.proxy_ipv4_http_port = proxy_ipv4_http_port
+        self.proxy_ipv4_socks_port = proxy_ipv4_socks_port
+        self.proxy_ipv6_http_port = proxy_ipv6_http_port
+        self.proxy_ipv6_socks_port = proxy_ipv6_socks_port
         self.created_at = created_at
 
     def json(self):
@@ -162,10 +183,26 @@ class ServerModemModel():
                 'status': usb_port.status
             },
             'proxy': {
-                'port': self.proxy_port
+                'ipv4': {
+                    'http': {
+                        'port': self.proxy_ipv4_http_port
+                    },
+                    'socks': {
+                        'port': self.proxy_ipv4_socks_port
+                    }                    
+                },
+                'ipv6': {
+                    'http': {
+                        'port': self.proxy_ipv6_http_port
+                    },
+                    'socks': {
+                        'port': self.proxy_ipv6_socks_port
+                    }                    
+                }                
             },
             'modem': {
                 'id': modem.id,
+                'imei': modem.imei,
                 'addr_id': modem.addr_id,
                 'device': {
                     'id': device.id,
@@ -179,13 +216,23 @@ class ServerModemModel():
     @classmethod
     def find_by_id(cls, id: int):
         conn = connection()
-        row = conn.execute("select id, server_id, modem_id, usb_port_id, proxy_port, created_at from modem_server where id=?", (id, )).fetchone()
+        row = conn.execute("select id, server_id, modem_id, usb_port_id, proxy_ipv4_http_port, proxy_ipv4_socks_port, proxy_ipv6_http_port, proxy_ipv6_socks_port, created_at from modem_server where id=?", (id, )).fetchone()
         conn.close(True)
 
         if row == None:
             return None
 
-        return ServerModemModel(id=row[0], server_id=row[1], modem_id=row[2], usb_port_id=row[3], proxy_port=row[4], created_at=row[3])
+        return ServerModemModel(
+            id=row[0], 
+            server_id=row[1], 
+            modem_id=row[2], 
+            usb_port_id=row[3], 
+            proxy_ipv4_http_port=row[4], 
+            proxy_ipv4_socks_port=row[5], 
+            proxy_ipv6_http_port=row[6], 
+            proxy_ipv6_socks_port=row[7], 
+            created_at=row[3]
+            )
 
     @classmethod
     def find_by_modem_id(cls, id: int):
@@ -211,15 +258,22 @@ class ServerModemModel():
         conn = connection()
 
         if self.id == None:
-            conn.execute("insert into modem_server (server_id, modem_id, usb_port_id, proxy_port) values (?, ?, ?, ?)", (
-                self.server_id, self.modem_id, self.usb_port_id, self.proxy_port
+            conn.execute("insert into modem_server (server_id, modem_id, usb_port_id, proxy_ipv4_http_port, proxy_ipv4_socks_port, proxy_ipv6_http_port, proxy_ipv6_socks_port) values (?, ?, ?, ?, ?, ?, ?)", (
+                self.server_id, 
+                self.modem_id, 
+                self.usb_port_id, 
+                self.proxy_ipv4_http_port,
+                self.proxy_ipv4_socks_port,
+                self.proxy_ipv6_http_port,
+                self.proxy_ipv6_socks_port
                 ))
             self.id = conn.last_insert_rowid()
         else:
-            conn.execute("update modem_server set server_id=?, modem_id=?, usb_port_id=?, proxy_port=? where id = ?", (
-                self.server_id, self.modem_id, self.usb_port_id, self.proxy_port, self.id
+            conn.execute("update modem_server set server_id=?, modem_id=?, usb_port_id=?, proxy_ipv4_http_port=? where id = ?", (
+                self.server_id, self.modem_id, self.usb_port_id, self.proxy_ipv4_http_port, self.id
                 ))
 
         conn.close(True)
+
 
 

@@ -1,15 +1,16 @@
-import { Grid, Link, Box, Card, Typography } from '@mui/material';
-import MuiTypography from '@mui/material/Typography';
+import { Grid, Box, Card, Typography } from '@mui/material';
 
 // project imports
 import SubCard from 'ui-component/cards/SubCard';
 import MainCard from 'ui-component/cards/MainCard';
 import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
-import { gridSpacing } from 'store/constant';
 
 import { useEffect, useState } from 'react';
 
-import { getModem, getModems } from 'services/api/server/modem';
+import { getServer } from 'services/api/server';
+import { getModem, getModems, reboot } from 'services/api/server/modem';
+
+import { bytesToSize } from 'utils/format';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -24,20 +25,42 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
+
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import PropTypes from 'prop-types';
+
 import { IconDotsVertical, IconAccessPoint, IconAccessPointOff } from '@tabler/icons';
 import { IconAntennaBars1, IconAntennaBars2, IconAntennaBars3, IconAntennaBars4, IconAntennaBars5 } from '@tabler/icons';
-// import { IconSignal4gPlus, IconSignal3g, IconSignal4g, IconSignal5g } from '@tabler/icons';
-import { green, grey } from '@mui/material/colors';
+import CloseIcon from '@mui/icons-material/Close';
+
+import ChangeDialog from 'ui-component/modem/ip/Change';
+import RebootDialog from 'ui-component/modem/Reboot';
+import SettingsDialog from 'ui-component/modem/Settings';
+import DiagnoseDialog from 'ui-component/modem/Diagnose';
 
 const Modems = () => {
     // const [isLoading, setLoading] = useState(true);
-    const [modems, setModems] = useState([]);
-    const [modemsDetails, setModemsDetails] = useState([]);
 
+    const [server, setServer] = useState([]);
+    const loadServer = () => {
+        getServer().then(
+            (response) => {
+                console.log(response);
+                setServer(response);
+            },
+            (error) => console.log('server error', error)
+        );
+    };
+
+    const [modems, setModems] = useState([]);
     const loadModems = () => {
         getModems().then(
             (items) => {
-                console.log(items);
+                // console.log(items);
                 setModems(items);
                 loadModemsDetails(items);
             },
@@ -46,8 +69,6 @@ const Modems = () => {
     };
 
     const loadModemsDetails = (items) => {
-        const modemsDetails = [];
-
         items.map(function (item) {
             getModem(item.modem.id).then(
                 (modem) => {
@@ -57,11 +78,12 @@ const Modems = () => {
                             m.device_network_type = modem.device_network_type;
                             m.device_network_provider = modem.device_network_provider;
                             m.device_network_signalbar = modem.device_network_signalbar;
+                            m.data = modem.data;
                         }
                         return m;
                     });
                     setModems(remodems);
-                    console.log(item.modem.id, remodems);
+                    // console.log(item.modem.id, remodems);
                 },
                 (error) => console.log('modem error', error)
             );
@@ -69,16 +91,77 @@ const Modems = () => {
     };
 
     useEffect(() => {
+        loadServer();
         loadModems();
     }, []);
 
-    const [anchorEl, setAnchorEl] = useState(null);
-    const open = Boolean(anchorEl);
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
+    const [anchorModemMenuEl, setAnchorModemMenuEl] = useState(null);
+    const [openModemMenuElem, setOpenModemMenuElem] = useState(null);
+    const handleModemOpenMenuClick = (elem) => (event) => {
+        setAnchorModemMenuEl(event.currentTarget);
+        setOpenModemMenuElem(elem);
     };
-    const handleClose = () => {
-        setAnchorEl(null);
+    const handleModemCloseMenu = () => {
+        setAnchorModemMenuEl(null);
+        setOpenModemMenuElem(null);
+    };
+
+    const [modemRebootDialog, setModemRebootDialog] = useState({
+        open: false,
+        modem: null
+    });
+    const handleModemRebootClick = (modem) => {
+        setModemRebootDialog({
+            open: true,
+            modem: modem
+        });
+    };
+    const handleModemRebootClose = () => {
+        setModemRebootDialog({ ...modemRebootDialog, open: false });
+    };
+
+    const [modemChangeIPDialog, setModemChangeIPDialog] = useState({
+        open: false,
+        modem: null
+    });
+    const handleModemChangeIPClick = (modem) => {
+        setModemChangeIPDialog({
+            open: true,
+            modem: modem
+        });
+    };
+    const handleModemChangeIPClose = () => {
+        setModemChangeIPDialog({ ...modemChangeIPDialog, open: false });
+    };
+
+    const [modemSettingsDialog, setModemSettingsDialog] = useState({
+        open: false,
+        modem: null
+    });
+    const handleModemSettingsClick = (modem) => {
+        console.log(modem);
+        setModemSettingsDialog({
+            open: true,
+            modem: modem
+        });
+    };
+    const handleModemSettingsClose = () => {
+        setModemSettingsDialog({ ...modemSettingsDialog, open: false });
+    };
+
+    const [modemDiagnoseDialog, setModemDiagnoseDialog] = useState({
+        open: false,
+        modem: null
+    });
+    const handleModemDiagnoseClick = (modem) => {
+        console.log(modem);
+        setModemDiagnoseDialog({
+            open: true,
+            modem: modem
+        });
+    };
+    const handleModemDiagnoseClose = () => {
+        setModemDiagnoseDialog({ ...modemDiagnoseDialog, open: false });
     };
 
     const ColorBox = ({ bgcolor, title, dark }) => (
@@ -89,7 +172,7 @@ const Modems = () => {
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        py: 1,
+                        p: 1,
                         bgcolor,
                         color: dark ? 'grey.800' : '#ffffff'
                     }}
@@ -100,9 +183,21 @@ const Modems = () => {
         </>
     );
 
+    const ProxyConnection = ({ type, ip, port }) => (
+        <>
+            <div>
+                <span>{type}</span>
+                <span>/</span>
+                <span>{ip}</span>
+                <span>:</span>
+                <span>{port}</span>
+            </div>
+        </>
+    );
+
     const SignalBar = (data) => {
         const icons = {
-            ['0']: <Typography variant="subtitle2">-</Typography>,
+            ['0']: <span>-</span>,
             ['1']: <IconAntennaBars1 title={data.signal} />,
             ['2']: <IconAntennaBars2 title={data.signal} />,
             ['3']: <IconAntennaBars3 title={data.signal} />,
@@ -114,10 +209,14 @@ const Modems = () => {
     };
 
     return (
-        <MainCard title="Modems" secondary={<SecondaryAction link="https://next.material-ui.com/system/typography/" />}>
+        <MainCard
+            title="Modems"
+            contentClass={'test'}
+            secondary={<SecondaryAction link="https://next.material-ui.com/system/typography/" />}
+        >
             <Grid container spacing={0}>
                 <Grid item xs={12} sm={12}>
-                    <SubCard>
+                    <SubCard contentSX={{ padding: '0 !important' }}>
                         <Grid container direction="column" spacing={0}>
                             <Grid item>
                                 <TableContainer component={Paper}>
@@ -125,16 +224,16 @@ const Modems = () => {
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell>Modem</TableCell>
+                                                <TableCell align="left">Modelo</TableCell>
+                                                <TableCell align="left">IMEI</TableCell>
                                                 <TableCell align="left">Status</TableCell>
-                                                <TableCell align="right">IP externo</TableCell>
+                                                <TableCell align="left">IP externo</TableCell>
                                                 <TableCell align="right">Provedor</TableCell>
                                                 <TableCell align="right">Rede</TableCell>
                                                 <TableCell align="center">Sinal</TableCell>
-                                                <TableCell align="right">Porta proxy</TableCell>
-                                                <TableCell align="right">Status proxy</TableCell>
-                                                <TableCell align="right">Porta USB</TableCell>
-                                                <TableCell align="right">Tipo</TableCell>
-                                                <TableCell align="right">Modelo</TableCell>
+                                                <TableCell align="left">Proxy IPv4</TableCell>
+                                                <TableCell align="left">Proxy IPv6</TableCell>
+                                                <TableCell align="right">Uso de dados</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -146,32 +245,64 @@ const Modems = () => {
                                                 >
                                                     <TableCell component="th" scope="row">
                                                         <IconButton
-                                                            id="basic-button"
-                                                            aria-label="expand row"
+                                                            id={`modem-button-${row.modem.id}`}
+                                                            aria-label="Modem Options"
                                                             size="small"
-                                                            aria-controls={open ? 'basic-menu' : undefined}
+                                                            aria-controls={`modem-menu-${row.modem.id}`}
                                                             aria-haspopup="true"
-                                                            aria-expanded={open ? 'true' : undefined}
-                                                            onClick={handleClick}
+                                                            onClick={handleModemOpenMenuClick(row.modem.id)}
                                                         >
                                                             <IconDotsVertical />
                                                         </IconButton>
                                                         <Menu
-                                                            id="basic-menu"
-                                                            anchorEl={anchorEl}
-                                                            open={open}
-                                                            onClose={handleClose}
+                                                            id={`modem-menu-${row.modem.id}`}
+                                                            anchorEl={anchorModemMenuEl}
+                                                            open={openModemMenuElem === row.modem.id}
+                                                            onClose={handleModemCloseMenu}
                                                             MenuListProps={{
-                                                                'aria-labelledby': 'basic-button'
+                                                                'aria-labelledby': `modem-button-${row.modem.id}`
                                                             }}
                                                         >
-                                                            <MenuItem onClick={handleClose}>Profile</MenuItem>
-                                                            <MenuItem onClick={handleClose}>My account</MenuItem>
+                                                            <MenuItem
+                                                                onClick={() => {
+                                                                    handleModemChangeIPClick(row);
+                                                                    handleModemCloseMenu();
+                                                                }}
+                                                                disabled={row.is_connected}
+                                                            >
+                                                                Alterar IP
+                                                            </MenuItem>
+                                                            <MenuItem
+                                                                onClick={() => {
+                                                                    handleModemRebootClick(row);
+                                                                    handleModemCloseMenu();
+                                                                }}
+                                                                disabled={false}
+                                                            >
+                                                                Reiniciar
+                                                            </MenuItem>
+                                                            <MenuItem
+                                                                onClick={() => {
+                                                                    handleModemDiagnoseClick(row);
+                                                                    handleModemCloseMenu();
+                                                                }}
+                                                            >
+                                                                Executar diagnóstico
+                                                            </MenuItem>
                                                             <Divider />
-                                                            <MenuItem onClick={handleClose}>Configurações</MenuItem>
+                                                            <MenuItem
+                                                                onClick={() => {
+                                                                    handleModemSettingsClick(row);
+                                                                    handleModemCloseMenu();
+                                                                }}
+                                                            >
+                                                                Configurações
+                                                            </MenuItem>
                                                         </Menu>
                                                         &nbsp;&nbsp;{row.modem.id}
                                                     </TableCell>
+                                                    <TableCell align="left">{row.modem.device.model}</TableCell>
+                                                    <TableCell align="left">{row.modem.imei}</TableCell>
                                                     <TableCell align="left">
                                                         {row.is_connected ? (
                                                             <ColorBox bgcolor={'success.light'} title="Conectado" dark />
@@ -179,7 +310,7 @@ const Modems = () => {
                                                             <ColorBox bgcolor={'orange.light'} title="Desconectado" dark />
                                                         )}
                                                     </TableCell>
-                                                    <TableCell align="right">{row.external_ip ? row.external_ip : '-'}</TableCell>
+                                                    <TableCell align="left">{row.external_ip ? row.external_ip : '-'}</TableCell>
                                                     <TableCell align="right">
                                                         {row.device_network_provider ? row.device_network_provider : '-'}
                                                     </TableCell>
@@ -193,11 +324,100 @@ const Modems = () => {
                                                             <SignalBar signal={0} />
                                                         )}
                                                     </TableCell>
-                                                    <TableCell align="right">{row.proxy.port}</TableCell>
-                                                    <TableCell align="right"></TableCell>
-                                                    <TableCell align="right">{row.usb.port}</TableCell>
-                                                    <TableCell align="right">{row.modem.device.type}</TableCell>
-                                                    <TableCell align="right">{row.modem.device.model}</TableCell>
+                                                    <TableCell align="left">
+                                                        {row.proxy ? (
+                                                            <Grid
+                                                                container
+                                                                justifyContent="space-between"
+                                                                alignItems="start"
+                                                                direction="column"
+                                                            >
+                                                                <Grid item>
+                                                                    {server ? (
+                                                                        <ProxyConnection
+                                                                            type={'http'}
+                                                                            ip={server.external_ip}
+                                                                            port={row.proxy.ipv4.http.port}
+                                                                        />
+                                                                    ) : (
+                                                                        <span>-</span>
+                                                                    )}
+                                                                </Grid>
+                                                                <Grid item>
+                                                                    {server ? (
+                                                                        <ProxyConnection
+                                                                            type={'socks'}
+                                                                            ip={server.external_ip}
+                                                                            port={row.proxy.ipv4.socks.port}
+                                                                        />
+                                                                    ) : (
+                                                                        <span>-</span>
+                                                                    )}
+                                                                </Grid>
+                                                            </Grid>
+                                                        ) : (
+                                                            <span>-</span>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell align="left">
+                                                        {row.proxy ? (
+                                                            <Grid
+                                                                container
+                                                                justifyContent="space-between"
+                                                                alignItems="start"
+                                                                direction="column"
+                                                            >
+                                                                <Grid item>
+                                                                    {server ? (
+                                                                        <ProxyConnection
+                                                                            type={'http'}
+                                                                            ip={server.external_ip}
+                                                                            port={row.proxy.ipv6.http.port}
+                                                                        />
+                                                                    ) : (
+                                                                        <span>-</span>
+                                                                    )}
+                                                                </Grid>
+                                                                <Grid item>
+                                                                    {server ? (
+                                                                        <ProxyConnection
+                                                                            type={'socks'}
+                                                                            ip={server.external_ip}
+                                                                            port={row.proxy.ipv6.socks.port}
+                                                                        />
+                                                                    ) : (
+                                                                        <span>-</span>
+                                                                    )}
+                                                                </Grid>
+                                                            </Grid>
+                                                        ) : (
+                                                            <span>-</span>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell align="right">
+                                                        <Grid container justifyContent="space-between" alignItems="end" direction="column">
+                                                            <Grid item>
+                                                                {row.data && row.data.receive ? (
+                                                                    <span>
+                                                                        <span>Download&nbsp;</span>
+                                                                        <span>{bytesToSize(row.data.receive.bytes)}</span>
+                                                                    </span>
+                                                                ) : (
+                                                                    <span>-</span>
+                                                                )}
+                                                            </Grid>
+                                                            <Grid item>
+                                                                {row.data && row.data.transmit ? (
+                                                                    <span>
+                                                                        <span>Upload&nbsp;</span>
+                                                                        <span>{bytesToSize(row.data.transmit.bytes)}</span>
+                                                                    </span>
+                                                                ) : (
+                                                                    <span>-</span>
+                                                                )}
+                                                            </Grid>
+                                                        </Grid>
+                                                    </TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -208,6 +428,30 @@ const Modems = () => {
                     </SubCard>
                 </Grid>
             </Grid>
+            <SettingsDialog
+                open={modemSettingsDialog.open}
+                modem={modemSettingsDialog.modem}
+                onClose={handleModemSettingsClose}
+                onConfirm={handleModemSettingsClose}
+            />
+            <ChangeDialog
+                open={modemChangeIPDialog.open}
+                modem={modemChangeIPDialog.modem}
+                onClose={handleModemChangeIPClose}
+                onConfirm={handleModemChangeIPClose}
+            />
+            <RebootDialog
+                open={modemRebootDialog.open}
+                modem={modemRebootDialog.modem}
+                onClose={handleModemRebootClose}
+                onConfirm={handleModemRebootClose}
+            />
+            <DiagnoseDialog
+                open={modemDiagnoseDialog.open}
+                modem={modemDiagnoseDialog.modem}
+                onClose={handleModemDiagnoseClose}
+                onConfirm={handleModemDiagnoseClose}
+            />
         </MainCard>
     );
 };
