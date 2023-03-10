@@ -1,0 +1,7 @@
+{
+    "app.general.modem": "Modem",
+
+    "app.components.Reboot.modal.header.title": "Reiniciar",
+    "app.components.Reboot.modal.body.question": "Tem certeza de que deseja reiniciar este modem?",
+    "app.components.Reboot.modal.body.alert": "Considere pausar quaiquer serviços que estiverem usando-o como proxy antes de continuar."
+}

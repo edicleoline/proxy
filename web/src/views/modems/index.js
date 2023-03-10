@@ -42,6 +42,9 @@ import RebootDialog from 'ui-component/modem/Reboot';
 import SettingsDialog from 'ui-component/modem/Settings';
 import DiagnoseDialog from 'ui-component/modem/Diagnose';
 
+import io from 'socket.io-client';
+import objectHash from 'object-hash';
+
 const Modems = () => {
     // const [isLoading, setLoading] = useState(true);
 
@@ -56,43 +59,96 @@ const Modems = () => {
         );
     };
 
-    const [modems, setModems] = useState([]);
-    const loadModems = () => {
-        getModems().then(
-            (items) => {
-                // console.log(items);
-                setModems(items);
-                loadModemsDetails(items);
-            },
-            (error) => console.log('modems error', error)
-        );
-    };
+    // const [modems, setModems] = useState([]);
+    // const loadModems = () => {
+    //     getModems().then(
+    //         (items) => {
+    //             // console.log(items);
+    //             setModems(items);
+    //             loadModemsDetails(items);
+    //         },
+    //         (error) => console.log('modems error', error)
+    //     );
+    // };
 
-    const loadModemsDetails = (items) => {
-        items.map(function (item) {
-            getModem(item.modem.id).then(
-                (modem) => {
-                    const remodems = items.map(function (m) {
-                        if (m.modem.id == modem.modem.id) {
-                            m.external_ip = modem.external_ip_through_device;
-                            m.device_network_type = modem.device_network_type;
-                            m.device_network_provider = modem.device_network_provider;
-                            m.device_network_signalbar = modem.device_network_signalbar;
-                            m.data = modem.data;
-                        }
-                        return m;
-                    });
-                    setModems(remodems);
-                    // console.log(item.modem.id, remodems);
-                },
-                (error) => console.log('modem error', error)
-            );
-        });
-    };
+    // const loadModemsDetails = (items) => {
+    //     items.map(function (item) {
+    //         getModem(item.modem.id).then(
+    //             (modem) => {
+    //                 const remodems = items.map(function (m) {
+    //                     if (m.modem.id == modem.modem.id) {
+    //                         m.external_ip = modem.external_ip_through_device;
+    //                         m.device_network_type = modem.device_network_type;
+    //                         m.device_network_provider = modem.device_network_provider;
+    //                         m.device_network_signalbar = modem.device_network_signalbar;
+    //                         m.data = modem.data;
+    //                     }
+    //                     return m;
+    //                 });
+    //                 setModems(remodems);
+    //                 // console.log(item.modem.id, remodems);
+    //             },
+    //             (error) => console.log('modem error', error)
+    //         );
+    //     });
+    // };
 
     useEffect(() => {
         loadServer();
-        loadModems();
+        // loadModems();
+    }, []);
+
+    const [modems, setModems] = useState([]);
+    let modemsHash = null;
+
+    const socket = io('http://127.0.0.1:5000');
+    const [socketConnected, setSocketConnected] = useState(socket.connected);
+    // const [lastPong, setLastPong] = useState(null);
+
+    useEffect(() => {
+        socket.on('connect', () => {
+            setSocketConnected(true);
+            console.log('socket.io: connected');
+        });
+
+        socket.on('disconnect', () => {
+            setSocketConnected(false);
+            console.log('socket.io: disconnected');
+        });
+
+        // socket.on('pong', () => {
+        //     setLastPong(new Date().toISOString());
+        // });
+
+        socket.on('message', (message) => {
+            console.log('socket.io server: message', message);
+        });
+
+        socket.on('modems', (items) => {
+            // console.log('socket.io server: modems', items);
+            const hash = objectHash.MD5(items);
+            if (!modemsHash || modemsHash !== hash) {
+                console.log('new modems hash', hash);
+                modemsHash = hash;
+                setModems(items);
+            }
+        });
+
+        socket.on('modems_details', (items) => {
+            console.log('socket.io server: modems_details', items);
+            // const hash = objectHash.MD5(items);
+            // if (!modemsHash || modemsHash !== hash) {
+            //     console.log('new modems hash', hash);
+            //     modemsHash = hash;
+            //     setModems(items);
+            // }
+        });
+
+        return () => {
+            socket.off('connect');
+            socket.off('disconnect');
+            socket.off('pong');
+        };
     }, []);
 
     const [anchorModemMenuEl, setAnchorModemMenuEl] = useState(null);

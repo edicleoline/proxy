@@ -1,3 +1,4 @@
+import os
 import requests
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
@@ -79,7 +80,16 @@ class ServerModemReboot(Resource):
 
         server_modem = ServerModemModel.find_by_modem_id(modem_id)
         imodem = IModem(server_modem)       
-        imodem.hard_reboot()
+
+        try:
+            imodem.hard_reboot()
+        except OSError as error:
+            return {
+                "error": {
+                    "code": error.errno,
+                    "message": str(error)
+                }                
+            }, 500    
 
         return {"message": "Successfully rebooted"}, 200
 
