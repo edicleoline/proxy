@@ -76,8 +76,12 @@ const RebootDialog = (props) => {
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={onClose}>Não</Button>
-                    <Button onClick={handleConfirmClick}>Reiniciar</Button>
+                    <Button onClick={onClose}>
+                        <FormattedMessage id="app.labels.no" />
+                    </Button>
+                    <Button onClick={handleConfirmClick}>
+                        <FormattedMessage id="app.labels.reboot" />
+                    </Button>
                 </DialogActions>
             </Dialog>
             <Snackbar

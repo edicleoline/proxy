@@ -106,6 +106,7 @@ api.add_resource(ServerModemReboot, "/server/modem/<int:modem_id>/reboot")
 #https://github.com/ajaichemmanam/react-flask-socketio/blob/7cdfe2c76a8ad4eb36e097dd30e2b273882a08fb/server.py
 
 server_model = ServerModel.find_by_id(1)
+modems_service = ModemsService(server_model = server_model)
 
 global modems_status_thread
 global modems_details_thread
@@ -118,8 +119,7 @@ class ModemsStatusThread(Thread):
         self.delay = 1
         super(ModemsStatusThread, self).__init__()
 
-    def run_forever(self):        
-        modems_service = ModemsService(server_model = server_model)
+    def run_forever(self):
         try:
             while not modems_status_thread_stop_event.isSet():
                 modems = modems_service.modems_status()
@@ -142,11 +142,10 @@ class ModemsDetailsThread(Thread):
         self.delay = 1
         super(ModemsDetailsThread, self).__init__()
 
-    def run_forever(self):        
-        modems_service = ModemsService(server_model = server_model)
+    def run_forever(self):
         try:
             while not modems_details_thread_stop_event.isSet():
-                modems = modems_service.modems_status()
+                modems = modems_service.modems_details()
                 socketio.emit('modems_details', modems, broadcast=True)
                 sleep(self.delay)
 

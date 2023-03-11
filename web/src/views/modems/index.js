@@ -5,7 +5,7 @@ import SubCard from 'ui-component/cards/SubCard';
 import MainCard from 'ui-component/cards/MainCard';
 import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import { getServer } from 'services/api/server';
 import { getModem, getModems, reboot } from 'services/api/server/modem';
@@ -99,7 +99,10 @@ const Modems = () => {
     }, []);
 
     const [modems, setModems] = useState([]);
-    let modemsHash = null;
+    const _modems = useRef(null);
+    const _modemsHash = useRef(null);
+
+    const _modemsDetailsHash = useRef(null);
 
     const socket = io('http://127.0.0.1:5000');
     const [socketConnected, setSocketConnected] = useState(socket.connected);
@@ -126,22 +129,79 @@ const Modems = () => {
 
         socket.on('modems', (items) => {
             // console.log('socket.io server: modems', items);
-            const hash = objectHash.MD5(items);
-            if (!modemsHash || modemsHash !== hash) {
-                console.log('new modems hash', hash);
-                modemsHash = hash;
-                setModems(items);
+            const itemsHash = objectHash.MD5(items);
+
+            if (!_modems.current) {
+                _modems.current = items;
+                _modemsHash.current = itemsHash;
+                setModems(_modems.current);
+            } else {
+                if (_modemsHash.current !== itemsHash) {
+                    let changed = false;
+                    const remodems = _modems.current.map(function (modem) {
+                        items.forEach((item) => {
+                            if (modem.id !== item.id) {
+                                return;
+                            }
+
+                            if (modem.is_connected !== item.is_connected) {
+                                changed = true;
+                                modem.is_connected = item.is_connected;
+
+                                if (!modem.is_connected) {
+                                    delete modem.external_ip;
+                                    delete modem.device_network_type;
+                                    delete modem.device_network_provider;
+                                    delete modem.device_network_signalbar;
+                                    delete modem.data;
+                                }
+                            }
+                        });
+
+                        return modem;
+                    });
+
+                    _modemsHash.current = itemsHash;
+                    if (changed) {
+                        _modems.current = remodems;
+                        setModems(_modems.current);
+                    }
+                }
             }
+
+            // if (!_modems.current) {
+            //     console.log('new modems hash', hash);
+            //     _modemsHash.current = hash;
+            //     _modems.current = items;
+            //     setModems(_modems.current);
+            // }
         });
 
         socket.on('modems_details', (items) => {
-            console.log('socket.io server: modems_details', items);
-            // const hash = objectHash.MD5(items);
-            // if (!modemsHash || modemsHash !== hash) {
-            //     console.log('new modems hash', hash);
-            //     modemsHash = hash;
-            //     setModems(items);
-            // }
+            // console.log('socket.io server: modems_details', items);
+            const hash = objectHash.MD5(items);
+            if (_modems.current && (!_modemsDetailsHash.current || _modemsDetailsHash.current !== hash)) {
+                console.log('new modems_details hash', hash);
+                _modemsDetailsHash.current = hash;
+
+                const remodems = _modems.current.map(function (modem) {
+                    items.forEach((modemDetail) => {
+                        if (modem.modem.id === modemDetail.modem.id) {
+                            console.log('remodem', modemDetail);
+                            modem.is_connected = modemDetail.is_connected;
+                            modem.external_ip = modemDetail.external_ip_through_device;
+                            modem.device_network_type = modemDetail.device_network_type;
+                            modem.device_network_provider = modemDetail.device_network_provider;
+                            modem.device_network_signalbar = modemDetail.device_network_signalbar;
+                            modem.data = modemDetail.data;
+                        }
+                    });
+                    return modem;
+                });
+                // console.log(remodems);
+                _modems.current = remodems;
+                setModems(remodems);
+            }
         });
 
         return () => {
@@ -381,7 +441,7 @@ const Modems = () => {
                                                         )}
                                                     </TableCell>
                                                     <TableCell align="left">
-                                                        {row.proxy ? (
+                                                        {row.is_connected && row.proxy ? (
                                                             <Grid
                                                                 container
                                                                 justifyContent="space-between"
@@ -416,7 +476,7 @@ const Modems = () => {
                                                         )}
                                                     </TableCell>
                                                     <TableCell align="left">
-                                                        {row.proxy ? (
+                                                        {row.is_connected && row.proxy ? (
                                                             <Grid
                                                                 container
                                                                 justifyContent="space-between"

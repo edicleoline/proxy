@@ -1,5 +1,7 @@
 {
-    "app.general.modem": "Modem",
+    "app.labels.yes": "Sim",
+    "app.labels.no": "Não",
+    "app.labels.reboot": "Reiniciar",
 
     "app.components.Reboot.modal.header.title": "Reiniciar",
     "app.components.Reboot.modal.body.question": "Tem certeza de que deseja reiniciar este modem?",

@@ -35,14 +35,28 @@ class ModemsService():
             signalbar = device_details['signalbar'] if device_details else None
             
             imodem_iface = imodem.iface()
-            modem_ifaddress = imodem_iface.ifaddresses[0]   
-                
+
             item['interface'] = imodem_iface.interface
-            item['internal_ip'] = modem_ifaddress['addr']
+
+            modem_ifaddresses = imodem_iface.ifaddresses
+            if modem_ifaddresses:
+                modem_ifaddress = modem_ifaddresses[0]                           
+                item['internal_ip'] = modem_ifaddress['addr']
 
             item['device_network_type'] = network_type
             item['device_network_provider'] = network_provider
             item['device_network_signalbar'] = signalbar
+
+            item['external_ip_through_device'] = imodem.external_ip_through_device(silence_mode=True)
+
+            item['data'] = {
+                'receive': {
+                    'bytes': 9123381                
+                },
+                'transmit': {
+                    'bytes': 3790765
+                }
+            }
 
             result.append(item)
 
