@@ -29,7 +29,7 @@ app.config["PROPAGATE_EXCEPTIONS"] = True
 CORS(app)
 
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, async_mode=async_mode, cors_allowed_origins='http://localhost:3000')
+socketio = SocketIO(app, async_mode=async_mode, cors_allowed_origins='*')
 
 app.config["JWT_SECRET_KEY"] = "berners"
 jwt = JWTManager(app)
@@ -236,4 +236,4 @@ def default_error_handler(e):
 if __name__ == '__main__':
     # http_server = WSGIServer(('',5000), app, handler_class=WebSocketHandler)
     # http_server.serve_forever()
-    socketio.run(app=app, port=5000)
+    socketio.run(app=app, port=5000, host='0.0.0.0')
