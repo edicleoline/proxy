@@ -22,10 +22,9 @@ class ModemsService():
 
         for x, item in enumerate(items):
             imodem = IModem(self.server_modems[x])
-            imodem_is_connected = imodem.is_connected()
-            item['is_connected'] = imodem_is_connected
+            item['is_connected'] = imodem.is_connected()
 
-            if imodem_is_connected == False:
+            if item['is_connected'] == False:
                 continue
 
             imodem_iface = imodem.iface()
@@ -61,6 +60,11 @@ class ModemsService():
                     'bytes': imodem_iface.tx_bytes      
                 }
             }
+
+            item['is_connected'] = imodem.is_connected()
+
+            if item['is_connected'] == False:
+                continue
 
             result.append(item)
 
