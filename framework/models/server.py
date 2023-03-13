@@ -71,11 +71,11 @@ class ServerModel():
 
     @classmethod
     def external_ip(cls):
-        return '200.196.15.114'
+        return '127.0.0.1'
 
     @classmethod
     def internal_ip(cls):
-        return '192.168.15.10'
+        return 'localhost'
 
     def save_to_db(self):
         conn = connection()

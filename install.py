@@ -204,7 +204,9 @@ if __name__ == '__main__':
             { 'imei': '998381769962604', 'device_id': 1, 'addr_id': '10.56.72' },
             { 'imei': '331972696716018', 'device_id': 1, 'addr_id': '10.56.73' },
             { 'imei': '528107331157293', 'device_id': 1, 'addr_id': '10.56.74' },
-            { 'imei': '527534278422839', 'device_id': 1, 'addr_id': '10.56.75' }        
+            { 'imei': '527534278422839', 'device_id': 1, 'addr_id': '10.56.75' },
+            { 'imei': '527534278422840', 'device_id': 1, 'addr_id': '10.56.76' },
+            { 'imei': '527534278422841', 'device_id': 1, 'addr_id': '10.56.77' }
         ]
 
         for m in modems:
@@ -221,6 +223,8 @@ if __name__ == '__main__':
             { 'server_id': 1, 'modem_id': 4, 'usb_port_id': 5, 'proxy_ipv4_http_port': 1028, 'proxy_ipv4_socks_port': 2028, 'proxy_ipv6_http_port': 3028, 'proxy_ipv6_socks_port': 4028 },
             { 'server_id': 1, 'modem_id': 5, 'usb_port_id': 6, 'proxy_ipv4_http_port': 1029, 'proxy_ipv4_socks_port': 2029, 'proxy_ipv6_http_port': 3029, 'proxy_ipv6_socks_port': 4029 },
             { 'server_id': 1, 'modem_id': 6, 'usb_port_id': 5, 'proxy_ipv4_http_port': 1030, 'proxy_ipv4_socks_port': 2030, 'proxy_ipv6_http_port': 3030, 'proxy_ipv6_socks_port': 4030 },
+            { 'server_id': 1, 'modem_id': 7, 'usb_port_id': 7, 'proxy_ipv4_http_port': 1031, 'proxy_ipv4_socks_port': 2031, 'proxy_ipv6_http_port': 3031, 'proxy_ipv6_socks_port': 4031 },
+            { 'server_id': 1, 'modem_id': 8, 'usb_port_id': 8, 'proxy_ipv4_http_port': 1032, 'proxy_ipv4_socks_port': 2032, 'proxy_ipv6_http_port': 3032, 'proxy_ipv6_socks_port': 4032 },
         ]
         for s in server_modems:
             server_modem_model = ServerModemModel(

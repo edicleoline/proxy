@@ -16,18 +16,20 @@ from flask_socketio import SocketIO, emit
 from gevent.pywsgi import WSGIServer
 from geventwebsocket.handler import WebSocketHandler
 from random import random
-from threading import Thread, Event
+from threading import Thread, Event, Lock
 from time import sleep
 
 from socketservice.modems import ModemsService
 from framework.models.server import ServerModel
+
+async_mode = None
 
 app = Flask(__name__)
 app.config["PROPAGATE_EXCEPTIONS"] = True
 CORS(app)
 
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, cors_allowed_origins='http://localhost:3000')
+socketio = SocketIO(app, async_mode=async_mode, cors_allowed_origins='http://localhost:3000')
 
 app.config["JWT_SECRET_KEY"] = "berners"
 jwt = JWTManager(app)
@@ -108,30 +110,50 @@ api.add_resource(ServerModemReboot, "/server/modem/<int:modem_id>/reboot")
 server_model = ServerModel.find_by_id(1)
 modems_service = ModemsService(server_model = server_model)
 
-global modems_status_thread
-global modems_details_thread
+modems_status_thread = None
+modems_status_thread_lock = Lock()
 
-modems_status_thread = Thread()
-modems_status_thread_stop_event = Event()
+modems_details_thread = None
+modems_details_thread_lock = Lock()
 
-class ModemsStatusThread(Thread):
-    def __init__(self):
-        self.delay = 1
-        super(ModemsStatusThread, self).__init__()
+def background_thread_modems_status():
+    while True:
+        modems = modems_service.modems_status()
+        socketio.emit('modems', modems, broadcast=True)
+        socketio.sleep(1)
 
-    def run_forever(self):
-        try:
-            while not modems_status_thread_stop_event.isSet():
-                modems = modems_service.modems_status()
-                socketio.emit('modems', modems, broadcast=True)
-                sleep(self.delay)
+def background_thread_modems_details():
+    while True:
+        modems = modems_service.modems_details()
+        socketio.emit('modems_details', modems, broadcast=True)
+        socketio.sleep(1)
 
-        except KeyboardInterrupt:
-            # kill()
-            pass
 
-    def run(self):
-        self.run_forever()
+
+# global modems_status_thread
+# global modems_details_thread
+
+# modems_status_thread = Thread()
+# modems_status_thread_stop_event = Event()
+
+# class ModemsStatusThread(Thread):
+#     def __init__(self):
+#         self.delay = 1
+#         super(ModemsStatusThread, self).__init__()
+
+#     def run_forever(self):
+#         try:
+#             while not modems_status_thread_stop_event.isSet():
+#                 modems = modems_service.modems_status()
+#                 socketio.emit('modems', modems, broadcast=True)
+#                 sleep(self.delay)
+
+#         except KeyboardInterrupt:
+#             # kill()
+#             pass
+
+#     def run(self):
+#         self.run_forever()
 
 
 modems_details_thread = Thread()
@@ -157,22 +179,20 @@ class ModemsDetailsThread(Thread):
         self.run_forever()
 
 
-@socketio.on('connect')
+@socketio.event
 def connect():
-    print('someone connected to websocket')
-    emit('message', {'text': 'You are connected to socket.io'})
+    print('socketio: client connected')
 
-    # global modems_status_thread
-    # if not modems_status_thread.is_alive():
-    #     print("Starting ModemsStatusThread")
-    #     modems_status_thread = ModemsStatusThread()
-    #     modems_status_thread.start()
+    global modems_status_thread
+    with modems_status_thread_lock:
+        if modems_status_thread is None:
+            modems_status_thread = socketio.start_background_task(background_thread_modems_status)
 
-    # global modems_details_thread
-    # if not modems_details_thread.is_alive():
-    #     print("Starting ModemsDetailsThread")
-    #     modems_details_thread = ModemsDetailsThread()
-    #     modems_details_thread.start()
+    global modems_details_thread
+    with modems_details_thread_lock:
+        if not modems_details_thread.is_alive():
+            modems_details_thread = ModemsDetailsThread()
+            modems_details_thread.start()
 
 # Handle the webapp connecting to the websocket, including namespace for testing
 # @socketio.on('connect', namespace='/devices')
@@ -214,28 +234,6 @@ def default_error_handler(e):
     print(e)
 
 if __name__ == '__main__':
-    # socketio.run(app=app, port=5000)
-    if not modems_status_thread.is_alive():
-        print("Starting ModemsStatusThread")
-        modems_status_thread = ModemsStatusThread()
-        modems_status_thread.start()
-
-    if not modems_details_thread.is_alive():
-        print("Starting ModemsDetailsThread")
-        modems_details_thread = ModemsDetailsThread()
-        modems_details_thread.start()
-
-    http_server = WSGIServer(('',5000), app, handler_class=WebSocketHandler)
-    http_server.serve_forever()
-
-    # global modems_status_thread
-    # if not modems_status_thread.is_alive():
-    #     print("Starting ModemsStatusThread")
-    #     modems_status_thread = ModemsStatusThread()
-    #     modems_status_thread.start()
-
-    # # global modems_details_thread
-    # if not modems_details_thread.is_alive():
-    #     print("Starting ModemsDetailsThread")
-    #     modems_details_thread = ModemsDetailsThread()
-    #     modems_details_thread.start()
+    # http_server = WSGIServer(('',5000), app, handler_class=WebSocketHandler)
+    # http_server.serve_forever()
+    socketio.run(app=app, port=5000)

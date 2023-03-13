@@ -26,9 +26,12 @@ export function getModem(id) {
     });
 }
 
-export function reboot(id) {
+export function reboot(id, hardReset = false) {
+    const data = {
+        hard_reset: hardReset
+    };
     return new Promise((resolve, reject) => {
-        api.post('/server/modem/' + id + '/reboot').then(
+        api.post('/server/modem/' + id + '/reboot', data).then(
             (response) => {
                 resolve(response.data);
             },

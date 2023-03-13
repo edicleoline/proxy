@@ -69,7 +69,10 @@ class ServerModem(Resource):
 
         return json
 
-
+_server_modem_reboot_parser = reqparse.RequestParser()
+_server_modem_reboot_parser.add_argument(
+    "hard_reset", type=bool, required=True, help=""
+)
 class ServerModemReboot(Resource):
     # @jwt_required()
     def post(self, modem_id): 
@@ -79,17 +82,24 @@ class ServerModemReboot(Resource):
             return {"message": "Item not found"}, 404
 
         server_modem = ServerModemModel.find_by_modem_id(modem_id)
-        imodem = IModem(server_modem)       
+        imodem = IModem(server_modem)   
 
-        try:
-            imodem.hard_reboot()
-        except OSError as error:
-            return {
-                "error": {
-                    "code": error.errno,
-                    "message": str(error)
-                }                
-            }, 500    
+        data = _server_modem_reboot_parser.parse_args()    
+        
+        if data['hard_reset'] == True:
+            try:
+                imodem.hard_reboot()
+            except OSError as error:
+                return {
+                    "error": {
+                        "code": error.errno,
+                        "message": str(error)
+                    }                
+                }, 500
+        else:
+            imodem.get_device_middleware().reboot()
+
+            
 
         return {"message": "Successfully rebooted"}, 200
 

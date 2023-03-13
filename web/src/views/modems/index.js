@@ -31,16 +31,21 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import Tooltip from '@mui/material/Tooltip';
+
 import PropTypes from 'prop-types';
 
 import { IconDotsVertical, IconAccessPoint, IconAccessPointOff } from '@tabler/icons';
 import { IconAntennaBars1, IconAntennaBars2, IconAntennaBars3, IconAntennaBars4, IconAntennaBars5 } from '@tabler/icons';
+import { IconLink, IconUnlink, IconArrowUp, IconArrowDown } from '@tabler/icons';
 import CloseIcon from '@mui/icons-material/Close';
 
 import ChangeDialog from 'ui-component/modem/ip/Change';
 import RebootDialog from 'ui-component/modem/Reboot';
 import SettingsDialog from 'ui-component/modem/Settings';
 import DiagnoseDialog from 'ui-component/modem/Diagnose';
+
+import { testProxyIPv4HTTP } from 'utils/proxy';
 
 import io from 'socket.io-client';
 import objectHash from 'object-hash';
@@ -104,11 +109,46 @@ const Modems = () => {
 
     const _modemsDetailsHash = useRef(null);
 
-    const socket = io('http://127.0.0.1:5000');
-    const [socketConnected, setSocketConnected] = useState(socket.connected);
-    // const [lastPong, setLastPong] = useState(null);
+    const testProxies = (modem, ip) => {
+        testModemProxyIPv4HTTP(modem, ip);
+
+        // const remodems = _modems.current.map(function (item) {
+        //     if (item.modem.id == modem.id) {
+        //         item.proxy.ipv4.http.status = 'fail';
+        //     }
+
+        //     return item;
+        // });
+
+        // _modems.current = remodems;
+        // setModems(_modems.current);
+    };
+    const testModemProxyIPv4HTTP = (modem, ip) => {
+        console.log('lets test modem-ipv4');
+
+        const remodems = _modems.current.map(function (item) {
+            if (item.modem.id == modem.id) {
+                if (item.modem.id == 5) {
+                    item.proxy.ipv4.http.status = 'fail';
+                } else {
+                    item.proxy.ipv4.http.status = 'success';
+                }
+            }
+
+            return item;
+        });
+
+        _modems.current = remodems;
+        setModems(_modems.current);
+    };
+
+    const [socketConnected, setSocketConnected] = useState(false);
 
     useEffect(() => {
+        const socket = io('http://127.0.0.1:5000');
+
+        console.log('useeffect!!!!');
+
         socket.on('connect', () => {
             setSocketConnected(true);
             console.log('socket.io: connected');
@@ -119,16 +159,16 @@ const Modems = () => {
             console.log('socket.io: disconnected');
         });
 
-        // socket.on('pong', () => {
-        //     setLastPong(new Date().toISOString());
-        // });
-
         socket.on('message', (message) => {
             console.log('socket.io server: message', message);
         });
 
+        socket.on('my_response', (message) => {
+            console.log('my_response', message);
+        });
+
         socket.on('modems', (items) => {
-            // console.log('socket.io server: modems', items);
+            console.log('socket.io server: modems', items);
             const itemsHash = objectHash.MD5(items);
 
             if (!_modems.current) {
@@ -168,17 +208,10 @@ const Modems = () => {
                     }
                 }
             }
-
-            // if (!_modems.current) {
-            //     console.log('new modems hash', hash);
-            //     _modemsHash.current = hash;
-            //     _modems.current = items;
-            //     setModems(_modems.current);
-            // }
         });
 
         socket.on('modems_details', (items) => {
-            // console.log('socket.io server: modems_details', items);
+            console.log('socket.io server: modems_details', items);
             const hash = objectHash.MD5(items);
             if (_modems.current && (!_modemsDetailsHash.current || _modemsDetailsHash.current !== hash)) {
                 console.log('new modems_details hash', hash);
@@ -189,16 +222,21 @@ const Modems = () => {
                         if (modem.modem.id === modemDetail.modem.id) {
                             console.log('remodem', modemDetail);
                             modem.is_connected = modemDetail.is_connected;
-                            modem.external_ip = modemDetail.external_ip_through_device;
                             modem.device_network_type = modemDetail.device_network_type;
                             modem.device_network_provider = modemDetail.device_network_provider;
                             modem.device_network_signalbar = modemDetail.device_network_signalbar;
                             modem.data = modemDetail.data;
+
+                            if (modem.external_ip !== modemDetail.external_ip_through_device) {
+                                testProxies(modem, modemDetail.external_ip_through_device);
+                            }
+
+                            modem.external_ip = modemDetail.external_ip_through_device;
                         }
                     });
                     return modem;
                 });
-                // console.log(remodems);
+
                 _modems.current = remodems;
                 setModems(remodems);
             }
@@ -207,7 +245,6 @@ const Modems = () => {
         return () => {
             socket.off('connect');
             socket.off('disconnect');
-            socket.off('pong');
         };
     }, []);
 
@@ -299,29 +336,85 @@ const Modems = () => {
         </>
     );
 
-    const ProxyConnection = ({ type, ip, port }) => (
-        <>
-            <div>
-                <span>{type}</span>
-                <span>/</span>
-                <span>{ip}</span>
-                <span>:</span>
-                <span>{port}</span>
-            </div>
-        </>
-    );
+    const ProxyConnection = ({ type, ip, port, status }) => {
+        let icon = '';
 
-    const SignalBar = (data) => {
+        if (status === 'fail') {
+            icon = (
+                <Tooltip title="Desconectado">
+                    <div>
+                        <IconUnlink size={14} style={{ position: 'relative', top: 1, marginRight: 2, color: '#c62828' }} />
+                    </div>
+                </Tooltip>
+            );
+        } else if (status === 'success') {
+            icon = (
+                <Tooltip title="Conectado">
+                    <div>
+                        <IconLink size={14} style={{ position: 'relative', top: 1, marginRight: 2, color: '#00c853' }} />
+                    </div>
+                </Tooltip>
+            );
+        }
+
+        return (
+            <>
+                <Grid container justifyContent="space-between" alignItems="end" direction="row" sx={{ p: 0.2, px: 0.8, borderRadius: 1 }}>
+                    <Grid item>{icon}</Grid>
+                    <Grid item>{type}</Grid>
+                    <Grid item>/</Grid>
+                    <Grid item>{ip}</Grid>
+                    <Grid item>:</Grid>
+                    <Grid item>{port}</Grid>
+                </Grid>
+            </>
+        );
+    };
+
+    const DataUsage = ({ download, upload }) => {
+        return (
+            <>
+                <Grid container justifyContent="space-between" alignItems="end" direction="column">
+                    <Grid item>
+                        <Grid container justifyContent="end" alignItems="end" direction="row" sx={{ p: 0.2, px: 0, borderRadius: 1 }}>
+                            <Grid item>
+                                <Tooltip title="Download">
+                                    <div>
+                                        <IconArrowDown size={14} style={{ position: 'relative', top: 1, marginRight: 2 }} />
+                                    </div>
+                                </Tooltip>
+                            </Grid>
+                            <Grid item>{bytesToSize(download)}</Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid item>
+                        <Grid container justifyContent="end" alignItems="end" direction="row" sx={{ p: 0.2, px: 0, borderRadius: 1 }}>
+                            <Grid item>
+                                <Tooltip title="Upload">
+                                    <div>
+                                        <IconArrowUp size={14} style={{ position: 'relative', top: 1, marginRight: 2 }} />
+                                    </div>
+                                </Tooltip>
+                            </Grid>
+                            <Grid item>{bytesToSize(upload)}</Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </>
+        );
+    };
+
+    const SignalBar = ({ signal }) => {
         const icons = {
             ['0']: <span>-</span>,
-            ['1']: <IconAntennaBars1 title={data.signal} />,
-            ['2']: <IconAntennaBars2 title={data.signal} />,
-            ['3']: <IconAntennaBars3 title={data.signal} />,
-            ['4']: <IconAntennaBars4 title={data.signal} />,
-            ['5']: <IconAntennaBars5 title={data.signal} />
+            ['1']: <IconAntennaBars1 title={signal} />,
+            ['2']: <IconAntennaBars2 title={signal} />,
+            ['3']: <IconAntennaBars3 title={signal} />,
+            ['4']: <IconAntennaBars4 title={signal} />,
+            ['5']: <IconAntennaBars5 title={signal} />
         };
 
-        return icons[data.signal];
+        return icons[signal];
     };
 
     return (
@@ -384,7 +477,7 @@ const Modems = () => {
                                                                     handleModemChangeIPClick(row);
                                                                     handleModemCloseMenu();
                                                                 }}
-                                                                disabled={row.is_connected}
+                                                                disabled={!row.is_connected}
                                                             >
                                                                 Alterar IP
                                                             </MenuItem>
@@ -441,7 +534,7 @@ const Modems = () => {
                                                         )}
                                                     </TableCell>
                                                     <TableCell align="left">
-                                                        {row.is_connected && row.proxy ? (
+                                                        {row.external_ip && row.proxy ? (
                                                             <Grid
                                                                 container
                                                                 justifyContent="space-between"
@@ -454,6 +547,7 @@ const Modems = () => {
                                                                             type={'http'}
                                                                             ip={server.external_ip}
                                                                             port={row.proxy.ipv4.http.port}
+                                                                            status={row.proxy.ipv4.http.status}
                                                                         />
                                                                     ) : (
                                                                         <span>-</span>
@@ -465,6 +559,7 @@ const Modems = () => {
                                                                             type={'socks'}
                                                                             ip={server.external_ip}
                                                                             port={row.proxy.ipv4.socks.port}
+                                                                            status={row.proxy.ipv4.socks.status}
                                                                         />
                                                                     ) : (
                                                                         <span>-</span>
@@ -476,7 +571,7 @@ const Modems = () => {
                                                         )}
                                                     </TableCell>
                                                     <TableCell align="left">
-                                                        {row.is_connected && row.proxy ? (
+                                                        {row.external_ip && row.proxy ? (
                                                             <Grid
                                                                 container
                                                                 justifyContent="space-between"
@@ -489,6 +584,7 @@ const Modems = () => {
                                                                             type={'http'}
                                                                             ip={server.external_ip}
                                                                             port={row.proxy.ipv6.http.port}
+                                                                            status={row.proxy.ipv6.http.status}
                                                                         />
                                                                     ) : (
                                                                         <span>-</span>
@@ -500,6 +596,7 @@ const Modems = () => {
                                                                             type={'socks'}
                                                                             ip={server.external_ip}
                                                                             port={row.proxy.ipv6.socks.port}
+                                                                            status={row.proxy.ipv6.socks.status}
                                                                         />
                                                                     ) : (
                                                                         <span>-</span>
@@ -511,7 +608,7 @@ const Modems = () => {
                                                         )}
                                                     </TableCell>
                                                     <TableCell align="right">
-                                                        <Grid container justifyContent="space-between" alignItems="end" direction="column">
+                                                        {/* <Grid container justifyContent="space-between" alignItems="end" direction="column">
                                                             <Grid item>
                                                                 {row.data && row.data.receive ? (
                                                                     <span>
@@ -532,7 +629,12 @@ const Modems = () => {
                                                                     <span>-</span>
                                                                 )}
                                                             </Grid>
-                                                        </Grid>
+                                                        </Grid> */}
+                                                        {row.data && row.data.receive ? (
+                                                            <DataUsage download={row.data.receive.bytes} upload={row.data.transmit.bytes} />
+                                                        ) : (
+                                                            <span>-</span>
+                                                        )}
                                                     </TableCell>
                                                 </TableRow>
                                             ))}

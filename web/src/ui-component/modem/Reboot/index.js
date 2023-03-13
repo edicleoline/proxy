@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 
-import { Grid, Box, Card, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 
 import Dialog from '@mui/material/Dialog';
@@ -16,7 +16,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import MuiAlert from '@mui/material/Alert';
 
-import { IntlProvider, FormattedMessage, FormattedNumber } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 
 import { reboot } from 'services/api/server/modem';
 
@@ -28,7 +28,7 @@ const RebootDialog = (props) => {
     const { modem, open, onClose, onConfirm, ...other } = props;
 
     const handleConfirmClick = () => {
-        reboot(modem.id).then(
+        reboot(modem.id, false).then(
             (response) => {
                 console.log(response);
             },
@@ -37,7 +37,11 @@ const RebootDialog = (props) => {
                     err.response && err.response.data && err.response.data.error && err.response.data.error.message
                         ? err.response.data.error.message
                         : err.message;
-                setError({ ...error, open: true, message: `Erro ao reiniciar modem ${modem.id} - ${message}` });
+                setError({
+                    ...error,
+                    open: true,
+                    message: <FormattedMessage id="app.components.modem.Reboot.error" values={{ modemId: modem.id, error: message }} />
+                });
                 console.log('reboot error', err);
             }
         );
@@ -61,18 +65,21 @@ const RebootDialog = (props) => {
             <Dialog open={open} onClose={onClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
                 <DialogTitle id="alert-dialog-title">
                     <Typography variant="h2" component="span" sx={{ fontWeight: '500' }}>
-                        <FormattedMessage id="app.components.Reboot.modal.header.title" />
+                        <FormattedMessage id="app.components.modem.Reboot.modal.header.title" />
                         &nbsp;
                     </Typography>
                     <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
-                        modem {modem ? ' ' + modem.id : ''}
+                        <FormattedMessage
+                            id="app.components.modem.Reboot.modal.header.subtitle"
+                            values={{ modemId: modem ? ' ' + modem.id : '' }}
+                        />
                     </Typography>
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
-                        <FormattedMessage id="app.components.Reboot.modal.body.question" />
+                        <FormattedMessage id="app.components.modem.Reboot.modal.body.question" />
                         <br />
-                        <FormattedMessage id="app.components.Reboot.modal.body.alert" />
+                        <FormattedMessage id="app.components.modem.Reboot.modal.body.alert" />
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>

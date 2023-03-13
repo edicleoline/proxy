@@ -3,7 +3,9 @@
     "app.labels.no": "Não",
     "app.labels.reboot": "Reiniciar",
 
-    "app.components.Reboot.modal.header.title": "Reiniciar",
-    "app.components.Reboot.modal.body.question": "Tem certeza de que deseja reiniciar este modem?",
-    "app.components.Reboot.modal.body.alert": "Considere pausar quaiquer serviços que estiverem usando-o como proxy antes de continuar."
+    "app.components.modem.Reboot.modal.header.title": "Reiniciar",
+    "app.components.modem.Reboot.modal.header.subtitle": "modem {modemId}",
+    "app.components.modem.Reboot.modal.body.question": "Tem certeza de que deseja reiniciar este modem?",
+    "app.components.modem.Reboot.modal.body.alert": "Considere pausar quaiquer serviços que estiverem usando-o como proxy antes de continuar.",
+    "app.components.modem.Reboot.error": "O modem {modemId} não pôde ser reiniciado. {error}"
 }

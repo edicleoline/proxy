@@ -55,6 +55,12 @@ class Modem:
         middleware = None
 
         iface = self.iface()
+        if iface == None:
+            return None
+
+        if iface.ifaddresses == None:
+            return None
+
         ifaddress = iface.ifaddresses[0]
         gateway = NetIface.get_gateway_from_ipv4(ipv4 = ifaddress['addr'])
 
@@ -180,9 +186,11 @@ class Modem:
             print('\n')
             time.sleep(1)
 
-    def external_ip_through_device(self, silence_mode = False):
+    def external_ip_through_device(self, silence_mode = False, retries=2):
         device_middleware = self.get_device_middleware()
-        return device_middleware.wan.try_get_current_ip(retries=2, silence_mode=silence_mode)
+        if device_middleware == None:
+            return None
+        return device_middleware.wan.try_get_current_ip(retries=retries, silence_mode=silence_mode)
 
     def external_ip_through_proxy(self):
         proxies = { 
