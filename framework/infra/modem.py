@@ -175,7 +175,7 @@ class Modem:
                         user_ip_history = UserIPHistory(user = user, modem_ip_history_id = modem_ip_history.id)
                         user_ip_history.save_to_db()
 
-                    proxyService = ProxyService(ip=modem_ifaddress['addr'], port=self.server_modem_model.proxy_port)
+                    proxyService = ProxyService(ip=modem_ifaddress['addr'], proxy_ipv4_http_port=self.server_modem_model.proxy_ipv4_http_port)
                     proxyService.resolve_proxy()
 
                     route = Route(gateway=modem_gateway, interface=inframodem_iface.interface, ip=modem_ifaddress['addr'], table=self.modem.id)

@@ -11,9 +11,9 @@ CBLAC = '\033[90m'
 CEND = '\033[0m'
 
 class ProxyService:
-    def __init__(self, ip, port):
+    def __init__(self, ip, proxy_ipv4_http_port):
         self.ip = ip
-        self.port = port
+        self.proxy_ipv4_http_port = proxy_ipv4_http_port
 
     def resolve_proxy(self):   
         sys.stdout.write('{0}[+] Setting up the proxy...{1}\n'.format(CBLUE, CEND)) 
