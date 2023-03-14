@@ -445,7 +445,7 @@ const Modems = () => {
                                                                     handleModemChangeIPClick(row);
                                                                     handleModemCloseMenu();
                                                                 }}
-                                                                disabled={!row.is_connected}
+                                                                disabled={row.is_connected}
                                                             >
                                                                 Alterar IP
                                                             </MenuItem>

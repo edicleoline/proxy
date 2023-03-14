@@ -27,25 +27,33 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 const RebootDialog = (props) => {
     const { modem, open, onClose, onConfirm, ...other } = props;
 
+    const [isLoading, setLoading] = useState(false);
+
     const handleConfirmClick = () => {
-        reboot(modem.id, false).then(
-            (response) => {
-                console.log(response);
-            },
-            (err) => {
-                const message =
-                    err.response && err.response.data && err.response.data.error && err.response.data.error.message
-                        ? err.response.data.error.message
-                        : err.message;
-                setError({
-                    ...error,
-                    open: true,
-                    message: <FormattedMessage id="app.components.modem.Reboot.error" values={{ modemId: modem.id, error: message }} />
-                });
-                console.log('reboot error', err);
-            }
-        );
-        onClose();
+        setLoading(true);
+
+        reboot(modem.id, false)
+            .then(
+                (response) => {
+                    console.log(response);
+                },
+                (err) => {
+                    const message =
+                        err.response && err.response.data && err.response.data.error && err.response.data.error.message
+                            ? err.response.data.error.message
+                            : err.message;
+                    setError({
+                        ...error,
+                        open: true,
+                        message: <FormattedMessage id="app.components.modem.Reboot.error" values={{ modemId: modem.id, error: message }} />
+                    });
+                    console.log('reboot error', err);
+                }
+            )
+            .finally(() => {
+                setLoading(false);
+                onClose();
+            });
     };
 
     const [error, setError] = useState({
@@ -64,7 +72,7 @@ const RebootDialog = (props) => {
         <div>
             <Dialog open={open} onClose={onClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
                 <DialogTitle id="alert-dialog-title">
-                    <Typography variant="h2" component="span" sx={{ fontWeight: '500' }}>
+                    <Typography variant="h3" component="span" sx={{ fontWeight: '500' }}>
                         <FormattedMessage id="app.components.modem.Reboot.modal.header.title" />
                         &nbsp;
                     </Typography>
@@ -79,14 +87,18 @@ const RebootDialog = (props) => {
                     <DialogContentText id="alert-dialog-description">
                         <FormattedMessage id="app.components.modem.Reboot.modal.body.question" />
                         <br />
-                        <FormattedMessage id="app.components.modem.Reboot.modal.body.alert" />
+                        {modem && modem.is_connected === true ? (
+                            <FormattedMessage id="app.components.modem.Reboot.modal.body.alert" />
+                        ) : (
+                            <></>
+                        )}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={onClose}>
+                    <Button onClick={onClose} disabled={isLoading}>
                         <FormattedMessage id="app.labels.no" />
                     </Button>
-                    <Button onClick={handleConfirmClick}>
+                    <Button onClick={handleConfirmClick} disabled={isLoading}>
                         <FormattedMessage id="app.labels.reboot" />
                     </Button>
                 </DialogActions>

@@ -4,6 +4,7 @@ from flask_restful import Resource, reqparse
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
 from framework.models.server import ServerModel, ServerModemModel
 from framework.infra.modem import Modem as IModem
+from time import sleep
 
 class ServerModem(Resource):
     # @jwt_required()
@@ -89,6 +90,7 @@ class ServerModemReboot(Resource):
         if data['hard_reset'] == True:
             try:
                 imodem.hard_reboot()
+                sleep(3)
             except OSError as error:
                 return {
                     "error": {
@@ -97,9 +99,17 @@ class ServerModemReboot(Resource):
                     }                
                 }, 500
         else:
-            imodem.get_device_middleware().reboot()
-
-            
+            device_middleware = imodem.get_device_middleware()
+            if device_middleware:
+                device_middleware.reboot()
+                sleep(5)
+            else:
+                return {
+                    "error": {
+                        "code": 610,
+                        "message": 'Modem is offline. Try hard-reset.'
+                    }                
+                }, 400        
 
         return {"message": "Successfully rebooted"}, 200
 
