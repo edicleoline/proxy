@@ -41,3 +41,19 @@ export function reboot(id, hardReset = false) {
         );
     });
 }
+
+export function rotate(id, hardReset = false) {
+    const data = {
+        hard_reset: hardReset
+    };
+    return new Promise((resolve, reject) => {
+        api.post('/server/modem/' + id + '/rotate', data).then(
+            (response) => {
+                resolve(response.data);
+            },
+            (error) => {
+                reject(error);
+            }
+        );
+    });
+}

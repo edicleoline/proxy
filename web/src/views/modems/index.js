@@ -122,12 +122,8 @@ const Modems = () => {
             console.log('socket.io server: message', message);
         });
 
-        socket.on('my_response', (message) => {
-            console.log('my_response', message);
-        });
-
         socket.on('modems', (items) => {
-            console.log('socket.io server: modems', items);
+            // console.log('socket.io server: modems', items);
             const itemsHash = objectHash.MD5(items);
 
             if (!_modems.current) {
@@ -170,10 +166,10 @@ const Modems = () => {
         });
 
         socket.on('modems_details', (items) => {
-            console.log('socket.io server: modems_details', items);
+            // console.log('socket.io server: modems_details', items);
             const hash = objectHash.MD5(items);
             if (_modems.current && (!_modemsDetailsHash.current || _modemsDetailsHash.current !== hash)) {
-                console.log('new modems_details hash', hash);
+                // console.log('new modems_details hash', hash);
                 _modemsDetailsHash.current = hash;
 
                 const _remodems = _modems.current.map(function (modem) {
@@ -189,7 +185,7 @@ const Modems = () => {
                 const remodems = _modems.current.map(function (modem) {
                     items.forEach((modemDetail) => {
                         if (modem.modem.id === modemDetail.modem.id) {
-                            console.log('remodem', modemDetail);
+                            // console.log('remodem', modemDetail);
                             modem.device_network_type = modemDetail.device_network_type;
                             modem.device_network_provider = modemDetail.device_network_provider;
                             modem.device_network_signalbar = modemDetail.device_network_signalbar;
@@ -445,9 +441,9 @@ const Modems = () => {
                                                                     handleModemChangeIPClick(row);
                                                                     handleModemCloseMenu();
                                                                 }}
-                                                                disabled={row.is_connected}
+                                                                disabled={!row.is_connected}
                                                             >
-                                                                Alterar IP
+                                                                Rotacionar IP
                                                             </MenuItem>
                                                             <MenuItem
                                                                 onClick={() => {
@@ -467,6 +463,14 @@ const Modems = () => {
                                                                 Executar diagnóstico
                                                             </MenuItem>
                                                             <Divider />
+                                                            <MenuItem
+                                                                onClick={() => {
+                                                                    console.log('modem log');
+                                                                    handleModemCloseMenu();
+                                                                }}
+                                                            >
+                                                                Log
+                                                            </MenuItem>
                                                             <MenuItem
                                                                 onClick={() => {
                                                                     handleModemSettingsClick(row);

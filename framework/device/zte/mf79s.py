@@ -21,11 +21,10 @@ CBLAC = '\033[90m'
 CEND = '\033[0m'
 
 class MF79S:
-    def __init__(self, interface, gateway, password, retries, retries_ip):
+    def __init__(self, interface, gateway, password, retries_ip):
         self.interface = interface
         self.gateway = gateway
         self.password = base64.b64encode(str(password).encode("utf-8"))
-        self.retries = retries
         self.retries_ip = retries_ip
         self.wan = Wan(interface=interface)
 
@@ -135,7 +134,6 @@ class MF79S:
             return False
 
     def release(self):        
-        ip = self.wan.try_get_current_ip(retries=3)
         if self.login() == False:
             sys.stdout.write('{0}[!] Our task ends here. Something went wrong with [LOGIN METHOD]{1}\n'.format(CRED, CEND))
             sys.stdout.flush()
@@ -153,7 +151,7 @@ class MF79S:
                 break            
             else:
                 time.sleep(1)                
-                if retry >= self.retries:
+                if retry >= 2:
                     break
 
         if connected == False:

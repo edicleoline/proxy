@@ -13,6 +13,9 @@ from framework.infra.proxyservice import ProxyService
 from framework.device.zte.mf79s import MF79S
 from framework.device.zte.error.exception import ConnectException
 
+from datetime import datetime
+from enum import Enum
+
 CRED = '\033[91m'
 CGREEN = '\033[92m'
 CYELLOW = '\033[93m'
@@ -21,6 +24,10 @@ CMAGENTA = '\033[95m'
 CGREY = '\033[90m'
 CBLAC = '\033[90m'
 CEND = '\033[0m'
+
+class RotateError(Enum):
+    IP_NOT_CHANGED  = 300
+    NO_PUBLIC_IP    = 301
 
 class Modem:
     def __init__(self, server_modem_model: ServerModemModel):
@@ -51,7 +58,7 @@ class Modem:
         sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
         sys.stdout.flush()
 
-    def get_device_middleware(self):
+    def get_device_middleware(self, retries_ip = 5):
         middleware = None
 
         iface = self.iface()
@@ -66,7 +73,7 @@ class Modem:
 
         if True:#device != None:
             if True:#modem.model == 'MF79S':
-                middleware = MF79S(interface = iface.interface, gateway = gateway, password = 'vivo', retries = 5, retries_ip = 15)
+                middleware = MF79S(interface = iface.interface, gateway = gateway, password = 'vivo', retries_ip = retries_ip)
 
         return middleware
 
@@ -85,7 +92,7 @@ class Modem:
             write_alert = False
             time.sleep(1)
 
-    def rotate(self, ip_match:str, user:str, hard_reset = False):
+    def rotate(self, ip_match:str, user:str, hard_reset = False, not_changed_try_count = 3, not_ip_try_count = 3, callback = None):
         r"""
         Rotate IP
 
@@ -97,12 +104,17 @@ class Modem:
         if ip_match == None and user:
             user_last_ip = UserIPHistory.get_last_ip(user)
             if user_last_ip:
-                ip_match = ".".join(user_last_ip.modem_ip_history.ip.split(".", 2)[:2])  
-                sys.stdout.write('{0}[!] IPv4q match auto enabled for [{1}]{2}\n\n'.format(CGREEN, ip_match, CEND))
+                ip_match = ".".join(user_last_ip.split(".", 2)[:2])  
+                sys.stdout.write('{0}[!] IPv4 match auto enabled for [{1}]{2}\n\n'.format(CGREEN, ip_match, CEND))
                 sys.stdout.flush()
         
-        while True:
-            ip, done = None, False
+        not_changed_count, not_ip_count = 0, 0
+        while True:            
+            old_ip, new_ip, done = None, None, False
+
+            device_middleware = self.get_device_middleware()
+            if device_middleware:
+                old_ip = device_middleware.wan.try_get_current_ip(retries=2)
         
             if hard_reset:
                 self.hard_reboot()
@@ -116,27 +128,30 @@ class Modem:
                 self.wait_until_modem_connection(True)
                 
                 device_middleware = self.get_device_middleware()
-                ip = device_middleware.wan.try_get_current_ip(retries=30)
+                new_ip = device_middleware.wan.try_get_current_ip(retries=30)
 
             else:
                 self.wait_until_modem_connection(True)                                
 
                 device_middleware = self.get_device_middleware()
 
+                if callback: callback(self.modem.id, "Releasing", datetime.now(), None)
                 try:                    
-                    ip = device_middleware.release()
+                    new_ip = device_middleware.release()
                 except ConnectException as e:
                     sys.stdout.write('{0}[!] Run diagnose and try to fix{1}\n'.format(CBLUE, CEND))
                     sys.stdout.flush()
                     sys.exit(1)
 
-            if ip != None:
+                if callback: callback(self.modem.id, "Released with IPv4 {0}".format(new_ip), datetime.now(), None)
+
+            if new_ip != None and new_ip != old_ip:
                 modem_details = device_middleware.details()
                 network_type = modem_details['network_type'] if modem_details else None
                 network_provider = modem_details['network_provider'] if modem_details else None
                 signalbar = modem_details['signalbar'] if modem_details else None
 
-                modem_ip_history = ModemIPHistory(modem_id = self.modem.id, ip = ip, network_type = network_type, network_provider = network_provider, signalbar = signalbar)
+                modem_ip_history = ModemIPHistory(modem_id = self.modem.id, ip = new_ip, network_type = network_type, network_provider = network_provider, signalbar = signalbar)
                 modem_ip_history.save_to_db()
 
                 inframodem_iface = self.iface()
@@ -144,7 +159,7 @@ class Modem:
                 modem_gateway = NetIface.get_gateway_from_ipv4(ipv4 = modem_ifaddress['addr'])
 
                 if user:
-                    is_ip_reserved_for_other = UserIPHistory.is_ip_reserved_for_other(ip=ip, user=user)
+                    is_ip_reserved_for_other = UserIPHistory.is_ip_reserved_for_other(ip=new_ip, user=user)
                     if is_ip_reserved_for_other:
                         sys.stdout.write('{0}[!] Lets rotate again because this IP is reserved for another user{1}\n'.format(CBLUE, CEND))
                         sys.stdout.flush()
@@ -156,7 +171,7 @@ class Modem:
                     ip_match_list = ip_match.split(',')
                     ip_match_found = False
                     for ip_match_item in ip_match_list:
-                        if ip.startswith(ip_match_item.strip()):
+                        if new_ip.startswith(ip_match_item.strip()):
                             done = True
                             ip_match_found = True
                         
@@ -182,6 +197,26 @@ class Modem:
                     route.resolve_route()
 
                     break
+
+            elif new_ip != None and new_ip == old_ip:
+                not_changed_count = not_changed_count + 1
+                if callback: callback(self.modem.id, "Lets release again because IP not changed", datetime.now(), None)
+                sys.stdout.write('{0}[!] Lets rotate again because this IP does not changed{1}\n'.format(CBLUE, CEND))
+                sys.stdout.flush()
+
+            elif new_ip == None:
+                not_ip_count = not_ip_count + 1
+                if callback: callback(self.modem.id, "Lets try release again because there is no IP", datetime.now(), None)
+
+            if not_changed_count >= not_changed_try_count:
+                if callback: callback(self.modem.id, "Stopping threading because your IP not changed after {0} times".format(not_changed_try_count), datetime.now(), RotateError.IP_NOT_CHANGED)
+                sys.stdout.write('{0}[!] Stopping threading because your IP not changed after {1} times{2}\n'.format(CBLUE, not_changed_try_count, CEND))
+                sys.stdout.flush()
+                break
+
+            if not_ip_count >= not_ip_try_count:
+                if callback: callback(self.modem.id, "Stopping threading because there is no IP. Check your SIM data plan.", datetime.now(), RotateError.NO_PUBLIC_IP)
+                break
 
             print('\n')
             time.sleep(1)

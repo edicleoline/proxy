@@ -32,7 +32,9 @@ const RebootDialog = (props) => {
     const handleConfirmClick = () => {
         setLoading(true);
 
-        reboot(modem.id, false)
+        let hard_reset = modem.is_connected != true;
+
+        reboot(modem.id, hard_reset)
             .then(
                 (response) => {
                     console.log(response);

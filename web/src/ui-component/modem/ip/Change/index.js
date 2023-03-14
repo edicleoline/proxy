@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import PropTypes from 'prop-types';
 
 import { Grid, Box, Card, Typography } from '@mui/material';
@@ -14,12 +16,40 @@ import Stack from '@mui/material/Stack';
 import Autocomplete from '@mui/material/Autocomplete';
 import Link from '@mui/material/Link';
 
+import { FormattedMessage } from 'react-intl';
+
+import { rotate } from 'services/api/server/modem';
+
 const ChangeDialog = (props) => {
     const { modem, open, onClose, onConfirm, ...other } = props;
 
+    const [isLoading, setLoading] = useState(false);
+
     const handleConfirmClick = () => {
-        console.log('confirm change', modem);
-        onClose();
+        setLoading(true);
+
+        rotate(modem.id, false)
+            .then(
+                (response) => {
+                    console.log(response);
+                },
+                (err) => {
+                    const message =
+                        err.response && err.response.data && err.response.data.error && err.response.data.error.message
+                            ? err.response.data.error.message
+                            : err.message;
+                    setError({
+                        ...error,
+                        open: true,
+                        message: <FormattedMessage id="app.components.modem.Reboot.error" values={{ modemId: modem.id, error: message }} />
+                    });
+                    console.log('reboot error', err);
+                }
+            )
+            .finally(() => {
+                setLoading(false);
+                onClose();
+            });
     };
 
     const top100Films = [
