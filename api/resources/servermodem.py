@@ -124,6 +124,12 @@ _server_modem_rotate_parser = reqparse.RequestParser()
 _server_modem_rotate_parser.add_argument(
     "hard_reset", type=bool, required=True, help=""
 )
+_server_modem_rotate_parser.add_argument(
+    "user", type=str, required=False, help=""
+)
+_server_modem_rotate_parser.add_argument(
+    "ipv4_filter", type=str, required=False, help=""
+)
 class ServerModemRotate(Resource):
     # @jwt_required()
     def post(self, modem_id): 
@@ -135,13 +141,13 @@ class ServerModemRotate(Resource):
         server_modem = ServerModemModel.find_by_modem_id(modem_id)
         imodem = IModem(server_modem)   
 
-        data = _server_modem_rotate_parser.parse_args()          
+        data = _server_modem_rotate_parser.parse_args()      
 
         processThread = threading.Thread(
             target=imodem.rotate, 
             args=(
-                None, 
-                None, 
+                data['ipv4_filter'] if data['ipv4_filter'] else None, 
+                data['user'] if data['user'] else None, 
                 data['hard_reset'], 
                 3, 
                 3,

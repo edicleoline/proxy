@@ -24,11 +24,13 @@ const ChangeDialog = (props) => {
     const { modem, open, onClose, onConfirm, ...other } = props;
 
     const [isLoading, setLoading] = useState(false);
+    const [user, setUser] = useState('');
+    const [ipv4Filter, setIPv4Filter] = useState('');
 
     const handleConfirmClick = () => {
         setLoading(true);
 
-        rotate(modem.id, false)
+        rotate(modem.id, false, user, ipv4Filter)
             .then(
                 (response) => {
                     console.log(response);
@@ -51,6 +53,11 @@ const ChangeDialog = (props) => {
                 onClose();
             });
     };
+
+    // const handleTextFieldUserChange = (e) => {
+    //     setUser(e.target.value);
+    //     console.log(e.target.value);
+    // };
 
     const top100Films = [
         { title: 'The Shawshank Redemption', year: 1994 },
@@ -78,9 +85,19 @@ const ChangeDialog = (props) => {
                 </DialogContentText>
                 <Stack spacing={2} sx={{ paddingTop: 0.5 }}>
                     <Autocomplete
-                        id="free-solo-demo"
+                        id="modem-ip-change-user"
                         freeSolo
                         options={top100Films.map((option) => option.title)}
+                        autoHighlight
+                        value={user}
+                        onChange={(event, newValue) => {
+                            setUser(newValue);
+                            console.log(newValue);
+                        }}
+                        onInputChange={(event, newInputValue) => {
+                            setUser(newInputValue);
+                            console.log(newInputValue);
+                        }}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -97,10 +114,13 @@ const ChangeDialog = (props) => {
                         )}
                     />
                     <TextField
-                        id="standard-basic"
+                        id="modem-ip-change-filter"
                         label="Filtrar IPv4"
                         variant="standard"
                         helperText="Você pode informar mais de um filtro, separados por vírgula."
+                        onChange={(event) => {
+                            setIPv4Filter(event.target.value);
+                        }}
                     />
                 </Stack>
             </DialogContent>
