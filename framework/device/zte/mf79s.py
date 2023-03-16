@@ -22,7 +22,8 @@ CBLAC = '\033[90m'
 CEND = '\033[0m'
 
 class MF79S:
-    def __init__(self, interface, gateway, password, retries_ip):
+    def __init__(self, addr_id, interface, gateway, password, retries_ip):
+        self.addr_id = addr_id
         self.interface = interface
         self.gateway = gateway
         self.password = base64.b64encode(str(password).encode("utf-8"))
@@ -193,7 +194,7 @@ class MF79S:
         self.reboot()
         time.sleep(10)
         while True:
-            iface = NetIface.get_iface_by_interface(self.interface)
+            iface = NetIface.get_iface_by_addr_id(self.addr_id)
             if iface != None:
                 break
 
