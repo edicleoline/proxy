@@ -118,8 +118,8 @@ const Modems = () => {
     const [socketConnected, setSocketConnected] = useState(false);
 
     useEffect(() => {
-        // const socket = io('http://192.168.15.10:5000');
-        const socket = io('http://192.168.15.20:5000');
+        const socket = io('http://192.168.15.10:5000');
+        // const socket = io('http://192.168.15.20:5000');
 
         console.log('useeffect!!!!');
 
@@ -420,8 +420,12 @@ const Modems = () => {
             );
         }
 
-        let lockLabel = 'Rotacionando';
-        console.log(lock);
+        let lockLabel = lock.task;
+        if (lock.task === 'ROTATE') {
+            lockLabel = 'Rotacionando';
+        } else if (lock.task === 'REBOOT') {
+            lockLabel = 'Reiniciando';
+        }
 
         return (
             <>

@@ -1,14 +1,44 @@
 from framework.infra.modem import Modem as IModem
 import threading
 from enum import Enum
-from framework.manager.error.exception import ModemLockedByOtherThreadException
+from framework.manager.error.exception import ModemLockedByOtherThreadException, ModemRebootException
 
 class ModemManager():
     def __init__(self):
         self.threads = []
 
     def reboot(self, infra_modem: IModem, hard_reset = False):
-        pass
+        if hard_reset == True:
+            try:
+                process_thread = threading.Thread(
+                    target=infra_modem.hard_reboot_and_wait, 
+                    args=(
+                        None
+                    )
+                )
+                process_thread.start()
+
+                self.threads.append(
+                    ModemThreadData(infra_modem, ModemThreadAction.REBOOT, process_thread)
+                )
+            except OSError as error:
+                raise ModemRebootException(str(error))
+        else:
+            device_middleware = infra_modem.get_device_middleware()
+            if device_middleware:
+                process_thread = threading.Thread(
+                    target=device_middleware.reboot_and_wait, 
+                    args=(
+                        None
+                    )
+                )
+                process_thread.start()
+
+                self.threads.append(
+                    ModemThreadData(infra_modem, ModemThreadAction.REBOOT, process_thread)
+                )
+            else:
+                raise ModemRebootException('Modem is offline. Try hard-reset')
 
     def rotate(
             self, 

@@ -108,7 +108,7 @@ const ChangeDialog = (props) => {
                     <DialogContentText id="alert-dialog-description" sx={{ marginBottom: 2.5 }}>
                         Antes de continuar, considere pausar quaiquer serviços que estiverem usando-o como proxy.
                     </DialogContentText>
-                    <Stack spacing={1.5} sx={{ paddingTop: 0.3 }}>
+                    <Stack spacing={2.5} sx={{ paddingTop: 0.3 }}>
                         <Autocomplete
                             id="modem-ip-change-user"
                             freeSolo
@@ -123,25 +123,12 @@ const ChangeDialog = (props) => {
                                 setUser(newInputValue);
                                 console.log(newInputValue);
                             }}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    label="Usuário"
-                                    variant="standard"
-                                    // helperText={
-                                    //     <span>
-                                    //         <span>Ficou confuso?</span>&nbsp;
-                                    //         <Link href="#">Aqui</Link>&nbsp;
-                                    //         <span>segue uma explicação.</span>
-                                    //     </span>
-                                    // }
-                                />
-                            )}
+                            renderInput={(params) => <TextField {...params} label="Usuário" variant="outlined" />}
                         />
                         <TextField
                             id="modem-ip-change-filter"
                             label="Filtro IPv4"
-                            variant="standard"
+                            variant="outlined"
                             helperText="Você pode informar mais de um filtro, separados por vírgula."
                             onChange={(event) => {
                                 setIPv4Filter(event.target.value);

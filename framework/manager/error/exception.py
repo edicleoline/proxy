@@ -4,5 +4,5 @@ class BaseException(Exception):
 class ModemLockedByOtherThreadException(BaseException):
     pass
 
-# class LoginException(ZteBaseException):
-#     pass
+class ModemRebootException(BaseException):
+    pass
