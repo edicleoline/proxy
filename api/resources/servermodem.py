@@ -92,33 +92,28 @@ class ServerModemReboot(Resource):
 
         data = _server_modem_reboot_parser.parse_args()
 
-        # app.socketio.emit('message', {'data': 'test_from_app.socketio'}, broadcast=True)
-        
-        if data['hard_reset'] == True:
-            try:
-                imodem.hard_reboot()
-                sleep(3)
-            except OSError as error:
-                return {
-                    "error": {
-                        "code": error.errno,
-                        "message": str(error)
-                    }                
-                }, 500
-        else:
-            device_middleware = imodem.get_device_middleware()
-            if device_middleware:
-                device_middleware.reboot()
-                sleep(5)
-            else:
-                return {
-                    "error": {
-                        "code": 610,
-                        "message": 'Modem is offline. Try hard-reset.'
-                    }                
-                }, 400        
+        try:
+            app.modems_manager.reboot(
+                infra_modem = imodem, 
+                hard_reset = data['hard_reset'], 
+                callback = None
+            )     
+        except ModemLockedByOtherThreadException as err:
+            return {
+                "error": {
+                    "code": 780,
+                    "message": str(err)
+                }                
+            }, 400 
+        except OSError as error:
+            return {
+                "error": {
+                    "code": error.errno,
+                    "message": str(error)
+                }                
+            }, 500
 
-        return {"message": "Successfully rebooted"}, 200
+        return {"message": "OK"}, 200
     
 
 _server_modem_rotate_parser = reqparse.RequestParser()

@@ -8,6 +8,11 @@ class ModemManager():
         self.threads = []
 
     def reboot(self, infra_modem: IModem, hard_reset = False):
+        thread_running = self.running(infra_modem)
+
+        if thread_running:
+            raise ModemLockedByOtherThreadException('We could running this task now because this modem is locked by another thread.')
+        
         if hard_reset == True:
             try:
                 process_thread = threading.Thread(
