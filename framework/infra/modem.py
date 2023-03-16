@@ -116,7 +116,7 @@ class Modem:
             if device_middleware:
                 old_ip = device_middleware.wan.try_get_current_ip(retries=2)
         
-            if hard_reset:
+            if hard_reset == True:
                 self.hard_reboot()
                 sys.stdout.write('{0}[!] Reboot signal sent. Now, let''s wait modem reboot (about 1 minute)...{1}\n'.format(CBLUE, CEND))
                 sys.stdout.flush()

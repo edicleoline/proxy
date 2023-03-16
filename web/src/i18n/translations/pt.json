@@ -7,5 +7,7 @@
     "app.components.modem.Reboot.modal.header.subtitle": "modem {modemId}",
     "app.components.modem.Reboot.modal.body.question": "Tem certeza de que deseja reiniciar este modem?",
     "app.components.modem.Reboot.modal.body.alert": "Antes de continuar, considere pausar quaiquer serviços que estiverem usando-o como proxy.",
-    "app.components.modem.Reboot.error": "O modem {modemId} não pôde ser reiniciado. {error}"
+    "app.components.modem.Reboot.error": "O modem {modemId} não pôde ser reiniciado. {error}",
+
+    "app.components.modem.Rotate.error": "{error}"
 }

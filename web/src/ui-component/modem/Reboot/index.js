@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import { Typography } from '@mui/material';
@@ -15,6 +15,9 @@ import Snackbar from '@mui/material/Snackbar';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import MuiAlert from '@mui/material/Alert';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 
 import { FormattedMessage } from 'react-intl';
 
@@ -28,13 +31,15 @@ const RebootDialog = (props) => {
     const { modem, open, onClose, onConfirm, ...other } = props;
 
     const [isLoading, setLoading] = useState(false);
+    const [hardReset, setHardReset] = useState(modem && !modem.is_connected ? true : false);
+    const [disableHardResetCheckbox, setDisableHardResetCheckbox] = useState(modem && !modem.is_connected ? true : false);
 
     const handleConfirmClick = () => {
         setLoading(true);
 
-        let hard_reset = modem.is_connected != true;
+        let _hardReset = !modem.is_connected ? true : hardReset;
 
-        reboot(modem.id, hard_reset)
+        reboot(modem.id, _hardReset)
             .then(
                 (response) => {
                     console.log(response);
@@ -70,6 +75,16 @@ const RebootDialog = (props) => {
         setError({ ...error, open: false });
     };
 
+    useEffect(() => {
+        if (modem && !modem.is_connected) {
+            setHardReset(true);
+            setDisableHardResetCheckbox(true);
+        } else if (modem && modem.is_connected) {
+            setDisableHardResetCheckbox(false);
+        }
+        console.log('started!!');
+    }, [open]);
+
     return (
         <div>
             <Dialog open={open} onClose={onClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
@@ -95,6 +110,16 @@ const RebootDialog = (props) => {
                             <></>
                         )}
                     </DialogContentText>
+                    <FormGroup>
+                        <FormControlLabel
+                            control={<Switch checked={hardReset} />}
+                            label="Ativar hard-reset"
+                            onChange={(event) => {
+                                setHardReset(event.target.checked);
+                            }}
+                            disabled={disableHardResetCheckbox}
+                        />
+                    </FormGroup>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={onClose} disabled={isLoading}>

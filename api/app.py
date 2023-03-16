@@ -21,6 +21,7 @@ from time import sleep
 
 from socketservice.modems import ModemsService
 from framework.models.server import ServerModel
+from framework.manager.modem import ModemManager
 
 from app import app
 
@@ -107,6 +108,8 @@ api.add_resource(ServerModem, "/server/modem/<int:modem_id>")
 api.add_resource(ServerModemReboot, "/server/modem/<int:modem_id>/reboot")
 api.add_resource(ServerModemRotate, "/server/modem/<int:modem_id>/rotate")
 
+
+app.modems_manager = ModemManager()
 
 #https://github.com/ajaichemmanam/react-flask-socketio/blob/7cdfe2c76a8ad4eb36e097dd30e2b273882a08fb/server.py
 

@@ -5,7 +5,7 @@ import SubCard from 'ui-component/cards/SubCard';
 import MainCard from 'ui-component/cards/MainCard';
 import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 
 import { getServer } from 'services/api/server';
 
@@ -31,7 +31,7 @@ import PropTypes from 'prop-types';
 
 import { IconDotsVertical, IconAccessPoint, IconAccessPointOff } from '@tabler/icons';
 import { IconAntennaBars1, IconAntennaBars2, IconAntennaBars3, IconAntennaBars4, IconAntennaBars5 } from '@tabler/icons';
-import { IconLink, IconUnlink, IconArrowUp, IconArrowDown } from '@tabler/icons';
+import { IconCheck, IconChecks, IconBan, IconArrowUp, IconArrowDown } from '@tabler/icons';
 import CloseIcon from '@mui/icons-material/Close';
 
 import ChangeDialog from 'ui-component/modem/ip/Change';
@@ -58,8 +58,22 @@ const Modems = () => {
         );
     };
 
+    const [tableMaxHeight, setTableMaxHeight] = useState(null);
+    const _resizeTable = () => {
+        const mainElHeight = window.innerHeight;
+        const max = mainElHeight - 205;
+        setTableMaxHeight(max);
+    };
+
     useEffect(() => {
         loadServer();
+        _resizeTable();
+
+        window.addEventListener('resize', _resizeTable);
+
+        return () => {
+            window.removeEventListener('resize', _resizeTable);
+        };
     }, []);
 
     const [modems, setModems] = useState([]);
@@ -104,6 +118,7 @@ const Modems = () => {
     const [socketConnected, setSocketConnected] = useState(false);
 
     useEffect(() => {
+        // const socket = io('http://192.168.15.10:5000');
         const socket = io('http://192.168.15.20:5000');
 
         console.log('useeffect!!!!');
@@ -150,6 +165,11 @@ const Modems = () => {
                                     delete modem.device_network_signalbar;
                                     delete modem.data;
                                 }
+                            }
+
+                            if (modem.lock !== item.lock) {
+                                changed = true;
+                                modem.lock = item.lock;
                             }
                         });
 
@@ -307,7 +327,7 @@ const Modems = () => {
             icon = (
                 <Tooltip title="Desconectado">
                     <div>
-                        <IconUnlink size={14} style={{ position: 'relative', top: 1, marginRight: 2, color: '#c62828' }} />
+                        <IconBan size={12} style={{ position: 'relative', top: 0, marginLeft: 2, color: '#c62828' }} />
                     </div>
                 </Tooltip>
             );
@@ -315,7 +335,7 @@ const Modems = () => {
             icon = (
                 <Tooltip title="Conectado">
                     <div>
-                        <IconLink size={14} style={{ position: 'relative', top: 1, marginRight: 2, color: '#00c853' }} />
+                        <IconCheck size={14} style={{ position: 'relative', top: 1, marginLeft: 2, color: '#00c853' }} />
                     </div>
                 </Tooltip>
             );
@@ -323,13 +343,19 @@ const Modems = () => {
 
         return (
             <>
-                <Grid container justifyContent="space-between" alignItems="end" direction="row" sx={{ p: 0.2, px: 0.8, borderRadius: 1 }}>
-                    <Grid item>{icon}</Grid>
+                <Grid
+                    container
+                    justifyContent="flex-start"
+                    alignItems="start"
+                    direction="row"
+                    sx={{ p: 0.2, px: 0.8, borderRadius: 1, minWidth: '160px' }}
+                >
                     <Grid item>{type}</Grid>
                     <Grid item>/</Grid>
                     <Grid item>{ip}</Grid>
                     <Grid item>:</Grid>
                     <Grid item>{port}</Grid>
+                    <Grid item>{icon}</Grid>
                 </Grid>
             </>
         );
@@ -338,7 +364,7 @@ const Modems = () => {
     const DataUsage = ({ download, upload }) => {
         return (
             <>
-                <Grid container justifyContent="space-between" alignItems="end" direction="column">
+                <Grid container justifyContent="space-between" alignItems="end" direction="column" sx={{ minWidth: '80px' }}>
                     <Grid item>
                         <Grid container justifyContent="end" alignItems="end" direction="row" sx={{ p: 0.2, px: 0, borderRadius: 1 }}>
                             <Grid item>
@@ -381,24 +407,50 @@ const Modems = () => {
         return icons[signal];
     };
 
+    const ModemStatus = ({ lock, connected }) => {
+        if (!lock) {
+            return (
+                <>
+                    {connected ? (
+                        <ColorBox bgcolor={'success.light'} title="Conectado" dark />
+                    ) : (
+                        <ColorBox bgcolor={'orange.light'} title="Desconectado" dark />
+                    )}
+                </>
+            );
+        }
+
+        let lockLabel = 'Rotacionando';
+        console.log(lock);
+
+        return (
+            <>
+                <ColorBox bgcolor={'#e8e1ff'} title={lockLabel} dark />
+            </>
+        );
+    };
+
     return (
         <MainCard
             title="Modems"
             contentClass={'test'}
             secondary={<SecondaryAction link="https://next.material-ui.com/system/typography/" />}
+            contentSX={{ padding: '0 !important' }}
+            sx={{ maxHeight: '900px' }}
+            id="modems-main-paper"
         >
             <Grid container spacing={0}>
                 <Grid item xs={12} sm={12}>
-                    <SubCard contentSX={{ padding: '0 !important' }}>
+                    <SubCard contentSX={{ padding: '0 !important' }} sx={{ border: 'none 0', borderRadius: '0' }}>
                         <Grid container direction="column" spacing={0}>
-                            <Grid item>
-                                <TableContainer component={Paper}>
-                                    <Table sx={{ minWidth: 650 }} aria-label="modems table">
+                            <Grid item sx={{ maxWidth: '100% !important' }}>
+                                <TableContainer component={Paper} sx={{ borderRadius: '0', maxHeight: tableMaxHeight }}>
+                                    <Table stickyHeader sx={{ minWidth: 650 }} aria-label="modems table">
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell>Modem</TableCell>
                                                 <TableCell align="left">Modelo</TableCell>
-                                                <TableCell align="left">IMEI</TableCell>
+                                                <TableCell align="left">Porta</TableCell>
                                                 <TableCell align="left">Status</TableCell>
                                                 <TableCell align="left">IP externo</TableCell>
                                                 <TableCell align="right">Provedor</TableCell>
@@ -416,7 +468,7 @@ const Modems = () => {
                                                     key={row.modem.id}
                                                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                                 >
-                                                    <TableCell component="th" scope="row">
+                                                    <TableCell component="th" scope="row" sx={{ minWidth: '100px' }}>
                                                         <IconButton
                                                             id={`modem-button-${row.modem.id}`}
                                                             aria-label="Modem Options"
@@ -483,13 +535,9 @@ const Modems = () => {
                                                         &nbsp;&nbsp;{row.modem.id}
                                                     </TableCell>
                                                     <TableCell align="left">{row.modem.device.model}</TableCell>
-                                                    <TableCell align="left">{row.modem.imei}</TableCell>
+                                                    <TableCell align="left">{row.usb.port}</TableCell>
                                                     <TableCell align="left">
-                                                        {row.is_connected ? (
-                                                            <ColorBox bgcolor={'success.light'} title="Conectado" dark />
-                                                        ) : (
-                                                            <ColorBox bgcolor={'orange.light'} title="Desconectado" dark />
-                                                        )}
+                                                        <ModemStatus lock={row.lock} connected={row.is_connected} />
                                                     </TableCell>
                                                     <TableCell align="left">{row.external_ip ? row.external_ip : '-'}</TableCell>
                                                     <TableCell align="right">
@@ -509,7 +557,7 @@ const Modems = () => {
                                                         {row.external_ip && row.proxy ? (
                                                             <Grid
                                                                 container
-                                                                justifyContent="space-between"
+                                                                justifyContent="flex-start"
                                                                 alignItems="start"
                                                                 direction="column"
                                                             >
@@ -546,7 +594,7 @@ const Modems = () => {
                                                         {row.external_ip && row.proxy ? (
                                                             <Grid
                                                                 container
-                                                                justifyContent="space-between"
+                                                                justifyContent="flex-start"
                                                                 alignItems="start"
                                                                 direction="column"
                                                             >
@@ -580,28 +628,6 @@ const Modems = () => {
                                                         )}
                                                     </TableCell>
                                                     <TableCell align="right">
-                                                        {/* <Grid container justifyContent="space-between" alignItems="end" direction="column">
-                                                            <Grid item>
-                                                                {row.data && row.data.receive ? (
-                                                                    <span>
-                                                                        <span>Download&nbsp;</span>
-                                                                        <span>{bytesToSize(row.data.receive.bytes)}</span>
-                                                                    </span>
-                                                                ) : (
-                                                                    <span>-</span>
-                                                                )}
-                                                            </Grid>
-                                                            <Grid item>
-                                                                {row.data && row.data.transmit ? (
-                                                                    <span>
-                                                                        <span>Upload&nbsp;</span>
-                                                                        <span>{bytesToSize(row.data.transmit.bytes)}</span>
-                                                                    </span>
-                                                                ) : (
-                                                                    <span>-</span>
-                                                                )}
-                                                            </Grid>
-                                                        </Grid> */}
                                                         {row.data && row.data.receive ? (
                                                             <DataUsage download={row.data.receive.bytes} upload={row.data.transmit.bytes} />
                                                         ) : (

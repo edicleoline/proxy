@@ -2,17 +2,29 @@ from framework.models.server import ServerModel
 from framework.infra.modem import Modem as IModem
 import json, hashlib
 import random
+from app import app
 
 class ModemsService():
     def __init__(self, server_model: ServerModel):
         self.server_model = server_model
         self.server_modems = self.server_model.modems()
 
+    def get_lock(self, infra_modem: IModem):
+        return app.modems_manager.running(infra_modem)
+
     def modems_status(self):
         items = [item.json() for item in self.server_modems]
         for x, item in enumerate(items):
             imodem = IModem(self.server_modems[x])
             item['is_connected'] = imodem.is_connected()
+
+            lock = self.get_lock(imodem)
+            if lock == None:
+                item['lock'] = None
+            else:
+                item['lock'] = {
+                    'task': lock.action.name
+                }
 
         return items
 

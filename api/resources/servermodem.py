@@ -2,6 +2,7 @@ import os
 import requests
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
+from framework.manager.error.exception import ModemLockedByOtherThreadException
 from framework.models.server import ServerModel, ServerModemModel
 from framework.infra.modem import Modem as IModem
 from time import sleep
@@ -141,55 +142,34 @@ class ServerModemRotate(Resource):
         server_modem = ServerModemModel.find_by_modem_id(modem_id)
         imodem = IModem(server_modem)   
 
-        data = _server_modem_rotate_parser.parse_args()      
+        data = _server_modem_rotate_parser.parse_args() 
 
-        processThread = threading.Thread(
-            target=imodem.rotate, 
-            args=(
-                data['ipv4_filter'] if data['ipv4_filter'] else None, 
-                data['user'] if data['user'] else None, 
-                data['hard_reset'], 
-                3, 
-                3,
-                lambda modem_id, message, datetime, error_code: 
-                    app.socketio.emit(
-                        'message', {
-                            'modem_id': modem_id, 
-                            'message': message, 
-                            'datetime': datetime.strftime("%Y-%m-%d %H:%M:%S"),
-                            'error_code': int(error_code.value) if error_code != None else None
-                        }, broadcast=True
-                    )
-            )
-        )
-        processThread.start()
+        try:
+            app.modems_manager.rotate(
+                infra_modem = imodem, 
+                user = data['user'] if data['user'] else None,
+                filter_ip = data['ipv4_filter'] if data['ipv4_filter'] else None, 
+                hard_reset = data['hard_reset'], 
+                not_changed_try_count = 3, 
+                not_ip_try_count = 3, 
+                callback = lambda modem_id, message, datetime, error_code: 
+                        app.socketio.emit(
+                            'message', {
+                                'modem_id': modem_id, 
+                                'message': message, 
+                                'datetime': datetime.strftime("%Y-%m-%d %H:%M:%S"),
+                                'error_code': int(error_code.value) if error_code != None else None
+                            }, broadcast=True
+                        )
+            )     
+        except ModemLockedByOtherThreadException as err:
+            return {
+                "error": {
+                    "code": 780,
+                    "message": str(err)
+                }                
+            }, 400        
 
-        # imodem.rotate(ip_match=None, user=None, hard_reset=data['hard_reset']) 
-        
-        # if data['hard_reset'] == True:
-        #     try:
-        #         imodem.hard_reboot()
-        #         sleep(3)
-        #     except OSError as error:
-        #         return {
-        #             "error": {
-        #                 "code": error.errno,
-        #                 "message": str(error)
-        #             }                
-        #         }, 500
-        # else:
-        #     device_middleware = imodem.get_device_middleware()
-        #     if device_middleware:
-        #         device_middleware.reboot()
-        #         sleep(5)
-        #     else:
-        #         return {
-        #             "error": {
-        #                 "code": 610,
-        #                 "message": 'Modem is offline. Try hard-reset.'
-        #             }                
-        #         }, 400        
-
-        return {"message": "Successfully rotated"}, 200
+        return {"message": "OK"}, 200
 
     

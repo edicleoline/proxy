@@ -19,7 +19,7 @@ const SettingsDialog = (props) => {
     return (
         <Dialog open={open} onClose={onClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
             <DialogTitle id="alert-dialog-title">
-                <Typography variant="h2" component="span" sx={{ fontWeight: '500' }}>
+                <Typography variant="h3" component="span" sx={{ fontWeight: '500' }}>
                     Configurações&nbsp;
                 </Typography>
                 <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>

@@ -7,4 +7,7 @@ import apsw.ext
 # db = SQLAlchemy("sqlite:////home/berners/Documents/dev/proxy/data.db")
 
 def connection():
-    return apsw.Connection("/home/berners/Documents/dev/proxy/data.db")
+    connection = apsw.Connection("/home/berners/Documents/dev/proxy/data.db")
+    connection.setbusytimeout(5000)
+    connection.execute("PRAGMA journal_mode=WAL")
+    return connection
