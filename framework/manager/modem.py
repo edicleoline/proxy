@@ -7,7 +7,7 @@ class ModemManager():
     def __init__(self):
         self.threads = []
 
-    def reboot(self, infra_modem: IModem, hard_reset = False):
+    def reboot(self, infra_modem: IModem, hard_reset = False, callback = None):
         thread_running = self.running(infra_modem)
 
         if thread_running:
@@ -16,10 +16,7 @@ class ModemManager():
         if hard_reset == True:
             try:
                 process_thread = threading.Thread(
-                    target=infra_modem.hard_reboot_and_wait, 
-                    args=(
-                        None
-                    )
+                    target=infra_modem.hard_reboot_and_wait
                 )
                 process_thread.start()
 
@@ -32,10 +29,7 @@ class ModemManager():
             device_middleware = infra_modem.get_device_middleware()
             if device_middleware:
                 process_thread = threading.Thread(
-                    target=device_middleware.reboot_and_wait, 
-                    args=(
-                        None
-                    )
+                    target=device_middleware.reboot_and_wait
                 )
                 process_thread.start()
 

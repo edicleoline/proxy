@@ -188,7 +188,7 @@ class MF79S:
         except:
             return False
         
-    def reboot_and_wait(self, callback = None):
+    def reboot_and_wait(self):
         self.reboot()
         time.sleep(5)
 

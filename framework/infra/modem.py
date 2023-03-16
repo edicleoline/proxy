@@ -48,7 +48,7 @@ class Modem:
         sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
         sys.stdout.flush()
 
-    def hard_reboot_and_wait(self, callback = None):
+    def hard_reboot_and_wait(self):
         self.hard_reboot()
         self.wait_until_modem_connection(print_alert = False)
 
