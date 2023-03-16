@@ -6,6 +6,7 @@ import json
 import sys
 
 from framework.device.zte.error.exception import ConnectException
+from framework.infra.netiface import NetIface
 
 sys.path.append('..')
 from framework.util.wan import Wan
@@ -190,7 +191,13 @@ class MF79S:
         
     def reboot_and_wait(self):
         self.reboot()
-        time.sleep(5)
+        time.sleep(10)
+        while True:
+            iface = NetIface.get_iface_by_interface(self.interface)
+            if iface != None:
+                break
+
+            time.sleep(1)
 
     def details(self):
         try:

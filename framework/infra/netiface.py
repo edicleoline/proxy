@@ -44,6 +44,15 @@ class NetIface:
                     return iface
 
         return None
+    
+    @staticmethod
+    def get_iface_by_interface(interface):
+        ifaces = NetIface.get_all()
+        for iface in ifaces:
+            if iface.interface == interface:
+                return iface
+            
+        return None
 
     @staticmethod
     def get_gateway_from_ipv4(ipv4):
