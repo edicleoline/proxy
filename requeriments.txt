@@ -11,3 +11,4 @@ flask_jwt_extended
 flask_socketio
 gevent
 gevent-websocket
+dataclasses-json

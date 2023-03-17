@@ -2,8 +2,8 @@ import sys, time
 import requests
 
 from framework.models.server import ServerModemModel
-from framework.models.modemiphistory import ModemIPHistory
-from framework.models.useriphistory import UserIPHistory
+from framework.models.modemiphistory import ModemIPHistoryModel
+from framework.models.proxyuseriphistory import ProxyUserIPHistoryModel
 
 from framework.infra.netiface import NetIface
 from framework.infra.usb import USB
@@ -96,21 +96,21 @@ class Modem:
             write_alert = False
             time.sleep(1)
 
-    def rotate(self, ip_match:str, user:str, hard_reset = False, not_changed_try_count = 3, not_ip_try_count = 3, callback = None):
+    def rotate(self, filters = None, proxy_user_id = None, hard_reset = False, not_changed_try_count = 3, not_ip_try_count = 3, callback = None):
         r"""
         Rotate IP
 
-        ip_match: stops when match IP addr. Use multiple IPs separed by comma.
+        ip_match: stops when match IP addr. Use multiple IPs separate by comma.
         """ 
 
         device_middleware = None
 
-        if ip_match == None and user:
-            user_last_ip = UserIPHistory.get_last_ip(user)
-            if user_last_ip:
-                ip_match = ".".join(user_last_ip.split(".", 2)[:2])  
-                sys.stdout.write('{0}[!] IPv4 match auto enabled for [{1}]{2}\n\n'.format(CGREEN, ip_match, CEND))
-                sys.stdout.flush()
+        # if ip_match == None and user:
+        #     user_last_ip = ProxyUserIPHistoryModel.get_last_ip(user)
+        #     if user_last_ip:
+        #         ip_match = ".".join(user_last_ip.split(".", 2)[:2])  
+        #         sys.stdout.write('{0}[!] IPv4 match auto enabled for [{1}]{2}\n\n'.format(CGREEN, ip_match, CEND))
+        #         sys.stdout.flush()
         
         not_changed_count, not_ip_count = 0, 0
         while True:            
@@ -147,6 +147,7 @@ class Modem:
                     sys.stdout.flush()
                     sys.exit(1)
 
+                # new_ip = '189.40.89.35' #TESTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
                 if callback: callback(self.modem.id, "Released with IPv4 {0}".format(new_ip), datetime.now(), None)
 
             if new_ip != None and new_ip != old_ip:
@@ -155,15 +156,15 @@ class Modem:
                 network_provider = modem_details['network_provider'] if modem_details else None
                 signalbar = modem_details['signalbar'] if modem_details else None
 
-                modem_ip_history = ModemIPHistory(modem_id = self.modem.id, ip = new_ip, network_type = network_type, network_provider = network_provider, signalbar = signalbar)
+                modem_ip_history = ModemIPHistoryModel(modem_id = self.modem.id, ip = new_ip, network_type = network_type, network_provider = network_provider, signalbar = signalbar)
                 modem_ip_history.save_to_db()
 
                 inframodem_iface = self.iface()
                 modem_ifaddress = inframodem_iface.ifaddresses[0]
                 modem_gateway = NetIface.get_gateway_from_ipv4(ipv4 = modem_ifaddress['addr'])
 
-                if user:
-                    is_ip_reserved_for_other = UserIPHistory.is_ip_reserved_for_other(ip=new_ip, user=user)
+                if proxy_user_id:
+                    is_ip_reserved_for_other = ProxyUserIPHistoryModel.is_ip_reserved_for_other(ip=new_ip, proxy_user_id=proxy_user_id)
                     if is_ip_reserved_for_other:
                         sys.stdout.write('{0}[!] Lets rotate again because this IP is reserved for another user{1}\n'.format(CBLUE, CEND))
                         sys.stdout.flush()
@@ -171,28 +172,26 @@ class Modem:
                         print('\n')
                         continue 
 
-                if ip_match:
-                    ip_match_list = ip_match.split(',')
+                if filters != None and len(filters) > 0:
                     ip_match_found = False
-                    for ip_match_item in ip_match_list:
-                        if new_ip.startswith(ip_match_item.strip()):
+                    for filter in filters:                        
+                        if filter.type == 'ip' and new_ip.startswith(filter.value.strip()):
                             done = True
                             ip_match_found = True
                         
                     if ip_match_found == False:
-                        sys.stdout.write('{0}[!] Lets rotate again because this IP does not match [{1}] {2}\n'.format(CBLUE, ip_match, CEND))
+                        sys.stdout.write('{0}[!] Lets rotate again because this IP does not match with filter {1}\n'.format(CBLUE, CEND))
                         sys.stdout.flush()
                         time.sleep(1)
                         print('\n')
                         continue
-
-                if not user and not ip_match:
+                else:
                     done = True
             
                 if done == True:
-                    if user:
-                        user_ip_history = UserIPHistory(user = user, modem_ip_history_id = modem_ip_history.id)
-                        user_ip_history.save_to_db()
+                    if proxy_user_id:
+                        proxy_user_ip_history_model = ProxyUserIPHistoryModel(proxy_user_id = proxy_user_id, modem_ip_history_id = modem_ip_history.id)
+                        proxy_user_ip_history_model.save_to_db()
 
                     proxyService = ProxyService(ip=modem_ifaddress['addr'], proxy_ipv4_http_port=self.server_modem_model.proxy_ipv4_http_port)
                     proxyService.resolve_proxy()

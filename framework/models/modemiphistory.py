@@ -1,6 +1,6 @@
 from db import connection
 
-class ModemIPHistory():
+class ModemIPHistoryModel():
     def __init__(self, modem_id = None, ip = None, network_type = None, network_provider = None, signalbar = None, created_at = None):
         self.modem_id = modem_id
         self.ip = ip

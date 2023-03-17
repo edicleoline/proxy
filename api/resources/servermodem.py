@@ -3,10 +3,12 @@ import requests
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
 from framework.manager.error.exception import ModemLockedByOtherThreadException
+from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
 from framework.models.server import ServerModel, ServerModemModel
 from framework.infra.modem import Modem as IModem
 from time import sleep
 import threading
+from flask import request
 
 from app import app
 
@@ -116,15 +118,25 @@ class ServerModemReboot(Resource):
         return {"message": "OK"}, 200
     
 
+def filters_type(value, name):
+    full_json_data = request.get_json()
+    filters_json = full_json_data[name]
+
+    if(not isinstance(filters_json, (list))):
+        raise ValueError("The parameter " + name + " is not a valid array")
+    
+    filters = ProxyUserIPFilterModel.schema().load(filters_json, many=True)
+    return filters
+
 _server_modem_rotate_parser = reqparse.RequestParser()
 _server_modem_rotate_parser.add_argument(
     "hard_reset", type=bool, required=True, help=""
 )
 _server_modem_rotate_parser.add_argument(
-    "user", type=str, required=False, help=""
+    "proxy_user_id", type=int, required=False, help=""
 )
 _server_modem_rotate_parser.add_argument(
-    "ipv4_filter", type=str, required=False, help=""
+    "filters", type=filters_type, location="json", required=False, help=""
 )
 class ServerModemRotate(Resource):
     # @jwt_required()
@@ -138,12 +150,12 @@ class ServerModemRotate(Resource):
         imodem = IModem(server_modem)   
 
         data = _server_modem_rotate_parser.parse_args() 
-
+        
         try:
             app.modems_manager.rotate(
                 infra_modem = imodem, 
-                user = data['user'] if data['user'] else None,
-                filter_ip = data['ipv4_filter'] if data['ipv4_filter'] else None, 
+                proxy_user_id = data['proxy_user_id'] if data['proxy_user_id'] else None,
+                filters = data['filters'], 
                 hard_reset = data['hard_reset'], 
                 not_changed_try_count = 3, 
                 not_ip_try_count = 3, 

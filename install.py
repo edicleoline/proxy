@@ -138,12 +138,43 @@ if __name__ == '__main__':
 
     try:
         conn.execute("""
-            CREATE TABLE user_ip_history (
+            CREATE TABLE proxy_user (
             id INTEGER NOT NULL, 
-            user VARCHAR(90) NOT NULL, 
+            name VARCHAR(90) NOT NULL, 
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+            PRIMARY KEY (id),
+            UNIQUE (name)
+            )
+            """)
+    except SQLError:
+        pass
+
+    try:
+        conn.execute("""
+            CREATE TABLE proxy_user_ip_history (
+            id INTEGER NOT NULL, 
+            proxy_user_id INTEGER NOT NULL, 
             modem_ip_history_id INTEGER NOT NULL,                         
             PRIMARY KEY (id), 
-            FOREIGN KEY(modem_ip_history_id) REFERENCES modem_ip_history (id)
+            FOREIGN KEY(modem_ip_history_id) REFERENCES modem_ip_history (id),
+            FOREIGN KEY(proxy_user_id) REFERENCES proxy_user (id)
+            )
+            """)
+    except SQLError:
+        pass
+
+    try:
+        conn.execute("""
+            CREATE TABLE proxy_user_ip_filter (
+            id INTEGER NOT NULL, 
+            proxy_user_id INTEGER NOT NULL, 
+            modem_id INTEGER NOT NULL, 
+            filter_type VARCHAR(15) NOT NULL,    
+            filter_value VARCHAR(90) NOT NULL,    
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,                    
+            PRIMARY KEY (id), 
+            FOREIGN KEY(proxy_user_id) REFERENCES proxy_user (id),
+            FOREIGN KEY(modem_id) REFERENCES modem (id)
             )
             """)
     except SQLError:

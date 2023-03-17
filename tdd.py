@@ -12,13 +12,16 @@ from framework.models.installation import InstallationModel
 from framework.infra.netiface import NetIface
 from framework.infra.modem import Modem as InfraModem
 from framework.infra.route import Route
+from framework.models.modemiphistory import ModemIPHistoryModel
+from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
 
 from framework.models.server import ServerModel, ServerModemModel, USBPortModel, USBPortStatus
 from framework.models.modem import ModemModel
 
-from framework.models.useriphistory import UserIPHistory
+from framework.models.proxyuseriphistory import ProxyUserIPHistoryModel
 from framework.models.installation import InstallationModel
 from framework.models.user import UserModel
+from framework.models.proxyuser import ProxyUserModel
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
@@ -51,13 +54,46 @@ print(server.json())
 # installation = USBPortModel.find_by_id(1)
 # print(installation.json())
 
-for modem in server.modems():
-    print(modem.modem().addr_id)
+#for modem in server.modems():
+#    print(modem.modem().addr_id)
 
+# proxy_user = ProxyUserModel()
+# proxy_user.name = 'João'
+# proxy_user.save_to_db()
+
+# proxy_user = ProxyUserModel()
+# proxy_user.name = 'Maria'
+# proxy_user.save_to_db()
+
+#print(ProxyUserModel.find_by_name('Maria').id)
+
+#modem_ip_history_model = ModemIPHistoryModel(modem_id = 1, ip = '177.10.11.12', network_type = '4g', network_provider = 'Vivo', signalbar = 5)
+#modem_ip_history_model.save_to_db()
+
+#proxy_user_ip_history_model = ProxyUserIPHistoryModel()
+#proxy_user_ip_history_model.proxy_user_id = 1
+#proxy_user_ip_history_model.modem_ip_history_id = 1
+#proxy_user_ip_history_model.save_to_db()
+
+# is_ip_reserved_for_other = ProxyUserIPHistoryModel.is_ip_reserved_for_other('177.10.11.123', 2)
+# print(is_ip_reserved_for_other)
+
+# proxy_user_ip_filter_model = ProxyUserIPFilterModel(proxy_user_id = 1, modem_id = 1, type = 'ip', value = '179.')
+# proxy_user_ip_filter_model.save_to_db()
+# proxy_user_ip_filter_model = ProxyUserIPFilterModel(proxy_user_id = 1, modem_id = 2, type = 'ip', value = '200.173')
+# proxy_user_ip_filter_model.save_to_db()
+
+# print(ProxyUserIPFilterModel.find_by_id(2).filter_value)
+
+# filters = ProxyUserIPFilterModel.find_by_proxy_user(1)
+filters = ProxyUserIPFilterModel.find_by_proxy_user_and_modem(1, 2)
+if filters:
+    for filter in filters:
+        print(filter.value)
 
 sys.exit()
 
-# t = UserIPHistory.is_ip_reserved_for_other(ip="187.119.228.144", user="carlos_antonio_santos")
+# t = ProxyUserIPHistoryModel.is_ip_reserved_for_other(ip="187.119.228.144", user="carlos_antonio_santos")
 # print(t)
 
 # test = ['test1', 'test2']

@@ -42,11 +42,11 @@ export function reboot(id, hardReset = false) {
     });
 }
 
-export function rotate(id, hardReset = false, user = null, ipv4Filter = null) {
+export function rotate(id, hardReset = false, proxy_user_id = null, filters = null) {
     const data = {
         hard_reset: hardReset,
-        user: user,
-        ipv4_filter: ipv4Filter
+        proxy_user_id: proxy_user_id,
+        filters: filters
     };
     return new Promise((resolve, reject) => {
         api.post('/server/modem/' + id + '/rotate', data).then(

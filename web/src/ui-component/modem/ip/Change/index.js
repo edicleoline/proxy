@@ -36,14 +36,27 @@ const ChangeDialog = (props) => {
     const { modem, open, onClose, onConfirm, ...other } = props;
 
     const [isLoading, setLoading] = useState(false);
-    const [user, setUser] = useState('');
+    const [proxyUser, setProxyUser] = useState(null);
     const [ipv4Filter, setIPv4Filter] = useState('');
     const [hardReset, setHardReset] = useState(true);
 
     const handleConfirmClick = () => {
         setLoading(true);
 
-        rotate(modem.id, hardReset, user, ipv4Filter)
+        let filters = null;
+        const ipv4FilterArray = ipv4Filter ? ipv4Filter.split(',') : null;
+        if (ipv4FilterArray) {
+            filters = [];
+            ipv4FilterArray.forEach((ipv4Filter) => {
+                ipv4Filter = ipv4Filter.replace(/\s/g, '');
+                filters.push({
+                    type: 'ip',
+                    value: ipv4Filter
+                });
+            });
+        }
+
+        rotate(modem.id, hardReset, null, filters)
             .then(
                 (response) => {
                     console.log(response);
@@ -67,10 +80,6 @@ const ChangeDialog = (props) => {
             });
     };
 
-    // const handleTextFieldUserChange = (e) => {
-    //     setUser(e.target.value);
-    //     console.log(e.target.value);
-    // };
     const [error, setError] = useState({
         open: false,
         message: ''
@@ -84,13 +93,8 @@ const ChangeDialog = (props) => {
     };
 
     const top100Films = [
-        { title: 'The Shawshank Redemption', year: 1994 },
-        { title: 'The Godfather', year: 1972 },
-        { title: 'The Godfather: Part II', year: 1974 },
-        { title: 'The Dark Knight', year: 2008 },
-        { title: '12 Angry Men', year: 1957 },
-        { title: "Schindler's List", year: 1993 },
-        { title: 'Pulp Fiction', year: 1994 }
+        { id: 1, name: 'João' },
+        { id: 2, name: 'Maria' }
     ];
 
     return (
@@ -112,15 +116,15 @@ const ChangeDialog = (props) => {
                         <Autocomplete
                             id="modem-ip-change-user"
                             freeSolo
-                            options={top100Films.map((option) => option.title)}
+                            options={top100Films.map((option) => option.name)}
                             autoHighlight
-                            value={user}
+                            value={proxyUser}
                             onChange={(event, newValue) => {
-                                setUser(newValue);
+                                setProxyUser(newValue);
                                 console.log(newValue);
                             }}
                             onInputChange={(event, newInputValue) => {
-                                setUser(newInputValue);
+                                setProxyUser(newInputValue);
                                 console.log(newInputValue);
                             }}
                             renderInput={(params) => <TextField {...params} label="Usuário" variant="outlined" />}

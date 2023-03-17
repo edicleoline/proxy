@@ -118,8 +118,8 @@ const Modems = () => {
     const [socketConnected, setSocketConnected] = useState(false);
 
     useEffect(() => {
-        const socket = io('http://192.168.15.10:5000');
-        // const socket = io('http://192.168.15.20:5000');
+        // const socket = io('http://192.168.15.10:5000');
+        const socket = io('http://192.168.15.20:5000');
 
         console.log('useeffect!!!!');
 
@@ -269,6 +269,10 @@ const Modems = () => {
     };
     const handleModemChangeIPClose = () => {
         setModemChangeIPDialog({ ...modemChangeIPDialog, open: false });
+    };
+
+    const handleCancelModemChangeIPClick = (modem) => {
+        console.log('cancel rotate!!');
     };
 
     const [modemSettingsDialog, setModemSettingsDialog] = useState({
@@ -492,21 +496,32 @@ const Modems = () => {
                                                                 'aria-labelledby': `modem-button-${row.modem.id}`
                                                             }}
                                                         >
-                                                            <MenuItem
-                                                                onClick={() => {
-                                                                    handleModemChangeIPClick(row);
-                                                                    handleModemCloseMenu();
-                                                                }}
-                                                                disabled={!row.is_connected}
-                                                            >
-                                                                Rotacionar IP
-                                                            </MenuItem>
+                                                            {row.lock != null && row.lock.task == 'ROTATE' ? (
+                                                                <MenuItem
+                                                                    onClick={() => {
+                                                                        handleCancelModemChangeIPClick(row);
+                                                                        handleModemCloseMenu();
+                                                                    }}
+                                                                >
+                                                                    Cancelar rotacionamento
+                                                                </MenuItem>
+                                                            ) : (
+                                                                <MenuItem
+                                                                    onClick={() => {
+                                                                        handleModemChangeIPClick(row);
+                                                                        handleModemCloseMenu();
+                                                                    }}
+                                                                    disabled={!row.is_connected || row.lock != null}
+                                                                >
+                                                                    Rotacionar IP
+                                                                </MenuItem>
+                                                            )}
                                                             <MenuItem
                                                                 onClick={() => {
                                                                     handleModemRebootClick(row);
                                                                     handleModemCloseMenu();
                                                                 }}
-                                                                disabled={false}
+                                                                disabled={row.lock != null}
                                                             >
                                                                 Reiniciar
                                                             </MenuItem>
@@ -515,6 +530,7 @@ const Modems = () => {
                                                                     handleModemDiagnoseClick(row);
                                                                     handleModemCloseMenu();
                                                                 }}
+                                                                disabled={row.lock != null}
                                                             >
                                                                 Executar diagnóstico
                                                             </MenuItem>

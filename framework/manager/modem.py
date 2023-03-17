@@ -42,11 +42,11 @@ class ModemManager():
     def rotate(
             self, 
             infra_modem: IModem, 
-            user: str = None, 
-            filter_ip: str = None, 
+            proxy_user_id = None, 
+            filters = None, 
             hard_reset = False, 
             not_changed_try_count = 3, 
-            not_ip_try_count = 3, 
+            not_ip_try_count = 6, 
             callback = None
     ):
         thread_running = self.running(infra_modem)
@@ -57,8 +57,8 @@ class ModemManager():
         process_thread = threading.Thread(
             target=infra_modem.rotate, 
             args=(
-                filter_ip, 
-                user, 
+                filters, 
+                proxy_user_id, 
                 hard_reset, 
                 not_changed_try_count, 
                 not_ip_try_count,
