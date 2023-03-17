@@ -118,8 +118,8 @@ const Modems = () => {
     const [socketConnected, setSocketConnected] = useState(false);
 
     useEffect(() => {
-        // const socket = io('http://192.168.15.10:5000');
-        const socket = io('http://192.168.15.20:5000');
+        const socket = io('http://192.168.15.10:5000');
+        // const socket = io('http://192.168.15.20:5000');
 
         console.log('useeffect!!!!');
 

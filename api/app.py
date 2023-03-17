@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
+from resources.proxyuser import ProxyUserByUsername, ProxyUserModemFilters, ProxyUsers
 
 from blocklist import BLOCKLIST
 from resources.user import UserRegister, UserLogin, TokenRefresh, UserLogout
@@ -108,6 +109,9 @@ api.add_resource(ServerModem, "/server/modem/<int:modem_id>")
 api.add_resource(ServerModemReboot, "/server/modem/<int:modem_id>/reboot")
 api.add_resource(ServerModemRotate, "/server/modem/<int:modem_id>/rotate")
 
+api.add_resource(ProxyUsers, "/proxy-users")
+api.add_resource(ProxyUserByUsername, "/proxy-user/by-username/<string:username>")
+api.add_resource(ProxyUserModemFilters, "/proxy-user/<int:proxy_user_id>/modem/<int:modem_id>/filters")
 
 app.modems_manager = ModemManager()
 

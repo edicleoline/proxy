@@ -33,6 +33,20 @@ class ProxyUserModel():
             return None
 
         return cls.find_by_id(row[0])
+    
+    @classmethod
+    def all(cls):
+        conn = connection()
+        rows = conn.execute("select id from proxy_user order by created_at desc").fetchall()
+        conn.close(True)
+
+        proxy_users = []
+        for row in rows:
+            proxy_users.append(
+                ProxyUserModel.find_by_id(row[0])
+            )
+
+        return proxy_users
 
     def save_to_db(self):
         conn = connection()

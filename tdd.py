@@ -57,31 +57,31 @@ print(server.json())
 #for modem in server.modems():
 #    print(modem.modem().addr_id)
 
-# proxy_user = ProxyUserModel()
-# proxy_user.username = 'João'
-# proxy_user.save_to_db()
+#proxy_user = ProxyUserModel()
+#proxy_user.username = 'João'
+#proxy_user.save_to_db()
 
-# proxy_user = ProxyUserModel()
-# proxy_user.username = 'Maria'
-# proxy_user.save_to_db()
+#proxy_user = ProxyUserModel()
+#proxy_user.username = 'Maria'
+#proxy_user.save_to_db()
 
-print(ProxyUserModel.find_by_username('João').id)
+#print(ProxyUserModel.find_by_username('João').id)
 
-#modem_ip_history_model = ModemIPHistoryModel(modem_id = 1, ip = '177.10.11.12', network_type = '4g', network_provider = 'Vivo', signalbar = 5)
-#modem_ip_history_model.save_to_db()
+modem_ip_history_model = ModemIPHistoryModel(modem_id = 1, ip = '177.10.11.12', network_type = '4g', network_provider = 'Vivo', signalbar = 5)
+modem_ip_history_model.save_to_db()
 
-#proxy_user_ip_history_model = ProxyUserIPHistoryModel()
-#proxy_user_ip_history_model.proxy_user_id = 1
-#proxy_user_ip_history_model.modem_ip_history_id = 1
-#proxy_user_ip_history_model.save_to_db()
+proxy_user_ip_history_model = ProxyUserIPHistoryModel()
+proxy_user_ip_history_model.proxy_user_id = 1
+proxy_user_ip_history_model.modem_ip_history_id = 1
+proxy_user_ip_history_model.save_to_db()
 
 # is_ip_reserved_for_other = ProxyUserIPHistoryModel.is_ip_reserved_for_other('177.10.11.123', 2)
 # print(is_ip_reserved_for_other)
 
-# proxy_user_ip_filter_model = ProxyUserIPFilterModel(proxy_user_id = 1, modem_id = 1, type = 'ip', value = '179.')
-# proxy_user_ip_filter_model.save_to_db()
-# proxy_user_ip_filter_model = ProxyUserIPFilterModel(proxy_user_id = 1, modem_id = 2, type = 'ip', value = '200.173')
-# proxy_user_ip_filter_model.save_to_db()
+proxy_user_ip_filter_model = ProxyUserIPFilterModel(proxy_user_id = 1, modem_id = 1, type = 'ip', value = '179.')
+proxy_user_ip_filter_model.save_to_db()
+proxy_user_ip_filter_model = ProxyUserIPFilterModel(proxy_user_id = 1, modem_id = 2, type = 'ip', value = '200.173')
+proxy_user_ip_filter_model.save_to_db()
 
 # print(ProxyUserIPFilterModel.find_by_id(2).filter_value)
 
