@@ -551,6 +551,15 @@ const Modems = () => {
                                                             >
                                                                 Configurações
                                                             </MenuItem>
+                                                            <Divider />
+                                                            <MenuItem
+                                                                onClick={() => {
+                                                                    console.log('modem turn off');
+                                                                    handleModemCloseMenu();
+                                                                }}
+                                                            >
+                                                                Desligar
+                                                            </MenuItem>
                                                         </Menu>
                                                         &nbsp;&nbsp;{row.modem.id}
                                                     </TableCell>

@@ -42,10 +42,10 @@ export function reboot(id, hardReset = false) {
     });
 }
 
-export function rotate(id, hardReset = false, proxy_user_id = null, filters = null) {
+export function rotate(id, hardReset = false, proxy_username = null, filters = null) {
     const data = {
         hard_reset: hardReset,
-        proxy_user_id: proxy_user_id,
+        proxy_username: proxy_username,
         filters: filters
     };
     return new Promise((resolve, reject) => {

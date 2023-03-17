@@ -56,7 +56,7 @@ const ChangeDialog = (props) => {
             });
         }
 
-        rotate(modem.id, hardReset, null, filters)
+        rotate(modem.id, hardReset, proxyUser, filters)
             .then(
                 (response) => {
                     console.log(response);

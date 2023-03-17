@@ -1,32 +1,32 @@
 from db import connection
 
 class ProxyUserModel():
-    def __init__(self, id = None, name = None, created_at = None):
+    def __init__(self, id = None, username = None, created_at = None):
         self.id = id
-        self.name = name
+        self.username = username
         self.created_at = created_at
     
     def json(self):
         return {
             'id': self.id,
-            'name': self.name
+            'username': self.username
         }
 
     @classmethod
     def find_by_id(cls, id):
         conn = connection()
-        row = conn.execute("select id, name, created_at from proxy_user where id=?", (id, )).fetchone()
+        row = conn.execute("select id, username, created_at from proxy_user where id=?", (id, )).fetchone()
         conn.close(True)
 
         if row == None:
             return None
 
-        return ProxyUserModel(id = row[0], name = row[1], created_at = row[2])
+        return ProxyUserModel(id = row[0], username = row[1], created_at = row[2])
         
     @classmethod
-    def find_by_name(cls, name):
+    def find_by_username(cls, username):
         conn = connection()
-        row = conn.execute("select id from proxy_user where name=?", (name, )).fetchone()
+        row = conn.execute("select id from proxy_user where username=?", (username, )).fetchone()
         conn.close(True)
 
         if row == None:
@@ -38,13 +38,13 @@ class ProxyUserModel():
         conn = connection()
 
         if self.id == None:
-            conn.execute("insert into proxy_user (name) values (?)", (
-                self.name,
+            conn.execute("insert into proxy_user (username) values (?)", (
+                self.username,
                 ))
             self.id = conn.last_insert_rowid()
         else:
-            conn.execute("update proxy_user set name=? where id = ?", (
-                self.name, self.id
+            conn.execute("update proxy_user set username=? where id = ?", (
+                self.username, self.id
                 ))
 
         conn.close(True)

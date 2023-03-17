@@ -58,14 +58,14 @@ print(server.json())
 #    print(modem.modem().addr_id)
 
 # proxy_user = ProxyUserModel()
-# proxy_user.name = 'João'
+# proxy_user.username = 'João'
 # proxy_user.save_to_db()
 
 # proxy_user = ProxyUserModel()
-# proxy_user.name = 'Maria'
+# proxy_user.username = 'Maria'
 # proxy_user.save_to_db()
 
-#print(ProxyUserModel.find_by_name('Maria').id)
+print(ProxyUserModel.find_by_username('João').id)
 
 #modem_ip_history_model = ModemIPHistoryModel(modem_id = 1, ip = '177.10.11.12', network_type = '4g', network_provider = 'Vivo', signalbar = 5)
 #modem_ip_history_model.save_to_db()
@@ -86,10 +86,10 @@ print(server.json())
 # print(ProxyUserIPFilterModel.find_by_id(2).filter_value)
 
 # filters = ProxyUserIPFilterModel.find_by_proxy_user(1)
-filters = ProxyUserIPFilterModel.find_by_proxy_user_and_modem(1, 2)
-if filters:
-    for filter in filters:
-        print(filter.value)
+# filters = ProxyUserIPFilterModel.find_by_proxy_user_and_modem(1, 2)
+# if filters:
+#     for filter in filters:
+#         print(filter.value)
 
 sys.exit()
 

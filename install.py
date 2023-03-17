@@ -140,10 +140,10 @@ if __name__ == '__main__':
         conn.execute("""
             CREATE TABLE proxy_user (
             id INTEGER NOT NULL, 
-            name VARCHAR(90) NOT NULL, 
+            username VARCHAR(90) NOT NULL, 
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
             PRIMARY KEY (id),
-            UNIQUE (name)
+            UNIQUE (username)
             )
             """)
     except SQLError:

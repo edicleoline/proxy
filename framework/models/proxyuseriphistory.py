@@ -17,13 +17,6 @@ class ProxyUserIPHistoryModel():
         conn.close(True)
         return True if int(row[0]) > 0 else False
 
-    @classmethod
-    def get_last_ip(cls, proxy_user_id):
-        conn = connection()
-        row = conn.execute("select iih.id, iih.ip from user_ip_history uih join modem_ip_history iih ON (iih.id = uih.modem_ip_history_id) where uih.user = ? order by uih.id desc limit 1", (user,)).fetchone()
-        conn.close(True)
-        return row[1] if row else None
-
     def save_to_db(self):
         conn = connection()
         conn.execute("INSERT INTO proxy_user_ip_history (proxy_user_id, modem_ip_history_id) VALUES (?, ?)", (

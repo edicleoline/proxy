@@ -58,12 +58,12 @@ const SettingsDialog = (props) => {
             <DialogContent>
                 <Stack spacing={2.5} sx={{ paddingTop: 3 }}>
                     <FormControl sx={{ maxWidth: 160 }}>
-                        <InputLabel id="modem-setting-port-label">Porta</InputLabel>
+                        <InputLabel id="modem-setting-port-label">Porta USB</InputLabel>
                         <Select
                             labelId="modem-setting-port-label"
                             id="modem-setting-port-select"
                             value={port}
-                            label="Porta"
+                            label="Porta USB"
                             onChange={handleChangePort}
                         >
                             <MenuItem value={10}>1</MenuItem>
@@ -98,20 +98,24 @@ const SettingsDialog = (props) => {
                             }}
                         />
                     </FormGroup>
-                    <FormControl sx={{ m: 1, maxWidth: 350 }} variant="outlined">
-                        <TextField
-                            id="auto-rotate-value"
-                            InputProps={{
-                                endAdornment: <InputAdornment position="end">minutos</InputAdornment>
-                            }}
-                            aria-describedby="outlined-weight-helper-text"
-                            inputProps={{
-                                'aria-label': 'weight'
-                            }}
-                            label="Intervalo de rotacionamento"
-                            type="number"
-                        />
-                    </FormControl>
+                    {autoRotate ? (
+                        <FormControl sx={{ m: 1, maxWidth: 350 }} variant="outlined">
+                            <TextField
+                                id="auto-rotate-value"
+                                InputProps={{
+                                    endAdornment: <InputAdornment position="end">minutos</InputAdornment>
+                                }}
+                                aria-describedby="outlined-weight-helper-text"
+                                inputProps={{
+                                    'aria-label': 'weight'
+                                }}
+                                label="Intervalo de rotacionamento"
+                                type="number"
+                            />
+                        </FormControl>
+                    ) : (
+                        <></>
+                    )}
                 </Stack>
             </DialogContent>
             <DialogActions>
