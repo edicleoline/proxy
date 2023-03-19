@@ -1,5 +1,6 @@
 from framework.infra.modem import Modem as IModem
-import threading
+from threading import Thread
+from threading import Event
 from enum import Enum
 from framework.manager.error.exception import ModemLockedByOtherThreadException, ModemRebootException, NoTaskRunningException
 
@@ -15,7 +16,7 @@ class ModemManager():
         
         if hard_reset == True:
             try:
-                process_thread = threading.Thread(
+                process_thread = Thread(
                     target=infra_modem.hard_reboot_and_wait
                 )
                 process_thread.start()
@@ -28,7 +29,7 @@ class ModemManager():
         else:
             device_middleware = infra_modem.get_device_middleware()
             if device_middleware:
-                process_thread = threading.Thread(
+                process_thread = Thread(
                     target=device_middleware.reboot_and_wait
                 )
                 process_thread.start()
@@ -54,7 +55,7 @@ class ModemManager():
         if thread_running:
             raise ModemLockedByOtherThreadException('We could running this task now because this modem is locked by another thread.')
 
-        process_thread = threading.Thread(
+        process_thread = Thread(
             target=infra_modem.rotate, 
             args=(
                 filters, 
@@ -71,13 +72,13 @@ class ModemManager():
             ModemThreadData(infra_modem, ModemThreadAction.ROTATE, process_thread)
         )
 
-    def cancel_task(self, infra_modem: IModem, callback = None):
+    def stop_task(self, infra_modem: IModem, callback = None):
         thread_running = self.running(infra_modem)
 
         if not thread_running:
             raise NoTaskRunningException('We could find any task running for this modem.')
         
-        thread_running.thread.terminate()
+        thread_running.event_stop.set()
 
     def running(self, infra_modem: IModem):
         for t in self.threads:
@@ -104,7 +105,8 @@ class ModemThreadStatus(Enum):
 
 
 class ModemThreadData():
-    def __init__(self, infra_modem: IModem, action: ModemThreadAction, thread: threading.Thread):
+    def __init__(self, infra_modem: IModem, action: ModemThreadAction, thread: Thread, event_stop: Event = Event()):
         self.infra_modem = infra_modem
         self.action = action
         self.thread = thread
+        self.event_stop = event_stop

@@ -144,7 +144,7 @@ class ServerModemRotate(Resource):
         server_modem = ServerModemModel.find_by_modem_id(modem_id)
         imodem = IModem(server_modem)
         try:
-            app.modems_manager.cancel_task(
+            app.modems_manager.stop_task(
                 infra_modem = imodem,
                 callback = None
             )

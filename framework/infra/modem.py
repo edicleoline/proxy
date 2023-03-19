@@ -1,5 +1,6 @@
 import sys, time
 import requests
+from threading import Event
 
 from framework.models.server import ServerModemModel
 from framework.models.modemiphistory import ModemIPHistoryModel
@@ -96,7 +97,15 @@ class Modem:
             write_alert = False
             time.sleep(1)
 
-    def rotate(self, filters = None, proxy_user_id = None, hard_reset = False, not_changed_try_count = 3, not_ip_try_count = 3, callback = None):
+    def rotate(
+            self, 
+            filters = None, 
+            proxy_user_id = None, 
+            hard_reset = False, 
+            not_changed_try_count = 3, 
+            not_ip_try_count = 3, 
+            callback = None, 
+            event_stop: Event = Event()):
         r"""
         Rotate IP
 
@@ -113,7 +122,11 @@ class Modem:
         #         sys.stdout.flush()
         
         not_changed_count, not_ip_count = 0, 0
-        while True:            
+        while True:           
+            if event_stop.is_set():
+                if callback: callback(self.modem.id, "Stopped by event", datetime.now(), None)
+                break
+
             old_ip, new_ip, done = None, None, False
 
             device_middleware = self.get_device_middleware()
