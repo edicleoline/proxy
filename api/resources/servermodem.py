@@ -2,7 +2,7 @@ import os
 import requests
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
-from framework.manager.error.exception import ModemLockedByOtherThreadException
+from framework.manager.error.exception import ModemLockedByOtherThreadException, NoTaskRunningException
 from framework.models.proxyuser import ProxyUserModel
 from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
 from framework.models.server import ServerModel, ServerModemModel
@@ -140,6 +140,24 @@ _server_modem_rotate_parser.add_argument(
     "filters", type=filters_type, location="json", required=False, help=""
 )
 class ServerModemRotate(Resource):
+    def delete(self, modem_id):
+        server_modem = ServerModemModel.find_by_modem_id(modem_id)
+        imodem = IModem(server_modem)
+        try:
+            app.modems_manager.cancel_task(
+                infra_modem = imodem,
+                callback = None
+            )
+        except NoTaskRunningException as err:
+            return {
+                "error": {
+                    "code": 790,
+                    "message": str(err)
+                }                
+            }, 400        
+
+        return {"message": "OK"}, 200
+
     # @jwt_required()
     def post(self, modem_id): 
         server = ServerModel.find_by_id(1)

@@ -6,3 +6,6 @@ class ModemLockedByOtherThreadException(BaseException):
 
 class ModemRebootException(BaseException):
     pass
+
+class NoTaskRunningException(BaseException):
+    pass

@@ -1,7 +1,7 @@
 from framework.infra.modem import Modem as IModem
 import threading
 from enum import Enum
-from framework.manager.error.exception import ModemLockedByOtherThreadException, ModemRebootException
+from framework.manager.error.exception import ModemLockedByOtherThreadException, ModemRebootException, NoTaskRunningException
 
 class ModemManager():
     def __init__(self):
@@ -71,6 +71,13 @@ class ModemManager():
             ModemThreadData(infra_modem, ModemThreadAction.ROTATE, process_thread)
         )
 
+    def cancel_task(self, infra_modem: IModem, callback = None):
+        thread_running = self.running(infra_modem)
+
+        if not thread_running:
+            raise NoTaskRunningException('We could find any task running for this modem.')
+        
+        thread_running.thread.terminate()
 
     def running(self, infra_modem: IModem):
         for t in self.threads:
