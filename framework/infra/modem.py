@@ -97,6 +97,15 @@ class Modem:
             write_alert = False
             time.sleep(1)
 
+    def event_stop_is_set(self, event_stop: Event, callback = None):
+        if event_stop and event_stop.is_set():
+            print('i see event stop')
+            if callback: callback(self.modem.id, "Stopped by event", datetime.now(), None)
+            return True
+        else:
+            return False
+
+
     def rotate(
             self, 
             filters = None, 
@@ -105,7 +114,7 @@ class Modem:
             not_changed_try_count = 3, 
             not_ip_try_count = 3, 
             callback = None, 
-            event_stop: Event = Event()):
+            event_stop: Event = None):
         r"""
         Rotate IP
 
@@ -122,11 +131,9 @@ class Modem:
         #         sys.stdout.flush()
         
         not_changed_count, not_ip_count = 0, 0
-        while True:           
-            if event_stop.is_set():
-                if callback: callback(self.modem.id, "Stopped by event", datetime.now(), None)
-                break
-
+        while True:
+            if self.event_stop_is_set(event_stop, callback) == True: break
+            
             old_ip, new_ip, done = None, None, False
 
             device_middleware = self.get_device_middleware()
