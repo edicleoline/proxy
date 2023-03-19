@@ -55,6 +55,8 @@ class ModemManager():
         if thread_running:
             raise ModemLockedByOtherThreadException('We could running this task now because this modem is locked by another thread.')
 
+        event_stop = Event()
+
         process_thread = Thread(
             target=infra_modem.rotate, 
             args=(
@@ -63,13 +65,14 @@ class ModemManager():
                 hard_reset, 
                 not_changed_try_count, 
                 not_ip_try_count,
-                callback
+                callback,
+                event_stop
             )
         )
         process_thread.start()
 
         self.threads.append(
-            ModemThreadData(infra_modem, ModemThreadAction.ROTATE, process_thread)
+            ModemThreadData(infra_modem, ModemThreadAction.ROTATE, process_thread, event_stop)
         )
 
     def stop_task(self, infra_modem: IModem, callback = None):
@@ -79,6 +82,7 @@ class ModemManager():
             raise NoTaskRunningException('We could find any task running for this modem.')
         
         thread_running.event_stop.set()
+        print('stop event sent')
 
     def running(self, infra_modem: IModem):
         for t in self.threads:
@@ -105,7 +109,7 @@ class ModemThreadStatus(Enum):
 
 
 class ModemThreadData():
-    def __init__(self, infra_modem: IModem, action: ModemThreadAction, thread: Thread, event_stop: Event = Event()):
+    def __init__(self, infra_modem: IModem, action: ModemThreadAction, thread: Thread, event_stop: Event):
         self.infra_modem = infra_modem
         self.action = action
         self.thread = thread
