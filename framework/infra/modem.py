@@ -148,6 +148,8 @@ class Modem:
                 sys.stdout.write('{0}[!] Modem rebooted. Wait until to get external IP...{1}\n'.format(CBLUE, CEND))
                 sys.stdout.flush()
 
+                if self.event_stop_is_set(event_stop, callback) == True: break
+
                 time.sleep(30)
 
                 self.wait_until_modem_connection(True)
@@ -191,6 +193,7 @@ class Modem:
                         sys.stdout.flush()
                         time.sleep(1)
                         print('\n')
+                        if self.event_stop_is_set(event_stop, callback) == True: break
                         continue 
 
                 if filters != None and len(filters) > 0:
@@ -205,6 +208,7 @@ class Modem:
                         sys.stdout.flush()
                         time.sleep(1)
                         print('\n')
+                        if self.event_stop_is_set(event_stop, callback) == True: break
                         continue
                 else:
                     done = True
