@@ -23,7 +23,10 @@ class ModemsService():
                 item['lock'] = None
             else:
                 item['lock'] = {
-                    'task': lock.action.name
+                    'task': {
+                        'name': lock.action.name,
+                        'stopping': lock.event_stop.is_set()
+                    }
                 }
 
         return items
