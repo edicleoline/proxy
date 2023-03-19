@@ -38,6 +38,11 @@ export default function themePalette(theme) {
             main: theme.colors?.warningMain,
             dark: theme.colors?.warningDark
         },
+        // info: {
+        //     light: theme.colors?.infoLight,
+        //     main: theme.colors?.infoMain,
+        //     dark: theme.colors?.infoDark
+        // },
         success: {
             light: theme.colors?.successLight,
             200: theme.colors?.success200,

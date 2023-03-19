@@ -21,18 +21,24 @@ $success200: #69f0ae;
 $successMain: #00e676;
 $successDark: #00c853;
 
+// info Colors
+$infoLight: #7fb9e9;
+$info200: #90caf9;
+$infoMain: #2196f3;
+$infoDark: #1e88e5;
+
 // error
 $errorLight: #ef9a9a;
 $errorMain: #f44336;
 $errorDark: #c62828;
 
 // orange
-$orangeLight: #fbe9e7;
+$orangeLight: #fbf1e7;
 $orangeMain: #ffab91;
 $orangeDark: #d84315;
 
 // warning
-$warningLight: #fff8e1;
+$warningLight: #ffc107;
 $warningMain: #ffe57f;
 $warningDark: #ffc107;
 
@@ -100,6 +106,12 @@ $darkTextSecondary: #8492c4;
     success200: $success200;
     successMain: $successMain;
     successDark: $successDark;
+
+    // success
+    infoLight: $infoLight;
+    info200: $info200;
+    infoMain: $infoMain;
+    infoDark: $infoDark;
 
     // error
     errorLight: $errorLight;

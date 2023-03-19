@@ -21,12 +21,19 @@ class ProxyUserByUsername(Resource):
     def get(self, username):
         proxy_user = ProxyUserModel.find_by_username(username = username)
 
+        if proxy_user == None:
+            return {"items": []}, 200
+
         return proxy_user.json()
 
 
 class ProxyUserModemFilters(Resource):
     def get(self, proxy_user_id, modem_id):
         filters = ProxyUserIPFilterModel.find_by_proxy_user_and_modem(proxy_user_id = proxy_user_id, modem_id = modem_id)
+
+        if filters == None:
+            return {"items": []}, 200
+
         items = [item.json() for item in filters]
 
         return {"items": items}, 200

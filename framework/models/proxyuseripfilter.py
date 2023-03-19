@@ -63,14 +63,17 @@ class ProxyUserIPFilterModel():
     @classmethod
     def find_by_proxy_user_and_modem(cls, proxy_user_id, modem_id):
         conn = connection()
-        rows = conn.execute("select id from proxy_user_ip_filter where proxy_user_id=? and modem_id=?", (proxy_user_id, modem_id)).fetchall()
+        rows = conn.execute("""select id
+            from proxy_user_ip_filter 
+                where proxy_user_id=? and modem_id=? GROUP BY filter_value""", (proxy_user_id, modem_id)).fetchall()
         conn.close(True)
 
         if rows == None:
             return None
         
         items = []
-        for row in rows:
+        print(rows)
+        for row in rows:            
             items.append(
                 ProxyUserIPFilterModel.find_by_id(row[0])
             )
