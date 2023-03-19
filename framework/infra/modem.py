@@ -132,8 +132,6 @@ class Modem:
         
         not_changed_count, not_ip_count = 0, 0
         while True:
-            if self.event_stop_is_set(event_stop, callback) == True: break
-            
             old_ip, new_ip, done = None, None, False
 
             device_middleware = self.get_device_middleware()
@@ -144,9 +142,12 @@ class Modem:
                 self.hard_reboot()
                 sys.stdout.write('{0}[!] Reboot signal sent. Now, let''s wait modem reboot (about 1 minute)...{1}\n'.format(CBLUE, CEND))
                 sys.stdout.flush()
+
                 self.wait_until_modem_connection(False)
+
                 sys.stdout.write('{0}[!] Modem rebooted. Wait until to get external IP...{1}\n'.format(CBLUE, CEND))
                 sys.stdout.flush()
+
                 time.sleep(30)
 
                 self.wait_until_modem_connection(True)
@@ -242,6 +243,7 @@ class Modem:
                 break
 
             print('\n')
+            if self.event_stop_is_set(event_stop, callback) == True: break
             time.sleep(1)
 
     def external_ip_through_device(self, silence_mode = False, retries=2):
