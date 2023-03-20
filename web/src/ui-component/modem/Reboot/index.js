@@ -22,6 +22,7 @@ import Switch from '@mui/material/Switch';
 import { FormattedMessage } from 'react-intl';
 
 import { reboot } from 'services/api/server/modem';
+import { BootstrapDialogTitle } from 'ui-component/extended/BootstrapDialog';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -88,21 +89,17 @@ const RebootDialog = (props) => {
     return (
         <div>
             <Dialog open={open} onClose={onClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-                <DialogTitle id="alert-dialog-title">
-                    <Typography variant="h3" component="span" sx={{ fontWeight: '500' }}>
-                        <FormattedMessage id="app.components.modem.Reboot.modal.header.title" />
-                        &nbsp;
-                    </Typography>
+                <BootstrapDialogTitle id="customized-dialog-title" onClose={onClose}>
                     <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
-                        <FormattedMessage
-                            id="app.components.modem.Reboot.modal.header.subtitle"
-                            values={{ modemId: modem ? ' ' + modem.id : '' }}
-                        />
+                        <FormattedMessage id="app.components.modem.Reboot.modal.header.title" />
                     </Typography>
-                </DialogTitle>
+                </BootstrapDialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
-                        <FormattedMessage id="app.components.modem.Reboot.modal.body.question" />
+                        <FormattedMessage
+                            id="app.components.modem.Reboot.modal.body.question"
+                            values={{ modemId: modem ? ' ' + modem.id : '' }}
+                        />
                         <br />
                         {modem && modem.is_connected === true ? (
                             <FormattedMessage id="app.components.modem.Reboot.modal.body.alert" />

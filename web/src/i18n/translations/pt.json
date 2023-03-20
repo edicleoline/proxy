@@ -3,12 +3,14 @@
     "app.labels.no": "Não",
     "app.labels.reboot": "Reiniciar",
 
-    "app.components.modem.Reboot.modal.header.title": "Reiniciar",
-    "app.components.modem.Reboot.modal.header.subtitle": "modem {modemId}",
-    "app.components.modem.Reboot.modal.body.question": "Tem certeza de que deseja reiniciar este modem?",
+    "app.components.modem.Reboot.modal.header.title": "Reiniciar modem",
+    "app.components.modem.Reboot.modal.body.question": "Tem certeza de que deseja reiniciar o modem {modemId}?",
     "app.components.modem.Reboot.modal.body.alert": "Antes de continuar, considere pausar quaiquer serviços que estiverem usando-o como proxy.",
     "app.components.modem.Reboot.error": "O modem {modemId} não pôde ser reiniciado. {error}",
 
     "app.components.modem.Rotate.error": "{error}",
-    "app.components.modem.Rotate.warning.inUse": "Antes de continuar, considere pausar quaiquer serviços que estiverem usando o modem {modemId} como proxy, ele poderá ficar indisponível durante o processo."
+    "app.components.modem.Rotate.warning.inUse": "Antes de continuar, considere pausar quaiquer serviços que estiverem usando o modem {modemId} como proxy, ele poderá ficar indisponível durante o processo.",
+    "app.components.modem.Task.help.stopping.title": "Cancelando tarefa",
+    "app.components.modem.Task.help.stopping.description": "Algumas tarefas podem demorar para serem canceladas.\nIsso porque elas são executadas de forma independente. Além disso, para ter melhor performance, nós subdividimos essas tarefas em tarefas menores, e essas por sua vez não podem ser interrompidas a qualquer momento.\nAssim, se uma subtarefa estiver pendente, precisamos aguardá-la finalizar para interromper todo o processo."
+
 }

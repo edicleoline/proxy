@@ -99,7 +99,6 @@ class Modem:
 
     def event_stop_is_set(self, event_stop: Event, callback = None):
         if event_stop and event_stop.is_set():
-            print('i see event stop')
             if callback: callback(self.modem.id, "Stopped by event", datetime.now(), None)
             return True
         else:

@@ -14,6 +14,8 @@ class ModemManager():
         if thread_running:
             raise ModemLockedByOtherThreadException('We could running this task now because this modem is locked by another thread.')
         
+        event_stop = Event()
+
         if hard_reset == True:
             try:
                 process_thread = Thread(
@@ -22,7 +24,7 @@ class ModemManager():
                 process_thread.start()
 
                 self.threads.append(
-                    ModemThreadData(infra_modem, ModemThreadAction.REBOOT, process_thread)
+                    ModemThreadData(infra_modem, ModemThreadAction.REBOOT, process_thread, event_stop)
                 )
             except OSError as error:
                 raise ModemRebootException(str(error))
@@ -35,7 +37,7 @@ class ModemManager():
                 process_thread.start()
 
                 self.threads.append(
-                    ModemThreadData(infra_modem, ModemThreadAction.REBOOT, process_thread)
+                    ModemThreadData(infra_modem, ModemThreadAction.REBOOT, process_thread, event_stop)
                 )
             else:
                 raise ModemRebootException('Modem is offline. Try hard-reset')

@@ -1,4 +1,4 @@
-import { Grid, Box, Card } from '@mui/material';
+import { Grid, Box, Card, Typography } from '@mui/material';
 
 // project imports
 import SubCard from 'ui-component/cards/SubCard';
@@ -8,6 +8,7 @@ import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
 import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 
 import { getServer } from 'services/api/server';
+import { stopRotate } from 'services/api/server/modem';
 
 import { bytesToSize } from 'utils/format';
 
@@ -18,20 +19,25 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-
 import Tooltip from '@mui/material/Tooltip';
+import Badge from '@mui/material/Badge';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 import { IconDotsVertical, IconAccessPoint, IconAccessPointOff } from '@tabler/icons';
 import { IconAntennaBars1, IconAntennaBars2, IconAntennaBars3, IconAntennaBars4, IconAntennaBars5 } from '@tabler/icons';
-import { IconCheck, IconChecks, IconBan, IconArrowUp, IconArrowDown } from '@tabler/icons';
+import { IconCheck, IconChecks, IconBan, IconArrowUp, IconArrowDown, IconAlertCircle } from '@tabler/icons';
 import CloseIcon from '@mui/icons-material/Close';
 
 import ChangeDialog from 'ui-component/modem/ip/Change';
@@ -138,7 +144,7 @@ const Modems = () => {
         });
 
         socket.on('modems', (items) => {
-            // console.log('socket.io server: modems', items);
+            //console.log('socket.io server: modems', items);
             const itemsHash = objectHash.MD5(items);
 
             if (!_modems.current) {
@@ -272,7 +278,26 @@ const Modems = () => {
     };
 
     const handleCancelModemChangeIPClick = (modem) => {
-        console.log('cancel rotate!!');
+        stopRotate(modem.id)
+            .then(
+                (response) => {
+                    console.log(response);
+                },
+                (err) => {
+                    const message =
+                        err.response && err.response.data && err.response.data.error && err.response.data.error.message
+                            ? err.response.data.error.message
+                            : err.message;
+                    /*setError({
+                        ...error,
+                        open: true,
+                        message: <FormattedMessage id="app.components.modem.Rotate.error" values={{ modemId: modem.id, error: message }} />
+                    });*/
+                }
+            )
+            .finally(() => {
+                //console.log();
+            });
     };
 
     const [modemSettingsDialog, setModemSettingsDialog] = useState({
@@ -304,25 +329,6 @@ const Modems = () => {
     const handleModemDiagnoseClose = () => {
         setModemDiagnoseDialog({ ...modemDiagnoseDialog, open: false });
     };
-
-    const ColorBox = ({ bgcolor, title, dark }) => (
-        <>
-            <Card sx={{ mb: 0 }}>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        p: 1,
-                        bgcolor,
-                        color: dark ? 'grey.800' : '#ffffff'
-                    }}
-                >
-                    {title}
-                </Box>
-            </Card>
-        </>
-    );
 
     const ProxyConnection = ({ type, ip, port, status }) => {
         let icon = '';
@@ -366,15 +372,25 @@ const Modems = () => {
     };
 
     const DataUsage = ({ download, upload }) => {
+        const iconProps = {
+            size: 14,
+            style: { position: 'relative', top: 1, marginRight: 2 }
+        };
+        const gridContainerProps = {
+            justifyContent: 'end',
+            alignItems: 'end',
+            direction: 'row',
+            sx: { p: 0.2, px: 0, borderRadius: 1 }
+        };
         return (
             <>
                 <Grid container justifyContent="space-between" alignItems="end" direction="column" sx={{ minWidth: '80px' }}>
                     <Grid item>
-                        <Grid container justifyContent="end" alignItems="end" direction="row" sx={{ p: 0.2, px: 0, borderRadius: 1 }}>
+                        <Grid container {...gridContainerProps}>
                             <Grid item>
                                 <Tooltip title="Download">
                                     <div>
-                                        <IconArrowDown size={14} style={{ position: 'relative', top: 1, marginRight: 2 }} />
+                                        <IconArrowDown {...iconProps} />
                                     </div>
                                 </Tooltip>
                             </Grid>
@@ -382,11 +398,11 @@ const Modems = () => {
                         </Grid>
                     </Grid>
                     <Grid item>
-                        <Grid container justifyContent="end" alignItems="end" direction="row" sx={{ p: 0.2, px: 0, borderRadius: 1 }}>
+                        <Grid container {...gridContainerProps}>
                             <Grid item>
                                 <Tooltip title="Upload">
                                     <div>
-                                        <IconArrowUp size={14} style={{ position: 'relative', top: 1, marginRight: 2 }} />
+                                        <IconArrowUp {...iconProps} />
                                     </div>
                                 </Tooltip>
                             </Grid>
@@ -411,29 +427,83 @@ const Modems = () => {
         return icons[signal];
     };
 
+    const StatusBox = ({ bgcolor, title, dark, children }) => (
+        <>
+            <Card sx={{ mb: 0, width: '100%' }}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        p: 1,
+                        bgcolor,
+                        color: dark ? 'grey.800' : '#ffffff',
+                        position: 'relative'
+                    }}
+                >
+                    {children}
+                    <span>{title}</span>
+                </Box>
+            </Card>
+        </>
+    );
+
+    const [taskStoppingHelpDialog, setTaskStoppingHelpDialog] = useState({
+        open: false,
+        title: '',
+        description: ''
+    });
+
     const ModemStatus = ({ lock, connected }) => {
         if (!lock) {
-            return (
-                <>
-                    {connected ? (
-                        <ColorBox bgcolor={'success.light'} title="Conectado" dark />
-                    ) : (
-                        <ColorBox bgcolor={'orange.light'} title="Desconectado" dark />
-                    )}
-                </>
-            );
+            const color = connected ? 'success.light' : 'orange.light';
+            const title = connected ? 'Conectado' : 'Desconectado';
+            return <StatusBox bgcolor={color} title={title} dark style={{ width: '100%' }} />;
         }
 
-        let lockLabel = lock.task;
-        if (lock.task === 'ROTATE') {
+        let lockLabel = lock.task.name;
+        if (lock.task.name === 'ROTATE') {
             lockLabel = 'Rotacionando';
-        } else if (lock.task === 'REBOOT') {
+        } else if (lock.task.name === 'REBOOT') {
             lockLabel = 'Reiniciando';
         }
 
         return (
             <>
-                <ColorBox bgcolor={'#e8e1ff'} title={lockLabel} dark />
+                <div>
+                    <StatusBox bgcolor={'#e8e1ff'} title={lockLabel} dark />
+                    {lock.task.stopping == true ? (
+                        <div
+                            style={{
+                                position: 'absolute',
+                                right: '6px',
+                                top: '6px',
+                                backgroundColor: '#ffffff',
+                                borderRadius: '50%'
+                            }}
+                        >
+                            <Tooltip title="Cancelando tarefa">
+                                <IconButton
+                                    aria-label="close"
+                                    onClick={() => {
+                                        setTaskStoppingHelpDialog({
+                                            ...taskStoppingHelpDialog,
+                                            open: true,
+                                            title: <FormattedMessage id="app.components.modem.Task.help.stopping.title" />,
+                                            description: <FormattedMessage id="app.components.modem.Task.help.stopping.description" />
+                                        });
+                                    }}
+                                    sx={{
+                                        color: (theme) => theme.palette.grey[500]
+                                    }}
+                                    size="small"
+                                >
+                                    <IconAlertCircle fontSize="inherit" />
+                                </IconButton>
+                            </Tooltip>
+                        </div>
+                    ) : null}
+                </div>
             </>
         );
     };
@@ -496,12 +566,13 @@ const Modems = () => {
                                                                 'aria-labelledby': `modem-button-${row.modem.id}`
                                                             }}
                                                         >
-                                                            {row.lock != null && row.lock.task == 'ROTATE' ? (
+                                                            {row.lock != null && row.lock.task && row.lock.task.name == 'ROTATE' ? (
                                                                 <MenuItem
                                                                     onClick={() => {
                                                                         handleCancelModemChangeIPClick(row);
                                                                         handleModemCloseMenu();
                                                                     }}
+                                                                    disabled={row.lock && row.lock.task && row.lock.task.stopping == true}
                                                                 >
                                                                     Cancelar rotacionamento
                                                                 </MenuItem>
@@ -565,7 +636,7 @@ const Modems = () => {
                                                     </TableCell>
                                                     <TableCell align="left">{row.modem.device.model}</TableCell>
                                                     <TableCell align="left">{row.usb.port}</TableCell>
-                                                    <TableCell align="left">
+                                                    <TableCell align="left" sx={{ position: 'relative' }}>
                                                         <ModemStatus lock={row.lock} connected={row.is_connected} />
                                                     </TableCell>
                                                     <TableCell align="left">{row.external_ip ? row.external_ip : '-'}</TableCell>
@@ -697,6 +768,41 @@ const Modems = () => {
                 onClose={handleModemDiagnoseClose}
                 onConfirm={handleModemDiagnoseClose}
             />
+            <Dialog
+                open={taskStoppingHelpDialog.open}
+                onClose={() => {
+                    setTaskStoppingHelpDialog({
+                        ...taskStoppingHelpDialog,
+                        open: false
+                    });
+                }}
+                aria-labelledby="dialog-stopping-task"
+                aria-describedby="dialog-stopping-task-description"
+                fullWidth={true}
+            >
+                <DialogTitle id="dialog-stopping-task-title">
+                    <Typography variant="h3" component="span" sx={{ fontWeight: '500' }}>
+                        {taskStoppingHelpDialog.title}
+                    </Typography>
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="dialog-stopping-task-description" sx={{ whiteSpace: 'pre-line' }}>
+                        {taskStoppingHelpDialog.description}
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => {
+                            setTaskStoppingHelpDialog({
+                                ...taskStoppingHelpDialog,
+                                open: false
+                            });
+                        }}
+                    >
+                        OK
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </MainCard>
     );
 };

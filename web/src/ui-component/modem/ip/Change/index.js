@@ -159,16 +159,8 @@ const ChangeDialog = (props) => {
     return (
         <div>
             <Dialog open={open} onClose={onClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-                {/* <DialogTitle id="alert-dialog-title">
-                    <Typography variant="h3" component="span" sx={{ fontWeight: '500' }}>
-                        Rotacionar IP&nbsp;
-                    </Typography>
-                    <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
-                        modem {modem ? ' ' + modem.id : ''}
-                    </Typography>
-                </DialogTitle> */}
                 <BootstrapDialogTitle id="customized-dialog-title" onClose={onClose}>
-                    <Typography variant="h5" component="span" sx={{ fontWeight: '500' }}>
+                    <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
                         Rotacionar IP
                     </Typography>
                 </BootstrapDialogTitle>

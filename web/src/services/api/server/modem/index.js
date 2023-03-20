@@ -31,7 +31,7 @@ export function reboot(id, hardReset = false) {
         hard_reset: hardReset
     };
     return new Promise((resolve, reject) => {
-        api.post('/server/modem/' + id + '/reboot', data).then(
+        api.post(`/server/modem/${id}/reboot`, data).then(
             (response) => {
                 resolve(response.data);
             },
@@ -49,7 +49,20 @@ export function rotate(id, hardReset = false, proxy_username = null, filters = n
         filters: filters
     };
     return new Promise((resolve, reject) => {
-        api.post('/server/modem/' + id + '/rotate', data).then(
+        api.post(`/server/modem/${id}/rotate`, data).then(
+            (response) => {
+                resolve(response.data);
+            },
+            (error) => {
+                reject(error);
+            }
+        );
+    });
+}
+
+export function stopRotate(id) {
+    return new Promise((resolve, reject) => {
+        api.delete(`/server/modem/${id}/rotate`).then(
             (response) => {
                 resolve(response.data);
             },
