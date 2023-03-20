@@ -20,9 +20,11 @@ import FormHelperText from '@mui/material/FormHelperText';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import OutlinedInput from '@mui/material/OutlinedInput';
+import Divider from '@mui/material/Divider';
 
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { BootstrapDialogTitle } from 'ui-component/extended/BootstrapDialog';
 
 const SettingsDialog = (props) => {
     const { modem, open, onClose, onConfirm, ...other } = props;
@@ -38,6 +40,7 @@ const SettingsDialog = (props) => {
     };
 
     const [autoRotate, setAutoRotate] = useState(false);
+    const [preventSameIPUsers, setPreventSameIPUsers] = useState(true);
 
     return (
         <Dialog
@@ -47,16 +50,13 @@ const SettingsDialog = (props) => {
             aria-describedby="alert-dialog-description"
             fullWidth={true}
         >
-            <DialogTitle id="alert-dialog-title">
-                <Typography variant="h3" component="span" sx={{ fontWeight: '500' }}>
-                    Configurações&nbsp;
-                </Typography>
+            <BootstrapDialogTitle id="customized-dialog-title" onClose={onClose}>
                 <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
-                    modem {modem ? ' ' + modem.id : ''}
+                    Configurações
                 </Typography>
-            </DialogTitle>
+            </BootstrapDialogTitle>
             <DialogContent>
-                <Stack spacing={2.5} sx={{ paddingTop: 3 }}>
+                <Stack spacing={2.5} sx={{ paddingTop: 0 }}>
                     <FormControl sx={{ maxWidth: 160 }}>
                         <InputLabel id="modem-setting-port-label">Porta USB</InputLabel>
                         <Select
@@ -71,6 +71,19 @@ const SettingsDialog = (props) => {
                             <MenuItem value={30}>3</MenuItem>
                         </Select>
                     </FormControl>
+                    <TextField
+                        sx={{ maxWidth: 300 }}
+                        id="ip-id"
+                        label="IP-ID"
+                        variant="outlined"
+                        //onChange={(event) => {
+                        //    setIPv4Filter(event.target.value);
+                        //}}
+                    />
+                    <Divider />
+                    <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
+                        Proxy
+                    </Typography>
                     <TextField
                         sx={{ maxWidth: 300 }}
                         id="proxy-ipv4-http-port"
@@ -89,7 +102,20 @@ const SettingsDialog = (props) => {
                         //    setIPv4Filter(event.target.value);
                         //}}
                     />
-                    <FormGroup>
+                    <Divider />
+                    <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
+                        Rotacionamento
+                    </Typography>
+                    <FormGroup style={{ marginBottom: '-16px' }}>
+                        <FormControlLabel
+                            control={<Switch checked={preventSameIPUsers} />}
+                            label="Evitar mesmo IP para diferentes usuários"
+                            onChange={(event) => {
+                                setPreventSameIPUsers(event.target.checked);
+                            }}
+                        />
+                    </FormGroup>
+                    <FormGroup style={{ marginBottom: '-10px' }}>
                         <FormControlLabel
                             control={<Switch checked={autoRotate} />}
                             label="Rotacionamento automático"
@@ -119,7 +145,6 @@ const SettingsDialog = (props) => {
                 </Stack>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose}>Cancelar</Button>
                 <Button onClick={handleApplyClick}>Aplicar</Button>
             </DialogActions>
         </Dialog>
