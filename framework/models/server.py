@@ -109,8 +109,7 @@ class USBPortModel():
         return {
             'id': self.id,
             'port': self.port,
-            'status': self.get_status(),
-            'server_id': self.server_id
+            'status': self.get_status().name
         }
 
     @classmethod

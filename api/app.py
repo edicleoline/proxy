@@ -7,7 +7,7 @@ from resources.proxyuser import ProxyUserByUsername, ProxyUserModemFilters, Prox
 from blocklist import BLOCKLIST
 from resources.user import UserRegister, UserLogin, TokenRefresh, UserLogout
 
-from resources.server import Server
+from resources.server import Server, ServerUSBPorts
 from resources.serverstatus import ServerStatus
 from resources.servermodems import ServerModems
 from resources.servermodem import ServerModem
@@ -104,6 +104,9 @@ api.add_resource(TokenRefresh, "/refresh")
 
 api.add_resource(Server, "/server")
 api.add_resource(ServerStatus, "/server/status")
+
+api.add_resource(ServerUSBPorts, "/server/usb-ports")
+
 api.add_resource(ServerModems, "/server/modem")
 api.add_resource(ServerModem, "/server/modem/<int:modem_id>")
 api.add_resource(ServerModemReboot, "/server/modem/<int:modem_id>/reboot")

@@ -12,5 +12,20 @@ class Server(Resource):
             return server.json()
 
         return {"message": "Item not found"}, 404
+    
+
+class ServerUSBPorts(Resource):
+    # @jwt_required()
+    def get(self):        
+        server = ServerModel.find_by_id(1)
+
+        if not server:
+            return {"message": "Item not found"}, 404
+        
+        usb_ports = server.usb_ports()
+
+        items = [item.json() for item in usb_ports]
+      
+        return {"items": items}, 200
 
     

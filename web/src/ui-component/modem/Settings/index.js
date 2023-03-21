@@ -22,7 +22,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Divider from '@mui/material/Divider';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { BootstrapDialogTitle } from 'ui-component/extended/BootstrapDialog';
 
@@ -33,14 +33,33 @@ const SettingsDialog = (props) => {
         onClose();
     };
 
-    const [port, setPort] = useState('');
-
-    const handleChangePort = (event) => {
-        setPort(event.target.value);
-    };
+    const [general, setGeneral] = useState({
+        addrId: '',
+        port: ''
+    });
 
     const [autoRotate, setAutoRotate] = useState(false);
     const [preventSameIPUsers, setPreventSameIPUsers] = useState(true);
+
+    const [proxy, setProxy] = useState({
+        ipv4HTTPPort: '',
+        ipv4SocksPort: ''
+    });
+
+    useEffect(() => {
+        if (open == true) {
+            setProxy({
+                ...proxy,
+                ipv4HTTPPort: modem && modem.proxy && modem.proxy.ipv4 ? modem.proxy.ipv4.http.port : '',
+                ipv4SocksPort: modem && modem.proxy && modem.proxy.ipv4 ? modem.proxy.ipv4.socks.port : ''
+            });
+            setGeneral({
+                ...general,
+                addrId: modem && modem.modem ? modem.modem.addr_id : ''
+            });
+        }
+        console.log(modem ? modem.modem.addr_id : '');
+    }, [open]);
 
     return (
         <Dialog
@@ -62,9 +81,11 @@ const SettingsDialog = (props) => {
                         <Select
                             labelId="modem-setting-port-label"
                             id="modem-setting-port-select"
-                            value={port}
+                            value={general.port}
                             label="Porta USB"
-                            onChange={handleChangePort}
+                            onChange={(event) => {
+                                setGeneral({ ...general, port: event.target.value });
+                            }}
                         >
                             <MenuItem value={10}>1</MenuItem>
                             <MenuItem value={20}>2</MenuItem>
@@ -76,6 +97,7 @@ const SettingsDialog = (props) => {
                         id="ip-id"
                         label="IP-ID"
                         variant="outlined"
+                        value={general.addrId}
                         //onChange={(event) => {
                         //    setIPv4Filter(event.target.value);
                         //}}
@@ -85,19 +107,21 @@ const SettingsDialog = (props) => {
                         Proxy
                     </Typography>
                     <TextField
-                        sx={{ maxWidth: 300 }}
+                        sx={{ maxWidth: 250 }}
                         id="proxy-ipv4-http-port"
                         label="Porta HTTP/HTTPS"
                         variant="outlined"
-                        //onChange={(event) => {
-                        //    setIPv4Filter(event.target.value);
-                        //}}
+                        value={proxy.ipv4HTTPPort}
+                        onChange={(event) => {
+                            setProxy({ ...proxy, ipv4HTTPPort: event.target.value });
+                        }}
                     />
                     <TextField
-                        sx={{ maxWidth: 300 }}
+                        sx={{ maxWidth: 250 }}
                         id="proxy-ipv4-http-socks"
                         label="Porta SOCKS"
                         variant="outlined"
+                        value={proxy.ipv4SocksPort}
                         //onChange={(event) => {
                         //    setIPv4Filter(event.target.value);
                         //}}
