@@ -197,9 +197,10 @@ class ServerModemRotate(Resource):
                 hard_reset = data['hard_reset'], 
                 not_changed_try_count = 3, 
                 not_ip_try_count = 3, 
-                callback = lambda modem_id, message, datetime, error_code: 
+                callback = lambda owner, modem_id, message, datetime, error_code: 
                         app.socketio.emit(
-                            'message', {
+                            'modem_log', {
+                                'owner': owner.name,
                                 'modem_id': modem_id, 
                                 'message': message, 
                                 'datetime': datetime.strftime("%Y-%m-%d %H:%M:%S"),

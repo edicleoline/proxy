@@ -158,8 +158,13 @@ const ChangeDialog = (props) => {
 
     return (
         <div>
-            <Dialog open={open} onClose={onClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-                <BootstrapDialogTitle id="customized-dialog-title" onClose={onClose}>
+            <Dialog
+                open={open}
+                onClose={onClose}
+                aria-labelledby="modem-dialog-rotate-title"
+                aria-describedby="modem-dialog-rotate-description"
+            >
+                <BootstrapDialogTitle id="modem-dialog-rotate-title" onClose={onClose}>
                     <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
                         Rotacionar IP
                     </Typography>

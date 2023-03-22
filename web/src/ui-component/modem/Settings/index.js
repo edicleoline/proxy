@@ -26,6 +26,8 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { BootstrapDialogTitle } from 'ui-component/extended/BootstrapDialog';
 
+import { getUSBPorts } from 'services/api/server';
+
 const SettingsDialog = (props) => {
     const { modem, open, onClose, onConfirm, ...other } = props;
 
@@ -33,13 +35,18 @@ const SettingsDialog = (props) => {
         onClose();
     };
 
+    const [isUSBPortsLoading, setIsUSBPortsLoading] = useState(false);
+    const [usbPorts, setUSBPorts] = useState([]);
+
     const [general, setGeneral] = useState({
         addrId: '',
-        port: ''
+        usbPort: ''
     });
 
-    const [autoRotate, setAutoRotate] = useState(false);
-    const [preventSameIPUsers, setPreventSameIPUsers] = useState(true);
+    const [rotate, setRotate] = useState({
+        autoRotate: false,
+        preventSameIPUsers: true
+    });
 
     const [proxy, setProxy] = useState({
         ipv4HTTPPort: '',
@@ -57,19 +64,38 @@ const SettingsDialog = (props) => {
                 ...general,
                 addrId: modem && modem.modem ? modem.modem.addr_id : ''
             });
+
+            setIsUSBPortsLoading(true);
+            getUSBPorts()
+                .then(
+                    (response) => {
+                        if (response.items) {
+                            setUSBPorts(response.items);
+                        }
+                    },
+                    (err) => {
+                        console.log('ServerUSBPorts', err);
+                    }
+                )
+                .finally(() => {
+                    setIsUSBPortsLoading(false);
+                });
         }
-        console.log(modem ? modem.modem.addr_id : '');
     }, [open]);
+
+    useEffect(() => {
+        setGeneral({ ...general, usbPort: modem && modem.usb ? modem.usb.id : '' });
+    }, [usbPorts]);
 
     return (
         <Dialog
             open={open}
             onClose={onClose}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
+            aria-labelledby="modem-dialog-settings-title"
+            aria-describedby="modem-dialog-settings-description"
             fullWidth={true}
         >
-            <BootstrapDialogTitle id="customized-dialog-title" onClose={onClose}>
+            <BootstrapDialogTitle id="modem-dialog-settings-title" onClose={onClose}>
                 <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
                     Configurações
                 </Typography>
@@ -81,26 +107,28 @@ const SettingsDialog = (props) => {
                         <Select
                             labelId="modem-setting-port-label"
                             id="modem-setting-port-select"
-                            value={general.port}
+                            value={general.usbPort}
                             label="Porta USB"
                             onChange={(event) => {
-                                setGeneral({ ...general, port: event.target.value });
+                                setGeneral({ ...general, usbPort: event.target.value });
                             }}
                         >
-                            <MenuItem value={10}>1</MenuItem>
-                            <MenuItem value={20}>2</MenuItem>
-                            <MenuItem value={30}>3</MenuItem>
+                            {usbPorts.map((usbPort) => (
+                                <MenuItem value={usbPort.id} key={usbPort.id}>
+                                    {usbPort.port}
+                                </MenuItem>
+                            ))}
                         </Select>
                     </FormControl>
                     <TextField
-                        sx={{ maxWidth: 300 }}
+                        sx={{ maxWidth: 250 }}
                         id="ip-id"
                         label="IP-ID"
                         variant="outlined"
                         value={general.addrId}
-                        //onChange={(event) => {
-                        //    setIPv4Filter(event.target.value);
-                        //}}
+                        onChange={(event) => {
+                            setGeneral({ ...general, addrId: event.target.value });
+                        }}
                     />
                     <Divider />
                     <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
@@ -122,9 +150,9 @@ const SettingsDialog = (props) => {
                         label="Porta SOCKS"
                         variant="outlined"
                         value={proxy.ipv4SocksPort}
-                        //onChange={(event) => {
-                        //    setIPv4Filter(event.target.value);
-                        //}}
+                        onChange={(event) => {
+                            setProxy({ ...proxy, ipv4SocksPort: event.target.value });
+                        }}
                     />
                     <Divider />
                     <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
@@ -132,34 +160,34 @@ const SettingsDialog = (props) => {
                     </Typography>
                     <FormGroup style={{ marginBottom: '-16px' }}>
                         <FormControlLabel
-                            control={<Switch checked={preventSameIPUsers} />}
+                            control={<Switch checked={rotate.preventSameIPUsers} />}
                             label="Evitar mesmo IP para diferentes usuários"
                             onChange={(event) => {
-                                setPreventSameIPUsers(event.target.checked);
+                                setRotate({ ...rotate, preventSameIPUsers: event.target.checked });
                             }}
                         />
                     </FormGroup>
                     <FormGroup style={{ marginBottom: '-10px' }}>
                         <FormControlLabel
-                            control={<Switch checked={autoRotate} />}
+                            control={<Switch checked={rotate.autoRotate} />}
                             label="Rotacionamento automático"
                             onChange={(event) => {
-                                setAutoRotate(event.target.checked);
+                                setRotate({ ...rotate, autoRotate: event.target.checked });
                             }}
                         />
                     </FormGroup>
-                    {autoRotate ? (
-                        <FormControl sx={{ m: 1, maxWidth: 350 }} variant="outlined">
+                    {rotate.autoRotate ? (
+                        <FormControl sx={{ m: 1, maxWidth: 250 }} variant="outlined">
                             <TextField
                                 id="auto-rotate-value"
                                 InputProps={{
                                     endAdornment: <InputAdornment position="end">minutos</InputAdornment>
                                 }}
-                                aria-describedby="outlined-weight-helper-text"
+                                aria-describedby="auto-rotate-value-helper-text"
                                 inputProps={{
-                                    'aria-label': 'weight'
+                                    'aria-label': 'minutos'
                                 }}
-                                label="Intervalo de rotacionamento"
+                                label="Intervalo"
                                 type="number"
                             />
                         </FormControl>

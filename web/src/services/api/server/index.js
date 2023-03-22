@@ -12,3 +12,16 @@ export function getServer() {
         );
     });
 }
+
+export function getUSBPorts() {
+    return new Promise((resolve, reject) => {
+        api.get('/server/usb-ports').then(
+            (response) => {
+                resolve(response.data);
+            },
+            (error) => {
+                reject(error);
+            }
+        );
+    });
+}

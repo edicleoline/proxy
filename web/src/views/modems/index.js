@@ -5,7 +5,7 @@ import SubCard from 'ui-component/cards/SubCard';
 import MainCard from 'ui-component/cards/MainCard';
 import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
 
-import { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import { useEffect, useState, useRef, useLayoutEffect, useMemo } from 'react';
 
 import { getServer } from 'services/api/server';
 import { stopRotate } from 'services/api/server/modem';
@@ -44,6 +44,8 @@ import ChangeDialog from 'ui-component/modem/ip/Change';
 import RebootDialog from 'ui-component/modem/Reboot';
 import SettingsDialog from 'ui-component/modem/Settings';
 import DiagnoseDialog from 'ui-component/modem/Diagnose';
+import { Dock, DockItemState } from 'ui-component/Dockmodal';
+import ModemLog from 'ui-component/ModemLog';
 
 import { testProxyIPv4HTTP } from 'utils/proxy';
 
@@ -139,8 +141,9 @@ const Modems = () => {
             console.log('socket.io: disconnected');
         });
 
-        socket.on('message', (message) => {
+        socket.on('modem_log', (message) => {
             console.log('socket.io server: message', message);
+            handleWriteModemLog(message);
         });
 
         socket.on('modems', (items) => {
@@ -448,6 +451,62 @@ const Modems = () => {
         </>
     );
 
+    const _dockLogItems = useRef([]);
+
+    const _log = [
+        {
+            modemId: 1,
+            message: 'test123'
+        },
+        {
+            modemId: 1,
+            message: 'test123666666'
+        }
+    ];
+    const [log, setLog] = useState(_log);
+
+    const addDockLog = (modem) => {
+        const props = {
+            modem: modem,
+            lines: log
+        };
+        _dockLogItems.current.push({
+            id: modem.modem.id,
+            title: `Log modem ${modem.modem.id}`,
+            contentProps: props,
+            content: <ModemLog {...props} />,
+            state: DockItemState.minimized
+        });
+        setDockLogItems(_dockLogItems.current);
+    };
+
+    const [dockLogItems, setDockLogItems] = useState(_dockLogItems.current);
+
+    const handleWriteModemLog = (log) => {
+        _log.push({
+            modemId: 1,
+            message: log.message
+        });
+        setLog(_log);
+        _dockLogItems.current[0].content = <ModemLog {..._dockLogItems.current[0].contentProps} />;
+        setDockLogItems(_dockLogItems.current);
+    };
+
+    // useEffect(() => {
+    //     setInterval(() => {
+    //         _log.push({
+    //             modemId: 1,
+    //             message: 'message from timer!!!'
+    //         });
+    //         setLog(_log);
+    //         _dockLogItems.current[0].content = <ModemLog {..._dockLogItems.current[0].contentProps} />;
+    //         setDockLogItems(_dockLogItems.current);
+    //     }, 5000);
+    // }, []);
+
+    // const dockLog = useMemo(() => <Dock items={dockLogItems} />, []);
+    // const dockLog = <Dock items={dockLogItems} />;
+
     const [taskStoppingHelpDialog, setTaskStoppingHelpDialog] = useState({
         open: false,
         title: '',
@@ -596,6 +655,7 @@ const Modems = () => {
                                                             >
                                                                 Reiniciar
                                                             </MenuItem>
+                                                            <Divider />
                                                             <MenuItem
                                                                 onClick={() => {
                                                                     handleModemDiagnoseClick(row);
@@ -605,11 +665,11 @@ const Modems = () => {
                                                             >
                                                                 Executar diagnóstico
                                                             </MenuItem>
-                                                            <Divider />
                                                             <MenuItem
                                                                 onClick={() => {
                                                                     console.log('modem log');
                                                                     handleModemCloseMenu();
+                                                                    addDockLog(row);
                                                                 }}
                                                             >
                                                                 Log
@@ -803,6 +863,8 @@ const Modems = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <Dock items={dockLogItems} />
+            {/* {dockLog} */}
         </MainCard>
     );
 };

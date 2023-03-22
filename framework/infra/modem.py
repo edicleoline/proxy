@@ -30,6 +30,10 @@ class RotateError(Enum):
     IP_NOT_CHANGED  = 300
     NO_PUBLIC_IP    = 301
 
+class Owner(Enum):
+    SYSTEM  = 1
+    USER    = 2
+
 class Modem:
     def __init__(self, server_modem_model: ServerModemModel):
         self.server_modem_model = server_modem_model
@@ -99,7 +103,7 @@ class Modem:
 
     def event_stop_is_set(self, event_stop: Event, callback = None):
         if event_stop and event_stop.is_set():
-            if callback: callback(self.modem.id, "Stopped by event", datetime.now(), None)
+            if callback: callback(Owner.SYSTEM, self.modem.id, "Stopped by event", datetime.now(), None)
             return True
         else:
             return False
@@ -141,11 +145,13 @@ class Modem:
                 self.hard_reboot()
                 sys.stdout.write('{0}[!] Reboot signal sent. Now, let''s wait modem reboot (about 1 minute)...{1}\n'.format(CBLUE, CEND))
                 sys.stdout.flush()
+                if callback: callback(Owner.SYSTEM, self.modem.id, "Reboot signal sent. Now, let''s wait modem reboot (about 1 minute)", datetime.now(), None)
 
                 self.wait_until_modem_connection(False)
 
                 sys.stdout.write('{0}[!] Modem rebooted. Wait until to get external IP...{1}\n'.format(CBLUE, CEND))
                 sys.stdout.flush()
+                if callback: callback(Owner.SYSTEM, self.modem.id, "Modem rebooted. Wait until to get external IP", datetime.now(), None)
 
                 if self.event_stop_is_set(event_stop, callback) == True: break
 
@@ -161,7 +167,7 @@ class Modem:
 
                 device_middleware = self.get_device_middleware()
 
-                if callback: callback(self.modem.id, "Releasing", datetime.now(), None)
+                if callback: callback(Owner.SYSTEM, self.modem.id, "Releasing", datetime.now(), None)
                 try:                    
                     new_ip = device_middleware.release()
                 except ConnectException as e:
@@ -170,7 +176,7 @@ class Modem:
                     sys.exit(1)
 
                 # new_ip = '189.40.89.35' #TESTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
-                if callback: callback(self.modem.id, "Released with IPv4 {0}".format(new_ip), datetime.now(), None)
+                if callback: callback(Owner.SYSTEM, self.modem.id, "Released with IPv4 {0}".format(new_ip), datetime.now(), None)
 
             if new_ip != None and new_ip != old_ip:
                 modem_details = device_middleware.details()
@@ -190,6 +196,7 @@ class Modem:
                     if is_ip_reserved_for_other:
                         sys.stdout.write('{0}[!] Lets rotate again because this IP is reserved for another user{1}\n'.format(CBLUE, CEND))
                         sys.stdout.flush()
+                        if callback: callback(Owner.SYSTEM, self.modem.id, "Lets rotate again because this IP is reserved for another user", datetime.now(), None)
                         time.sleep(1)
                         print('\n')
                         if self.event_stop_is_set(event_stop, callback) == True: break
@@ -205,6 +212,7 @@ class Modem:
                     if ip_match_found == False:
                         sys.stdout.write('{0}[!] Lets rotate again because this IP does not match with filter {1}\n'.format(CBLUE, CEND))
                         sys.stdout.flush()
+                        if callback: callback(Owner.SYSTEM, self.modem.id, "Lets rotate again because this IP does not match with filter", datetime.now(), None)
                         time.sleep(1)
                         print('\n')
                         if self.event_stop_is_set(event_stop, callback) == True: break
@@ -227,22 +235,24 @@ class Modem:
 
             elif new_ip != None and new_ip == old_ip:
                 not_changed_count = not_changed_count + 1
-                if callback: callback(self.modem.id, "Lets release again because IP not changed", datetime.now(), None)
+                if callback: callback(Owner.SYSTEM, self.modem.id, "Lets release again because IP not changed", datetime.now(), None)
                 sys.stdout.write('{0}[!] Lets rotate again because this IP does not changed{1}\n'.format(CBLUE, CEND))
                 sys.stdout.flush()
+                if callback: callback(Owner.SYSTEM, self.modem.id, "Lets rotate again because this IP does not changed", datetime.now(), None)
 
             elif new_ip == None:
                 not_ip_count = not_ip_count + 1
-                if callback: callback(self.modem.id, "Lets try release again because there is no IP", datetime.now(), None)
+                if callback: callback(Owner.SYSTEM, self.modem.id, "Lets try release again because there is no IP", datetime.now(), None)
 
             if not_changed_count >= not_changed_try_count:
-                if callback: callback(self.modem.id, "Stopping threading because your IP not changed after {0} times".format(not_changed_try_count), datetime.now(), RotateError.IP_NOT_CHANGED)
+                if callback: callback(Owner.SYSTEM, self.modem.id, "Stopping threading because your IP not changed after {0} times".format(not_changed_try_count), datetime.now(), RotateError.IP_NOT_CHANGED)
                 sys.stdout.write('{0}[!] Stopping threading because your IP not changed after {1} times{2}\n'.format(CBLUE, not_changed_try_count, CEND))
+                if callback: callback(Owner.SYSTEM, self.modem.id, 'Stopping threading because your IP not changed after {0} times'.format(not_changed_try_count), datetime.now(), None)
                 sys.stdout.flush()
                 break
 
             if not_ip_count >= not_ip_try_count:
-                if callback: callback(self.modem.id, "Stopping threading because there is no IP. Check your SIM data plan.", datetime.now(), RotateError.NO_PUBLIC_IP)
+                if callback: callback(Owner.SYSTEM, self.modem.id, "Stopping threading because there is no IP. Check your SIM data plan.", datetime.now(), RotateError.NO_PUBLIC_IP)
                 break
 
             print('\n')
