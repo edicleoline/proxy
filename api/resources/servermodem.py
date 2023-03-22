@@ -1,8 +1,10 @@
+from datetime import datetime
 import os
 import requests
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
 from framework.manager.error.exception import ModemLockedByOtherThreadException, NoTaskRunningException
+from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 from framework.models.proxyuser import ProxyUserModel
 from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
 from framework.models.server import ServerModel, ServerModemModel
@@ -10,6 +12,7 @@ from framework.infra.modem import Modem as IModem
 from time import sleep
 import threading
 from flask import request
+import json
 
 from app import app
 
@@ -144,10 +147,17 @@ class ServerModemRotate(Resource):
         server_modem = ServerModemModel.find_by_modem_id(modem_id)
         imodem = IModem(server_modem)
         try:
-            app.modems_manager.stop_task(
-                infra_modem = imodem,
-                callback = None
+            app.modems_manager.stop_task(infra_modem = imodem, callback = None)
+
+            modem_log_model = ModemLogModel(
+                modem_id=modem_id,
+                owner=ModemLogOwner.USER, 
+                type=ModemLogType.WARNING, 
+                message='Cancelar rotacionamento',
+                logged_at = datetime.now()
             )
+            modem_log_model.save_to_db()
+            app.socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
         except NoTaskRunningException as err:
             return {
                 "error": {
@@ -164,9 +174,21 @@ class ServerModemRotate(Resource):
 
         if not server:
             return {"message": "Item not found"}, 404
+        
+        server_modem_model = ServerModemModel.find_by_modem_id(modem_id)
 
-        server_modem = ServerModemModel.find_by_modem_id(modem_id)
-        imodem = IModem(server_modem)   
+        modem_log_model = ModemLogModel(
+            modem_id=modem_id,
+            owner=ModemLogOwner.USER, 
+            type=ModemLogType.INFO, 
+            message='Iniciar rotacionamento',
+            logged_at = datetime.now()
+        )
+        modem_log_model.save_to_db()
+        app.socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
+
+        callback = lambda modem_log_model: app.socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
+        imodem = IModem(server_modem_model=server_modem_model, callback=callback)   
 
         data = _server_modem_rotate_parser.parse_args() 
 
@@ -196,17 +218,7 @@ class ServerModemRotate(Resource):
                 filters = filters, 
                 hard_reset = data['hard_reset'], 
                 not_changed_try_count = 3, 
-                not_ip_try_count = 3, 
-                callback = lambda owner, modem_id, message, datetime, error_code: 
-                        app.socketio.emit(
-                            'modem_log', {
-                                'owner': owner.name,
-                                'modem_id': modem_id, 
-                                'message': message, 
-                                'datetime': datetime.strftime("%Y-%m-%d %H:%M:%S"),
-                                'error_code': int(error_code.value) if error_code != None else None
-                            }, broadcast=True
-                        )
+                not_ip_try_count = 3
             )     
         except ModemLockedByOtherThreadException as err:
             return {

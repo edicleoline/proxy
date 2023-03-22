@@ -22,6 +22,9 @@ from framework.models.proxyuseriphistory import ProxyUserIPHistoryModel
 from framework.models.installation import InstallationModel
 from framework.models.user import UserModel
 from framework.models.proxyuser import ProxyUserModel
+from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
+
+from datetime import datetime
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
@@ -38,8 +41,8 @@ CEND = '\033[0m'
 # for user in session.scalars(stmt):
 #     print(user.name)
 
-server = ServerModel.find_by_id(1)
-print(server.json())
+# server = ServerModel.find_by_id(1)
+# print(server.json())
 
 # usb_port = USBPortModel.find_by_id(2)
 # print(usb_port.json())
@@ -78,10 +81,10 @@ print(server.json())
 # is_ip_reserved_for_other = ProxyUserIPHistoryModel.is_ip_reserved_for_other('177.10.11.123', 2)
 # print(is_ip_reserved_for_other)
 
-proxy_user_ip_filter_model = ProxyUserIPFilterModel(proxy_user_id = 1, modem_id = 1, type = 'ip', value = '179.')
-proxy_user_ip_filter_model.save_to_db()
-proxy_user_ip_filter_model = ProxyUserIPFilterModel(proxy_user_id = 1, modem_id = 2, type = 'ip', value = '200.173')
-proxy_user_ip_filter_model.save_to_db()
+# proxy_user_ip_filter_model = ProxyUserIPFilterModel(proxy_user_id = 1, modem_id = 1, type = 'ip', value = '179.')
+# proxy_user_ip_filter_model.save_to_db()
+# proxy_user_ip_filter_model = ProxyUserIPFilterModel(proxy_user_id = 1, modem_id = 2, type = 'ip', value = '200.173')
+# proxy_user_ip_filter_model.save_to_db()
 
 # print(ProxyUserIPFilterModel.find_by_id(2).filter_value)
 
@@ -91,6 +94,17 @@ proxy_user_ip_filter_model.save_to_db()
 #     for filter in filters:
 #         print(filter.value)
 
+modem_log_model = ModemLogModel(
+    modem_id=1, 
+    owner=ModemLogOwner.SYSTEM, 
+    type=ModemLogType.INFO, 
+    message='log msg test', 
+    code='102532', 
+    params=[{'param1': 'param_value'}, {'param2': 'param2_value'}], 
+    logged_at=datetime.now()
+)
+modem_log_model.save_to_db()
+print(modem_log_model.to_json())
 sys.exit()
 
 # t = ProxyUserIPHistoryModel.is_ip_reserved_for_other(ip="187.119.228.144", user="carlos_antonio_santos")

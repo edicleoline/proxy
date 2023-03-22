@@ -25,7 +25,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { IconChevronUp, IconChevronDown } from '@tabler/icons';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, createRef } from 'react';
 import PropTypes from 'prop-types';
 import { BootstrapDialogTitle } from 'ui-component/extended/BootstrapDialog';
 
@@ -68,6 +68,8 @@ export const DockItem = (props) => {
     let __state = state;
     const [_state, _setState] = useState(__state);
 
+    const dockContentEnd = createRef();
+
     const handleToggleMinimize = () => {
         if (_state == DockItemState.maximized) {
             __state = DockItemState.minimized;
@@ -78,6 +80,18 @@ export const DockItem = (props) => {
         }
         _setState(__state);
     };
+
+    const handleClose = () => {
+        onClose();
+    };
+
+    const scrollToBottom = () => {
+        dockContentEnd.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [children]);
 
     // useEffect(() => {
     //     onToggleMinimize(__state);
@@ -143,6 +157,11 @@ export const DockItem = (props) => {
                                                                 alignItems="center"
                                                                 direction="row"
                                                                 sx={{ padding: '6px 8px 6px 12px' }}
+                                                                style={{
+                                                                    background: '#ffffff',
+                                                                    borderRadius: '6px 6px 0 0',
+                                                                    borderBottom: 'solid 1px #d8d8d8'
+                                                                }}
                                                             >
                                                                 <Grid item sx={{ flex: 1 }}>
                                                                     <Typography variant="h5" component="span" sx={{ fontWeight: '500' }}>
@@ -172,14 +191,28 @@ export const DockItem = (props) => {
                                                                             </IconButton>
                                                                         </Grid>
                                                                         <Grid item>
-                                                                            <IconButton aria-label="close" size="small">
+                                                                            <IconButton
+                                                                                aria-label="close"
+                                                                                size="small"
+                                                                                onClick={() => {
+                                                                                    handleClose();
+                                                                                }}
+                                                                            >
                                                                                 <CloseIcon fontSize="inherit" />
                                                                             </IconButton>
                                                                         </Grid>
                                                                     </Grid>
                                                                 </Grid>
                                                             </Grid>
-                                                            {_state == DockItemState.maximized ? <div>{children}</div> : null}
+                                                            {_state == DockItemState.maximized ? (
+                                                                <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                                                    {children}
+                                                                    <div
+                                                                        style={{ float: 'left', clear: 'both' }}
+                                                                        ref={dockContentEnd}
+                                                                    ></div>
+                                                                </div>
+                                                            ) : null}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -198,8 +231,8 @@ export const DockItem = (props) => {
 
 DockItem.propTypes = {
     title: PropTypes.string.isRequired,
-    onToggleMinimize: PropTypes.func.isRequired
-    // onConfirm: PropTypes.func.isRequired
+    onToggleMinimize: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired
 };
 
 export const Dock = (props) => {
@@ -267,6 +300,9 @@ export const Dock = (props) => {
                                           onToggleMinimize={() => {
                                               console.log('toggle event');
                                           }}
+                                          onClose={() => {
+                                              onClose(item);
+                                          }}
                                       >
                                           {item.content}
                                       </DockItem>
@@ -283,6 +319,6 @@ export const Dock = (props) => {
 };
 
 Dock.propTypes = {
-    // onClose: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired
     // onConfirm: PropTypes.func.isRequired
 };

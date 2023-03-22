@@ -105,7 +105,7 @@ const Modems = () => {
         // setModems(_modems.current);
     };
     const testModemProxyIPv4HTTP = (modem, ip) => {
-        console.log('lets test modem-ipv4');
+        // console.log('lets test modem-ipv4');
 
         const remodems = _modems.current.map(function (item) {
             if (item.modem.id == modem.id) {
@@ -126,8 +126,8 @@ const Modems = () => {
     const [socketConnected, setSocketConnected] = useState(false);
 
     useEffect(() => {
-        const socket = io('http://192.168.15.10:5000');
-        // const socket = io('http://192.168.15.20:5000');
+        // const socket = io('http://192.168.15.10:5000');
+        const socket = io('http://192.168.15.20:5000');
 
         console.log('useeffect!!!!');
 
@@ -453,16 +453,7 @@ const Modems = () => {
 
     const _dockLogItems = useRef([]);
 
-    const _log = [
-        {
-            modemId: 1,
-            message: 'test123'
-        },
-        {
-            modemId: 1,
-            message: 'test123666666'
-        }
-    ];
+    const _log = [];
     const [log, setLog] = useState(_log);
 
     const addDockLog = (modem) => {
@@ -480,29 +471,26 @@ const Modems = () => {
         setDockLogItems(_dockLogItems.current);
     };
 
+    const handleCloseDock = (item) => {
+        const copy = [..._dockLogItems.current];
+        const index = copy.map((item) => item.id).indexOf(item.id);
+        copy.splice(index, 1);
+        _dockLogItems.current = copy;
+        setDockLogItems(copy);
+    };
+
     const [dockLogItems, setDockLogItems] = useState(_dockLogItems.current);
 
     const handleWriteModemLog = (log) => {
-        _log.push({
-            modemId: 1,
-            message: log.message
-        });
+        _log.push(log);
         setLog(_log);
-        _dockLogItems.current[0].content = <ModemLog {..._dockLogItems.current[0].contentProps} />;
+        if (_dockLogItems.current) {
+            _dockLogItems.current.forEach((dockLogItem) => {
+                dockLogItem.content = <ModemLog {...dockLogItem.contentProps} />;
+            });
+        }
         setDockLogItems(_dockLogItems.current);
     };
-
-    // useEffect(() => {
-    //     setInterval(() => {
-    //         _log.push({
-    //             modemId: 1,
-    //             message: 'message from timer!!!'
-    //         });
-    //         setLog(_log);
-    //         _dockLogItems.current[0].content = <ModemLog {..._dockLogItems.current[0].contentProps} />;
-    //         setDockLogItems(_dockLogItems.current);
-    //     }, 5000);
-    // }, []);
 
     // const dockLog = useMemo(() => <Dock items={dockLogItems} />, []);
     // const dockLog = <Dock items={dockLogItems} />;
@@ -863,7 +851,7 @@ const Modems = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-            <Dock items={dockLogItems} />
+            <Dock items={dockLogItems} onClose={handleCloseDock} />
             {/* {dockLog} */}
         </MainCard>
     );

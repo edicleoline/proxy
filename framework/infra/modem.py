@@ -1,10 +1,12 @@
 import sys, time
 import requests
 from threading import Event
+from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
 
 from framework.models.server import ServerModemModel
 from framework.models.modemiphistory import ModemIPHistoryModel
 from framework.models.proxyuseriphistory import ProxyUserIPHistoryModel
+from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 
 from framework.infra.netiface import NetIface
 from framework.infra.usb import USB
@@ -26,18 +28,24 @@ CGREY = '\033[90m'
 CBLAC = '\033[90m'
 CEND = '\033[0m'
 
-class RotateError(Enum):
+class Error(Enum):
     IP_NOT_CHANGED  = 300
     NO_PUBLIC_IP    = 301
+    MIDDLEWARE_NOT_FOUND = 201
+    MIDDLEWARE_IP_RELEASE_FAIL = 202
+    NOT_CHANGED_IP_TRY_COUNT_EXCEEDED = 303
+    NO_IP_TRY_COUNT_EXCEEDED = 306
 
 class Owner(Enum):
     SYSTEM  = 1
     USER    = 2
 
 class Modem:
-    def __init__(self, server_modem_model: ServerModemModel):
+    def __init__(self, server_modem_model: ServerModemModel, callback = None):
         self.server_modem_model = server_modem_model
         self.modem = self.server_modem_model.modem()
+        self.usb_port = server_modem_model.usb_port()
+        self.callback = callback
 
     def iface(self):
         addr_id = self.modem.addr_id
@@ -46,10 +54,9 @@ class Modem:
     def hard_reboot(self):
         """Reboot USB port by cut power.       
         """                
-        usb_port = self.server_modem_model.usb_port()
-        sys.stdout.write('{0}[!] Let''s reboot USB port {1}...{2}'.format(CYELLOW, usb_port.port, CEND))
+        sys.stdout.write('{0}[!] Let''s reboot USB port {1}...{2}'.format(CYELLOW, self.usb_port.port, CEND))
         sys.stdout.flush()
-        USB(server=self.server_modem_model.server()).hard_reboot(usb_port=usb_port)
+        USB(server=self.server_modem_model.server()).hard_reboot(usb_port=self.usb_port)
         sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
         sys.stdout.flush()
 
@@ -60,10 +67,9 @@ class Modem:
     def hard_turn_off(self):
         """Turn off USB port.
         """        
-        usb_port = self.server_modem_model.usb_port()
-        sys.stdout.write('{0}[!] Let''s turn off USB port {1}...{2}'.format(CYELLOW, usb_port.port, CEND))
+        sys.stdout.write('{0}[!] Let''s turn off USB port {1}...{2}'.format(CYELLOW, self.usb_port.port, CEND))
         sys.stdout.flush()
-        USB(server=self.server_modem_model.server()).hard_turn_off(usb_port=usb_port)
+        USB(server=self.server_modem_model.server()).hard_turn_off(usb_port=self.usb_port)
         sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
         sys.stdout.flush()
 
@@ -101,13 +107,22 @@ class Modem:
             write_alert = False
             time.sleep(1)
 
-    def event_stop_is_set(self, event_stop: Event, callback = None):
+    def event_stop_is_set(self, event_stop: Event):
         if event_stop and event_stop.is_set():
-            if callback: callback(Owner.SYSTEM, self.modem.id, "Stopped by event", datetime.now(), None)
+            modem_log_model = ModemLogModel(
+                modem_id=self.modem.id, 
+                owner=ModemLogOwner.SYSTEM, 
+                type=ModemLogType.WARNING, 
+                message='Processo interrompido pelo usuário'
+            )
+            modem_log_model.save_to_db()
+            self.log(modem_log_model)
             return True
         else:
             return False
 
+    def log(self, log: ModemLogModel):
+        if self.callback: self.callback(log)
 
     def rotate(
             self, 
@@ -116,44 +131,83 @@ class Modem:
             hard_reset = False, 
             not_changed_try_count = 3, 
             not_ip_try_count = 3, 
-            callback = None, 
             event_stop: Event = None):
-        r"""
-        Rotate IP
 
-        ip_match: stops when match IP addr. Use multiple IPs separate by comma.
-        """ 
+        modem_log_model = ModemLogModel(
+            modem_id=self.modem.id, 
+            owner=ModemLogOwner.SYSTEM, 
+            type=ModemLogType.INFO, 
+            message='Iniciando rotacionamento',
+            params=[
+                {'filters': ProxyUserIPFilterModel.schema().dump(filters, many=True)}, 
+                {'hard_reset': hard_reset}, 
+                {'proxy_user_id': proxy_user_id}
+            ],
+            logged_at = datetime.now()
+        )
+        modem_log_model.save_to_db()
+        self.log(modem_log_model)
 
-        device_middleware = None
+        device_middleware, not_changed_count, not_ip_count = None, 0, 0
 
-        # if ip_match == None and user:
-        #     user_last_ip = ProxyUserIPHistoryModel.get_last_ip(user)
-        #     if user_last_ip:
-        #         ip_match = ".".join(user_last_ip.split(".", 2)[:2])  
-        #         sys.stdout.write('{0}[!] IPv4 match auto enabled for [{1}]{2}\n\n'.format(CGREEN, ip_match, CEND))
-        #         sys.stdout.flush()
-        
-        not_changed_count, not_ip_count = 0, 0
         while True:
             old_ip, new_ip, done = None, None, False
+
+            modem_log_model = ModemLogModel(
+                modem_id=self.modem.id, 
+                owner=ModemLogOwner.SYSTEM, 
+                type=ModemLogType.INFO, 
+                message='Iniciando middleware',
+                logged_at = datetime.now()              
+            )
+            modem_log_model.save_to_db()
+            self.log(modem_log_model)
 
             device_middleware = self.get_device_middleware()
             if device_middleware:
                 old_ip = device_middleware.wan.try_get_current_ip(retries=2)
+            else:
+                modem_log_model = ModemLogModel(
+                    modem_id=self.modem.id, 
+                    owner=ModemLogOwner.SYSTEM, 
+                    type=ModemLogType.ERROR, 
+                    message='Middleware não encontrado',
+                    code=Error.MIDDLEWARE_NOT_FOUND.value,
+                    logged_at = datetime.now()
+                )
+                modem_log_model.save_to_db()
+                self.log(modem_log_model)
+                break
         
             if hard_reset == True:
                 self.hard_reboot()
-                sys.stdout.write('{0}[!] Reboot signal sent. Now, let''s wait modem reboot (about 1 minute)...{1}\n'.format(CBLUE, CEND))
-                sys.stdout.flush()
-                if callback: callback(Owner.SYSTEM, self.modem.id, "Reboot signal sent. Now, let''s wait modem reboot (about 1 minute)", datetime.now(), None)
+
+                modem_log_model = ModemLogModel(
+                    modem_id=self.modem.id, 
+                    owner=ModemLogOwner.SYSTEM, 
+                    type=ModemLogType.INFO, 
+                    message='Porta USB reiniciada. Aguardando modem', 
+                    params=[
+                        {'usb_port': self.usb_port.port}
+                    ],
+                    logged_at = datetime.now()
+                )
+                modem_log_model.save_to_db()
+                self.log(modem_log_model)
 
                 self.wait_until_modem_connection(False)
 
-                sys.stdout.write('{0}[!] Modem rebooted. Wait until to get external IP...{1}\n'.format(CBLUE, CEND))
-                sys.stdout.flush()
-                if callback: callback(Owner.SYSTEM, self.modem.id, "Modem rebooted. Wait until to get external IP", datetime.now(), None)
+                if self.event_stop_is_set(event_stop) == True: break
 
-                if self.event_stop_is_set(event_stop, callback) == True: break
+                modem_log_model = ModemLogModel(
+                    modem_id=self.modem.id, 
+                    owner=ModemLogOwner.SYSTEM, 
+                    type=ModemLogType.INFO, 
+                    message='Modem reiniciado. Aguardando conexão com a operadora',
+                    logged_at = datetime.now()
+                )
+                modem_log_model.save_to_db()
+                self.log(modem_log_model)
 
                 time.sleep(30)
 
@@ -163,22 +217,54 @@ class Modem:
                 new_ip = device_middleware.wan.try_get_current_ip(retries=30)
 
             else:
+                if self.event_stop_is_set(event_stop) == True: break            
                 self.wait_until_modem_connection(True)                                
-
+                if self.event_stop_is_set(event_stop) == True: break                            
                 device_middleware = self.get_device_middleware()
 
-                if callback: callback(Owner.SYSTEM, self.modem.id, "Releasing", datetime.now(), None)
+                modem_log_model = ModemLogModel(
+                    modem_id=self.modem.id, 
+                    owner=ModemLogOwner.SYSTEM, 
+                    type=ModemLogType.INFO, 
+                    message='Reiniciando conexão com a operadora usando middleware',
+                    logged_at = datetime.now()             
+                )
+                modem_log_model.save_to_db()
+                self.log(modem_log_model)
+
                 try:                    
                     new_ip = device_middleware.release()
                 except ConnectException as e:
-                    sys.stdout.write('{0}[!] Run diagnose and try to fix{1}\n'.format(CBLUE, CEND))
-                    sys.stdout.flush()
-                    sys.exit(1)
+                    modem_log_model = ModemLogModel(
+                        modem_id=self.modem.id, 
+                        owner=ModemLogOwner.SYSTEM, 
+                        type=ModemLogType.ERROR, 
+                        message='Erro ao reiniciar conexão com a operadora usando middleware',
+                        code=Error.MIDDLEWARE_IP_RELEASE_FAIL.value,
+                        logged_at = datetime.now()
+                    )
+                    modem_log_model.save_to_db()
+                    self.log(modem_log_model)
+                    break
 
-                # new_ip = '189.40.89.35' #TESTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
-                if callback: callback(Owner.SYSTEM, self.modem.id, "Released with IPv4 {0}".format(new_ip), datetime.now(), None)
+                # new_ip = '189.40.89.35' #TESTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT  
+                
+            if self.event_stop_is_set(event_stop) == True: break              
 
             if new_ip != None and new_ip != old_ip:
+                modem_log_model = ModemLogModel(
+                    modem_id=self.modem.id, 
+                    owner=ModemLogOwner.SYSTEM, 
+                    type=ModemLogType.INFO, 
+                    message='Novo IP recebido com sucesso',
+                    params=[
+                        {'ipv4': new_ip}
+                    ],
+                    logged_at = datetime.now()
+                )
+                modem_log_model.save_to_db()
+                self.log(modem_log_model)
+
                 modem_details = device_middleware.details()
                 network_type = modem_details['network_type'] if modem_details else None
                 network_provider = modem_details['network_provider'] if modem_details else None
@@ -193,13 +279,23 @@ class Modem:
 
                 if proxy_user_id:
                     is_ip_reserved_for_other = ProxyUserIPHistoryModel.is_ip_reserved_for_other(ip=new_ip, proxy_user_id=proxy_user_id)
+
+                    if self.event_stop_is_set(event_stop) == True: break
+
                     if is_ip_reserved_for_other:
-                        sys.stdout.write('{0}[!] Lets rotate again because this IP is reserved for another user{1}\n'.format(CBLUE, CEND))
-                        sys.stdout.flush()
-                        if callback: callback(Owner.SYSTEM, self.modem.id, "Lets rotate again because this IP is reserved for another user", datetime.now(), None)
-                        time.sleep(1)
-                        print('\n')
-                        if self.event_stop_is_set(event_stop, callback) == True: break
+                        modem_log_model = ModemLogModel(
+                            modem_id=self.modem.id, 
+                            owner=ModemLogOwner.SYSTEM, 
+                            type=ModemLogType.INFO, 
+                            message='Vamos rotacionar novamente porque este IP está reservado para outro usuário',
+                            params=[
+                                {'ipv4': new_ip}
+                            ],
+                            logged_at = datetime.now()
+                        )
+                        modem_log_model.save_to_db()
+                        self.log(modem_log_model)
+                        
                         continue 
 
                 if filters != None and len(filters) > 0:
@@ -210,12 +306,20 @@ class Modem:
                             ip_match_found = True
                         
                     if ip_match_found == False:
-                        sys.stdout.write('{0}[!] Lets rotate again because this IP does not match with filter {1}\n'.format(CBLUE, CEND))
-                        sys.stdout.flush()
-                        if callback: callback(Owner.SYSTEM, self.modem.id, "Lets rotate again because this IP does not match with filter", datetime.now(), None)
-                        time.sleep(1)
-                        print('\n')
-                        if self.event_stop_is_set(event_stop, callback) == True: break
+                        modem_log_model = ModemLogModel(
+                            modem_id=self.modem.id, 
+                            owner=ModemLogOwner.SYSTEM, 
+                            type=ModemLogType.INFO, 
+                            message='Vamos rotacionar novamente porque este IP não combina com nenhum filtro fornecido',
+                            params=[
+                                {'ipv4': new_ip},
+                                {'filters': ProxyUserIPFilterModel.schema().dump(filters, many=True)}
+                            ],
+                            logged_at = datetime.now()
+                        )
+                        modem_log_model.save_to_db()
+                        self.log(modem_log_model)
+                        
                         continue
                 else:
                     done = True
@@ -233,31 +337,76 @@ class Modem:
 
                     break
 
-            elif new_ip != None and new_ip == old_ip:
+            elif (new_ip != None and new_ip == old_ip) and (not_changed_count < not_changed_try_count):
                 not_changed_count = not_changed_count + 1
-                if callback: callback(Owner.SYSTEM, self.modem.id, "Lets release again because IP not changed", datetime.now(), None)
-                sys.stdout.write('{0}[!] Lets rotate again because this IP does not changed{1}\n'.format(CBLUE, CEND))
-                sys.stdout.flush()
-                if callback: callback(Owner.SYSTEM, self.modem.id, "Lets rotate again because this IP does not changed", datetime.now(), None)
 
-            elif new_ip == None:
+                modem_log_model = ModemLogModel(
+                    modem_id=self.modem.id, 
+                    owner=ModemLogOwner.SYSTEM, 
+                    type=ModemLogType.WARNING, 
+                    message='Vamos rotacionar novamente porque o IP recebido pela operadora não foi alterado',
+                    params=[
+                        {'ipv4': new_ip}
+                    ],
+                    logged_at = datetime.now()
+                )
+                modem_log_model.save_to_db()
+                self.log(modem_log_model)
+
+            elif (not_ip_count < not_ip_try_count) and new_ip == None:
                 not_ip_count = not_ip_count + 1
-                if callback: callback(Owner.SYSTEM, self.modem.id, "Lets try release again because there is no IP", datetime.now(), None)
+                
+                modem_log_model = ModemLogModel(
+                    modem_id=self.modem.id, 
+                    owner=ModemLogOwner.SYSTEM, 
+                    type=ModemLogType.WARNING, 
+                    message='Vamos rotacionar novamente porque não conseguimos receber um IP válido',
+                    params=[
+                        {'ipv4': new_ip}
+                    ],
+                    logged_at = datetime.now()
+                )
+                modem_log_model.save_to_db()
+                self.log(modem_log_model)
 
             if not_changed_count >= not_changed_try_count:
-                if callback: callback(Owner.SYSTEM, self.modem.id, "Stopping threading because your IP not changed after {0} times".format(not_changed_try_count), datetime.now(), RotateError.IP_NOT_CHANGED)
-                sys.stdout.write('{0}[!] Stopping threading because your IP not changed after {1} times{2}\n'.format(CBLUE, not_changed_try_count, CEND))
-                if callback: callback(Owner.SYSTEM, self.modem.id, 'Stopping threading because your IP not changed after {0} times'.format(not_changed_try_count), datetime.now(), None)
-                sys.stdout.flush()
+                modem_log_model = ModemLogModel(
+                    modem_id=self.modem.id, 
+                    owner=ModemLogOwner.SYSTEM, 
+                    type=ModemLogType.ERROR, 
+                    message='Interrompemos a tarefa porque depois de algumas tentativas a operadora insiste atribuir o mesmo IP para este modem',
+                    params=[
+                        {'ipv4': new_ip},
+                        {'times': not_changed_try_count}
+                    ],
+                    code=Error.NOT_CHANGED_IP_TRY_COUNT_EXCEEDED.value,
+                    logged_at = datetime.now()
+                )
+                modem_log_model.save_to_db()
+                self.log(modem_log_model)
+
                 break
 
             if not_ip_count >= not_ip_try_count:
-                if callback: callback(Owner.SYSTEM, self.modem.id, "Stopping threading because there is no IP. Check your SIM data plan.", datetime.now(), RotateError.NO_PUBLIC_IP)
+                modem_log_model = ModemLogModel(
+                    modem_id=self.modem.id, 
+                    owner=ModemLogOwner.SYSTEM, 
+                    type=ModemLogType.ERROR, 
+                    message='Interrompemos a tarefa porque depois de algumas tentativas não conseguimos receber um IP válido. Verifique seu plano de dados',
+                    params=[
+                        {'ipv4': new_ip},
+                        {'times': not_ip_try_count}
+                    ],
+                    code=Error.NO_IP_TRY_COUNT_EXCEEDED.value,
+                    logged_at = datetime.now()
+                )
+                modem_log_model.save_to_db()
+                self.log(modem_log_model)
+
                 break
 
-            print('\n')
-            if self.event_stop_is_set(event_stop, callback) == True: break
-            time.sleep(1)
+            if self.event_stop_is_set(event_stop) == True: break
+            # time.sleep(1)
 
     def external_ip_through_device(self, silence_mode = False, retries=2):
         device_middleware = self.get_device_middleware()

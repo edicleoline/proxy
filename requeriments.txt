@@ -12,3 +12,4 @@ flask_socketio
 gevent
 gevent-websocket
 dataclasses-json
+marshmallow

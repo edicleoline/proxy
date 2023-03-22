@@ -179,6 +179,25 @@ if __name__ == '__main__':
             """)
     except SQLError:
         pass
+
+    try:
+        conn.execute("""
+            CREATE TABLE modem_log (
+            id INTEGER NOT NULL, 
+            modem_id INTEGER NOT NULL, 
+            owner INTEGER NOT NULL,
+            type INTEGER NOT NULL,
+            message VARCHAR(240) NOT NULL, 
+            code INTEGER, 
+            params_json VARCHAR(240), 
+            logged_at DATETIME NOT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,                    
+            PRIMARY KEY (id), 
+            FOREIGN KEY(modem_id) REFERENCES modem (id)
+            )
+            """)
+    except SQLError:
+        pass
     
     conn.close(True)
     

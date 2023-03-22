@@ -49,8 +49,7 @@ class ModemManager():
             filters = None, 
             hard_reset = False, 
             not_changed_try_count = 3, 
-            not_ip_try_count = 6, 
-            callback = None
+            not_ip_try_count = 6
     ):
         thread_running = self.running(infra_modem)
 
@@ -67,7 +66,6 @@ class ModemManager():
                 hard_reset, 
                 not_changed_try_count, 
                 not_ip_try_count,
-                callback,
                 event_stop
             )
         )
