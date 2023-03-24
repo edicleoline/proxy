@@ -63,43 +63,48 @@ export const DockItem = (props) => {
     const { title, children, open, onClose, onToggleMinimize, state, ...other } = props;
 
     const minimizedWidth = 265;
-    let _width = useRef(minimizedWidth);
 
-    let __state = state;
-    const [_state, _setState] = useState(__state);
+    const getWidth = (state) => {
+        if (state == DockItemState.maximized) {
+            return 380;
+        } else {
+            return minimizedWidth;
+        }
+    };
 
-    const dockContentEnd = createRef();
+    const [_width, _setWidth] = useState(getWidth(state));
+
+    const [_state, _setState] = useState(state);
+
+    const onChangeState = (state) => {
+        _setWidth(getWidth(state));
+    };
 
     const handleToggleMinimize = () => {
         if (_state == DockItemState.maximized) {
-            __state = DockItemState.minimized;
-            _width.current = minimizedWidth;
+            _setState(DockItemState.minimized);
         } else {
-            __state = DockItemState.maximized;
-            _width.current = 380;
+            _setState(DockItemState.maximized);
         }
-        _setState(__state);
     };
+
+    const dockContentEnd = createRef();
 
     const handleClose = () => {
         onClose();
     };
 
-    const scrollToBottom = () => {
-        dockContentEnd.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [children]);
+    // const scrollToBottom = () => {
+    //     dockContentEnd.current?.scrollIntoView({ behavior: 'smooth' });
+    // };
 
     // useEffect(() => {
-    //     onToggleMinimize(__state);
-    // }, [_state]);
+    //     scrollToBottom();
+    // }, [children]);
 
     useEffect(() => {
-        console.log('loaded dockitem');
-    });
+        onChangeState(_state);
+    }, [_state]);
 
     const styles = {
         item: {
@@ -122,9 +127,9 @@ export const DockItem = (props) => {
     };
 
     return (
-        <div style={{ ...styles.item, width: _width.current, height: `${innerHeight}px`, order: 1 }}>
+        <div style={{ ...styles.item, width: _width, height: `${innerHeight}px`, order: 1 }}>
             <div style={{ float: 'left' }}>
-                <div style={{ ...styles.itemContainer, width: _width.current - 5, position: 'relative', height: `${innerHeight}px` }}>
+                <div style={{ ...styles.itemContainer, width: _width - 5, position: 'relative', height: `${innerHeight}px` }}>
                     <div style={{ ...styles.itemWrapper, position: 'absolute' }}>
                         <div>
                             <div role="dialog" style={styles.dialog}>
@@ -205,7 +210,14 @@ export const DockItem = (props) => {
                                                                 </Grid>
                                                             </Grid>
                                                             {_state == DockItemState.maximized ? (
-                                                                <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                                                <div
+                                                                    style={{
+                                                                        maxHeight: '300px',
+                                                                        minHeight: '300px',
+                                                                        overflow: 'hidden',
+                                                                        position: 'relative'
+                                                                    }}
+                                                                >
                                                                     {children}
                                                                     <div
                                                                         style={{ float: 'left', clear: 'both' }}
@@ -247,7 +259,7 @@ export const Dock = (props) => {
             width: '100%',
             height: '100%',
             overflow: 'hidden',
-            zIndex: 9999
+            zIndex: 999
         }
     };
 
@@ -255,7 +267,6 @@ export const Dock = (props) => {
     const _resize = () => {
         const ih = window.innerHeight;
         setInnerHeight(ih);
-        console.log(ih);
     };
     useEffect(() => {
         _resize();
@@ -266,23 +277,6 @@ export const Dock = (props) => {
             window.removeEventListener('resize', _resize);
         };
     }, []);
-
-    // const _items = [
-    //     {
-    //         id: 1,
-    //         title: 'Log modem 1',
-    //         content: <Log>content log modem 1</Log>,
-    //         state: dockItemStates.minimized
-    //     },
-    //     {
-    //         id: 2,
-    //         title: 'Log modem 2',
-    //         content: <Log>content log modem 2</Log>,
-    //         state: dockItemStates.minimized
-    //     }
-    // ];
-
-    // const items = useRef(_items);
 
     return (
         <div style={styles.container}>

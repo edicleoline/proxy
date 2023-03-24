@@ -47,6 +47,9 @@ import DiagnoseDialog from 'ui-component/modem/Diagnose';
 import { Dock, DockItemState } from 'ui-component/Dockmodal';
 import ModemLog from 'ui-component/ModemLog';
 
+import { storeModemLog, modemLog } from 'storage/modem/log';
+import { useLiveQuery } from 'dexie-react-hooks';
+
 import { testProxyIPv4HTTP } from 'utils/proxy';
 
 import io from 'socket.io-client';
@@ -59,7 +62,6 @@ const Modems = () => {
     const loadServer = () => {
         getServer().then(
             (response) => {
-                console.log(response);
                 setServer(response);
             },
             (error) => console.log('server error', error)
@@ -129,8 +131,6 @@ const Modems = () => {
         // const socket = io('http://192.168.15.10:5000');
         const socket = io('http://192.168.15.20:5000');
 
-        console.log('useeffect!!!!');
-
         socket.on('connect', () => {
             setSocketConnected(true);
             console.log('socket.io: connected');
@@ -143,7 +143,7 @@ const Modems = () => {
 
         socket.on('modem_log', (message) => {
             console.log('socket.io server: message', message);
-            handleWriteModemLog(message);
+            handleStoreModemLog(message);
         });
 
         socket.on('modems', (items) => {
@@ -451,24 +451,24 @@ const Modems = () => {
         </>
     );
 
+    // const dockLog = useMemo(() => <Dock items={dockLogItems} />, []);
     const _dockLogItems = useRef([]);
 
-    const _log = [];
-    const [log, setLog] = useState(_log);
-
     const addDockLog = (modem) => {
-        const props = {
-            modem: modem,
-            lines: log
-        };
+        const index = _dockLogItems.current.map((item) => item.id).indexOf(modem.modem.id);
+        if (index > -1) {
+            return false;
+        }
+
         _dockLogItems.current.push({
             id: modem.modem.id,
             title: `Log modem ${modem.modem.id}`,
-            contentProps: props,
-            content: <ModemLog {...props} />,
-            state: DockItemState.minimized
+            content: <ModemLog modem={modem} />,
+            state: DockItemState.maximized
         });
         setDockLogItems(_dockLogItems.current);
+
+        return true;
     };
 
     const handleCloseDock = (item) => {
@@ -481,19 +481,9 @@ const Modems = () => {
 
     const [dockLogItems, setDockLogItems] = useState(_dockLogItems.current);
 
-    const handleWriteModemLog = (log) => {
-        _log.push(log);
-        setLog(_log);
-        if (_dockLogItems.current) {
-            _dockLogItems.current.forEach((dockLogItem) => {
-                dockLogItem.content = <ModemLog {...dockLogItem.contentProps} />;
-            });
-        }
-        setDockLogItems(_dockLogItems.current);
+    const handleStoreModemLog = (log) => {
+        storeModemLog(log);
     };
-
-    // const dockLog = useMemo(() => <Dock items={dockLogItems} />, []);
-    // const dockLog = <Dock items={dockLogItems} />;
 
     const [taskStoppingHelpDialog, setTaskStoppingHelpDialog] = useState({
         open: false,

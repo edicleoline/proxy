@@ -128,6 +128,7 @@ class Modem:
             self, 
             filters = None, 
             proxy_user_id = None, 
+            proxy_username = None,
             hard_reset = False, 
             not_changed_try_count = 3, 
             not_ip_try_count = 3, 
@@ -137,12 +138,12 @@ class Modem:
             modem_id=self.modem.id, 
             owner=ModemLogOwner.SYSTEM, 
             type=ModemLogType.INFO, 
-            message='Iniciando rotacionamento',
-            params=[
-                {'filters': ProxyUserIPFilterModel.schema().dump(filters, many=True)}, 
-                {'hard_reset': hard_reset}, 
-                {'proxy_user_id': proxy_user_id}
-            ],
+            message='app.log.modem.rotate.starting',
+            params={
+                'filters': ProxyUserIPFilterModel.schema().dump(filters, many=True) if filters else None,
+                'hard_reset': hard_reset,
+                'proxy_username': proxy_username
+            },
             logged_at = datetime.now()
         )
         modem_log_model.save_to_db()
@@ -187,14 +188,15 @@ class Modem:
                     owner=ModemLogOwner.SYSTEM, 
                     type=ModemLogType.INFO, 
                     message='Porta USB reiniciada. Aguardando modem', 
-                    params=[
-                        {'usb_port': self.usb_port.port}
-                    ],
+                    params={
+                        'usb_port': self.usb_port.port
+                    },
                     logged_at = datetime.now()
                 )
                 modem_log_model.save_to_db()
                 self.log(modem_log_model)
 
+                #verificar event thread cancel neste metodo, pois chegou a travar
                 self.wait_until_modem_connection(False)
 
                 if self.event_stop_is_set(event_stop) == True: break
@@ -257,9 +259,9 @@ class Modem:
                     owner=ModemLogOwner.SYSTEM, 
                     type=ModemLogType.INFO, 
                     message='Novo IP recebido com sucesso',
-                    params=[
-                        {'ipv4': new_ip}
-                    ],
+                    params={
+                        'ipv4': new_ip
+                    },
                     logged_at = datetime.now()
                 )
                 modem_log_model.save_to_db()
@@ -288,9 +290,9 @@ class Modem:
                             owner=ModemLogOwner.SYSTEM, 
                             type=ModemLogType.INFO, 
                             message='Vamos rotacionar novamente porque este IP está reservado para outro usuário',
-                            params=[
-                                {'ipv4': new_ip}
-                            ],
+                            params={
+                                'ipv4': new_ip
+                            },
                             logged_at = datetime.now()
                         )
                         modem_log_model.save_to_db()
@@ -311,10 +313,10 @@ class Modem:
                             owner=ModemLogOwner.SYSTEM, 
                             type=ModemLogType.INFO, 
                             message='Vamos rotacionar novamente porque este IP não combina com nenhum filtro fornecido',
-                            params=[
-                                {'ipv4': new_ip},
-                                {'filters': ProxyUserIPFilterModel.schema().dump(filters, many=True)}
-                            ],
+                            params={
+                                'ipv4': new_ip,
+                                'filters': ProxyUserIPFilterModel.schema().dump(filters, many=True)
+                            },
                             logged_at = datetime.now()
                         )
                         modem_log_model.save_to_db()
@@ -345,9 +347,9 @@ class Modem:
                     owner=ModemLogOwner.SYSTEM, 
                     type=ModemLogType.WARNING, 
                     message='Vamos rotacionar novamente porque o IP recebido pela operadora não foi alterado',
-                    params=[
-                        {'ipv4': new_ip}
-                    ],
+                    params={
+                        'ipv4': new_ip
+                    },
                     logged_at = datetime.now()
                 )
                 modem_log_model.save_to_db()
@@ -361,24 +363,32 @@ class Modem:
                     owner=ModemLogOwner.SYSTEM, 
                     type=ModemLogType.WARNING, 
                     message='Vamos rotacionar novamente porque não conseguimos receber um IP válido',
-                    params=[
-                        {'ipv4': new_ip}
-                    ],
+                    params={
+                        'ipv4': new_ip
+                    },
                     logged_at = datetime.now()
                 )
                 modem_log_model.save_to_db()
                 self.log(modem_log_model)
 
             if not_changed_count >= not_changed_try_count:
+                modem_details = device_middleware.details()
+                network_type = modem_details['network_type'] if modem_details else None
+                network_provider = modem_details['network_provider'] if modem_details else None
+                signalbar = modem_details['signalbar'] if modem_details else None
+
                 modem_log_model = ModemLogModel(
                     modem_id=self.modem.id, 
                     owner=ModemLogOwner.SYSTEM, 
                     type=ModemLogType.ERROR, 
                     message='Interrompemos a tarefa porque depois de algumas tentativas a operadora insiste atribuir o mesmo IP para este modem',
-                    params=[
-                        {'ipv4': new_ip},
-                        {'times': not_changed_try_count}
-                    ],
+                    params={
+                        'times': not_changed_try_count,
+                        'ipv4': new_ip,                        
+                        'network_type': network_type,
+                        'network_provider': network_provider,
+                        'signalbar': signalbar
+                    },
                     code=Error.NOT_CHANGED_IP_TRY_COUNT_EXCEEDED.value,
                     logged_at = datetime.now()
                 )
@@ -393,10 +403,10 @@ class Modem:
                     owner=ModemLogOwner.SYSTEM, 
                     type=ModemLogType.ERROR, 
                     message='Interrompemos a tarefa porque depois de algumas tentativas não conseguimos receber um IP válido. Verifique seu plano de dados',
-                    params=[
-                        {'ipv4': new_ip},
-                        {'times': not_ip_try_count}
-                    ],
+                    params={
+                        'ipv4': new_ip,
+                        'times': not_ip_try_count
+                    },
                     code=Error.NO_IP_TRY_COUNT_EXCEEDED.value,
                     logged_at = datetime.now()
                 )

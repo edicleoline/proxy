@@ -46,6 +46,7 @@ class ModemManager():
             self, 
             infra_modem: IModem, 
             proxy_user_id = None, 
+            proxy_username = None,
             filters = None, 
             hard_reset = False, 
             not_changed_try_count = 3, 
@@ -63,6 +64,7 @@ class ModemManager():
             args=(
                 filters, 
                 proxy_user_id, 
+                proxy_username,
                 hard_reset, 
                 not_changed_try_count, 
                 not_ip_try_count,
@@ -82,7 +84,6 @@ class ModemManager():
             raise NoTaskRunningException('We could find any task running for this modem.')
         
         thread_running.event_stop.set()
-        print('stop event sent')
 
     def running(self, infra_modem: IModem):
         for t in self.threads:

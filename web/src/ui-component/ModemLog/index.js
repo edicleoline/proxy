@@ -1,40 +1,19 @@
 import { Grid, Box, Card, Typography, CardContent } from '@mui/material';
 import Button from '@mui/material/Button';
-
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import TextField from '@mui/material/TextField';
-import Stack from '@mui/material/Stack';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import Switch from '@mui/material/Switch';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormGroup from '@mui/material/FormGroup';
-import InputAdornment from '@mui/material/InputAdornment';
-import FormHelperText from '@mui/material/FormHelperText';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
-import { IconChevronUp } from '@tabler/icons';
 import Paper from '@mui/material/Paper';
 import styled from 'styled-components';
 import moment from 'moment';
 
-import { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
-import PropTypes from 'prop-types';
-import { BootstrapDialogTitle } from 'ui-component/extended/BootstrapDialog';
+import { useState, useEffect, createRef } from 'react';
+import PropTypes, { bool } from 'prop-types';
+
+import { modemLog } from 'storage/modem/log';
+import { useLiveQuery } from 'dexie-react-hooks';
+
+import { FormattedMessage } from 'react-intl';
 
 const MessageWrapperSystem = styled.div`
     background-color: #ffffff;
-    padding: 8px 10px;
     border-radius: 4px 4px 4px 4px;
     position: relative;
     box-shadow: 1px 1px 1px rgb(0 0 0 / 5%);
@@ -53,8 +32,7 @@ const MessageWrapperSystem = styled.div`
 `;
 
 const MessageWrapperUser = styled.div`
-    background-color: #e1ffc7;
-    padding: 8px 10px;
+    background-color: #ede7f6;
     border-radius: 4px 4px 4px 4px;
     position: relative;
     box-shadow: -1px 1px 1px rgb(0 0 0 / 5%);
@@ -72,8 +50,15 @@ const MessageWrapperUser = styled.div`
     }
 `;
 
+const MessageWrapper = styled.div`
+    word-wrap: break-word;
+    white-space: pre-line;
+`;
+
 const MessageText = styled.div`
     word-wrap: break-word;
+    white-space: pre-line;
+    padding: 8px 10px;
 `;
 
 const MessageMetadata = styled.span`
@@ -86,55 +71,170 @@ const MessageMetadata = styled.span`
     opacity: 0.5;
 `;
 
+const SeparatorDate = styled.span`
+    display: inline-block;
+    padding: 0 6px;
+    position: relative;
+    font-size: 0.8rem;
+    background-color: #555;
+    color: #fff;
+    line-height: 1.4rem;
+    border-radius: 4px;
+`;
+
+const ParamsWrapper = styled.div`
+    border-top: solid 1px #f0f0f0;
+    padding: 8px 10px;
+    background-color: #f0f0f08c;
+`;
+
 const ModemLog = (props) => {
-    const { modem, children, lines, ...other } = props;
+    const { modem, children, ...other } = props;
 
     const time = (dateTime) => {
         const dt = moment(dateTime);
         return dt.format('HH:mm');
     };
 
-    const Message = ({ log }) => {
+    const Message = ({ message }) => {
         return (
-            <>
+            <MessageWrapper>
                 <MessageText>
-                    {log.message}
-                    {/* <Params log={log} /> */}
-                    <MessageMetadata>{time(log.logged_at)}</MessageMetadata>
+                    <FormattedMessage id={message.message} values={message.params} />
+                    <MessageMetadata>{time(message.logged_at)}</MessageMetadata>
                 </MessageText>
-            </>
+                <Params log={message} />
+            </MessageWrapper>
         );
     };
 
-    // const Params = ({ log }) => {
-    //     console.log(log);
-    //     if (!log.params) {
-    //         return null;
-    //     }
+    const ParamItem = ({ pkey, pvalue }) => {
+        if (pvalue instanceof Array) {
+            // return null;
+            pvalue = JSON.stringify(pvalue);
+        }
 
-    //     return (
-    //         <Grid container justifyContent="end" alignItems="flex-start" direction="column">
-    //             <Grid item>test123</Grid>
-    //         </Grid>
-    //     );
-    // };
+        let translateValue = false;
 
-    const line = (log) => {
-        if (log.modem_id != modem.id) {
-            return null;
+        if (typeof pvalue === 'boolean') {
+            pvalue = pvalue == true ? `app.log.modem.params.${pkey}.true` : `app.log.modem.params.${pkey}.false`;
+            translateValue = true;
+        }
+
+        if (pvalue == null) {
+            pvalue = 'app.log.modem.params.value.none';
+            translateValue = true;
         }
 
         return (
-            <Grid item key={log.id} style={{ width: '100%', marginBottom: '10px' }}>
-                <Grid container justifyContent="end" alignItems={log.owner == 'SYSTEM' ? 'flex-start' : 'flex-end'} direction="column">
+            <Grid container justifyContent="start" alignItems="flex-start" direction="row">
+                <Grid item>
+                    <FormattedMessage id={`app.log.modem.params.${pkey}`} />
+                    :&nbsp;
+                </Grid>
+                {translateValue ? (
+                    <Grid item>
+                        <FormattedMessage id={pvalue} />
+                    </Grid>
+                ) : (
+                    <Grid item>{pvalue}</Grid>
+                )}
+            </Grid>
+        );
+    };
+
+    const Params = ({ log }) => {
+        if (!log || !('params' in log) || !log.params) {
+            return null;
+        }
+
+        console.log(log);
+
+        return (
+            <ParamsWrapper>
+                <Grid container justifyContent="end" alignItems="flex-start" direction="column">
+                    {Object.entries(log.params).map(([key, value]) => (
+                        <ParamItem pkey={key} pvalue={value} />
+                    ))}
+                </Grid>
+            </ParamsWrapper>
+        );
+    };
+
+    const [containers, setContainers] = useState([]);
+
+    const _makeContainers = (logs) => {
+        if (!logs) {
+            return false;
+        }
+
+        const containers = [];
+
+        logs.forEach((log) => {
+            const date = moment(moment(log.logged_at).format('YYYY-MM-DD')).calendar(null, {
+                lastDay: '[Ontem]',
+                sameDay: '[Hoje]',
+                nextDay: '[Amanhã]',
+                lastWeek: '[last] dddd',
+                nextWeek: 'dddd',
+                sameElse: 'L'
+            });
+            const existDate = containers.filter((p) => p.type == 'separator' && p.value == date);
+            if (existDate.length < 1) {
+                containers.push({
+                    type: 'separator',
+                    value: date
+                });
+            }
+            containers.push({
+                type: 'log',
+                value: log
+            });
+        });
+
+        setContainers(containers);
+    };
+
+    const logs = useLiveQuery(() => modemLog.where({ modem_id: modem.modem.id }).toArray());
+    useEffect(() => {
+        _makeContainers(logs);
+    }, [logs]);
+
+    const contentEndAnchor = createRef();
+
+    const scrollToBottom = () => {
+        contentEndAnchor.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [containers]);
+
+    const Line = ({ container }) => {
+        if (container.type == 'separator') {
+            return (
+                <Grid item style={{ width: '100%', marginBottom: '10px' }}>
+                    <Grid container justifyContent="center" alignItems="center" direction="column">
+                        <Grid item>
+                            <SeparatorDate>{container.value}</SeparatorDate>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            );
+        }
+
+        const message = container.value;
+        return (
+            <Grid item style={{ width: '100%', marginBottom: '10px' }}>
+                <Grid container justifyContent="end" alignItems={message.owner == 'SYSTEM' ? 'flex-start' : 'flex-end'} direction="column">
                     <Grid item style={{ maxWidth: '85%' }}>
-                        {log.owner == 'SYSTEM' ? (
+                        {message.owner == 'SYSTEM' ? (
                             <MessageWrapperSystem>
-                                <Message log={log} />
+                                <Message message={message} />
                             </MessageWrapperSystem>
                         ) : (
                             <MessageWrapperUser>
-                                <Message log={log} />
+                                <Message message={message} />
                             </MessageWrapperUser>
                         )}
                     </Grid>
@@ -144,19 +244,14 @@ const ModemLog = (props) => {
     };
 
     return (
-        <Paper elevation={0} sx={{ borderRadius: 0 }}>
-            <Card style={{ backgroundColor: '#f0f0f0', borderRadius: '0' }}>
+        <Paper elevation={0} sx={{ borderRadius: 0 }} style={{ position: 'absolute', height: '100%' }}>
+            <Card style={{ backgroundColor: '#f0f0f0', borderRadius: '0', position: 'relative', height: '100%', overflowY: 'auto' }}>
                 <CardContent>
-                    <Grid
-                        container
-                        justifyContent="end"
-                        alignItems="end"
-                        direction="column"
-                        style={{ minHeight: '240px', width: '100%', background: 'transparent' }}
-                    >
-                        {lines != null ? lines.map((logItem, index) => line(logItem)) : null}
+                    <Grid container justifyContent="end" alignItems="end" direction="column" style={{ width: '100%' }}>
+                        {containers != null ? containers.map((container, index) => <Line key={index} container={container} />) : null}
                     </Grid>
                     {children}
+                    <div style={{ float: 'left', clear: 'both' }} ref={contentEndAnchor}></div>
                 </CardContent>
             </Card>
         </Paper>

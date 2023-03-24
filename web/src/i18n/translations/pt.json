@@ -11,6 +11,20 @@
     "app.components.modem.Rotate.error": "{error}",
     "app.components.modem.Rotate.warning.inUse": "Antes de continuar, considere pausar quaiquer serviços que estiverem usando o modem {modemId} como proxy, ele poderá ficar indisponível durante o processo.",
     "app.components.modem.Task.help.stopping.title": "Cancelando tarefa",
-    "app.components.modem.Task.help.stopping.description": "Algumas tarefas podem demorar para serem canceladas.\nIsso porque elas são executadas de forma independente. Além disso, para ter melhor performance, nós subdividimos essas tarefas em tarefas menores, e essas por sua vez não podem ser interrompidas a qualquer momento.\nAssim, se uma subtarefa estiver pendente, precisamos aguardá-la finalizar para interromper todo o processo."
+    "app.components.modem.Task.help.stopping.description": "Algumas tarefas podem demorar para serem canceladas.\nIsso porque elas são executadas de forma independente. Além disso, para ter melhor performance, nós subdividimos essas tarefas em tarefas menores, e essas por sua vez não podem ser interrompidas a qualquer momento.\nAssim, se uma subtarefa estiver pendente, precisamos aguardá-la finalizar para interromper todo o processo.",
+
+    "app.log.modem.rotate.starting": "Iniciando rotacionamento",
+
+    "app.log.modem.params.ipv4": "IPv4",
+    "app.log.modem.params.hard_reset": "Hard-reset",
+    "app.log.modem.params.times": "Tentativas",
+    "app.log.modem.params.proxy_username": "Usuário",
+    "app.log.modem.params.hard_reset.true": "ativado",
+    "app.log.modem.params.hard_reset.false": "desativado",
+    "app.log.modem.params.value.none": "não informado",
+    "app.log.modem.params.filters": "Filtros",
+    "app.log.modem.params.network_provider": "Operadora",
+    "app.log.modem.params.network_type": "Conexão",
+    "app.log.modem.params.signalbar": "Nível do sinal"
 
 }

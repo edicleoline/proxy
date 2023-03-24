@@ -215,6 +215,7 @@ class ServerModemRotate(Resource):
             app.modems_manager.rotate(
                 infra_modem = imodem, 
                 proxy_user_id = proxy_user_id,
+                proxy_username = proxy_username,
                 filters = filters, 
                 hard_reset = data['hard_reset'], 
                 not_changed_try_count = 3, 
