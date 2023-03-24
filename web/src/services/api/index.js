@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { getToken } from './auth';
+import config from 'config';
 
 const api = axios.create({
-    // baseURL: 'http://192.168.15.10:5000',
-    baseURL: 'http://192.168.15.20:5000',
+    baseURL: config.api.baseURL,
     headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json'

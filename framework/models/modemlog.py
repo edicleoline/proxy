@@ -41,6 +41,7 @@ class ModemLogOwner(Enum):
     USER    = 2
 
 class ModemLogType(Enum):
+    SUCCESS    = 0
     INFO       = 1
     WARNING    = 2
     ERROR      = 3

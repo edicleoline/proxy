@@ -11,9 +11,10 @@ import { modemLog } from 'storage/modem/log';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { FormattedMessage } from 'react-intl';
+import IntlMessageFormat from 'intl-messageformat';
+import { locale, messages } from 'i18n';
 
 const MessageWrapperSystem = styled.div`
-    background-color: #ffffff;
     border-radius: 4px 4px 4px 4px;
     position: relative;
     box-shadow: 1px 1px 1px rgb(0 0 0 / 5%);
@@ -59,6 +60,24 @@ const MessageText = styled.div`
     word-wrap: break-word;
     white-space: pre-line;
     padding: 8px 10px;
+    background-color: #ffffff;
+    overflow: hidden;
+
+    &.error {
+        background-color: #f6b9b969;
+    }
+    ,
+    &.success {
+        background-color: #b9f6cc69;
+    }
+    ,
+    &.info {
+        background-color: #ffffff;
+    }
+    ,
+    &.warning {
+        background-color: #f6e6b969;
+    }
 `;
 
 const MessageMetadata = styled.span`
@@ -85,8 +104,33 @@ const SeparatorDate = styled.span`
 const ParamsWrapper = styled.div`
     border-top: solid 1px #f0f0f0;
     padding: 8px 10px;
-    background-color: #f0f0f08c;
+    clear: both;
+
+    &.error {
+        background-color: #f6b9b9a1;
+        border-color: #f6b9b9a1;
+    }
+    ,
+    &.success {
+        background-color: #b9f6d4a1;
+        border-color: #9ddfb15e;
+    }
+    ,
+    &.info {
+        background-color: #f9f9f9;
+        border-color: #dddddd6e;
+    }
+    ,
+    &.warning {
+        background-color: #f6e3b9a1;
+        border-color: #e3d1a078;
+    }
 `;
+
+const logClassName = (message) => {
+    const classname = message.type.toLowerCase();
+    return classname;
+};
 
 const ModemLog = (props) => {
     const { modem, children, ...other } = props;
@@ -99,7 +143,7 @@ const ModemLog = (props) => {
     const Message = ({ message }) => {
         return (
             <MessageWrapper>
-                <MessageText>
+                <MessageText className={logClassName(message)}>
                     <FormattedMessage id={message.message} values={message.params} />
                     <MessageMetadata>{time(message.logged_at)}</MessageMetadata>
                 </MessageText>
@@ -110,8 +154,16 @@ const ModemLog = (props) => {
 
     const ParamItem = ({ pkey, pvalue }) => {
         if (pvalue instanceof Array) {
-            // return null;
-            pvalue = JSON.stringify(pvalue);
+            if (pkey == 'filters') {
+                let v = '';
+                pvalue.map((value) => {
+                    const translatedType = new IntlMessageFormat(messages[locale()][`app.log.modem.params.${value.type}`], locale());
+                    v += translatedType.format() + '/' + value.value + ', ';
+                });
+                pvalue = v.length > 2 ? v.slice(0, -2) : v;
+            } else {
+                pvalue = JSON.stringify(pvalue);
+            }
         }
 
         let translateValue = false;
@@ -151,10 +203,10 @@ const ModemLog = (props) => {
         console.log(log);
 
         return (
-            <ParamsWrapper>
+            <ParamsWrapper className={logClassName(log)}>
                 <Grid container justifyContent="end" alignItems="flex-start" direction="column">
-                    {Object.entries(log.params).map(([key, value]) => (
-                        <ParamItem pkey={key} pvalue={value} />
+                    {Object.entries(log.params).map(([key, value], index) => (
+                        <ParamItem key={index} pkey={key} pvalue={value} />
                     ))}
                 </Grid>
             </ParamsWrapper>
@@ -183,7 +235,8 @@ const ModemLog = (props) => {
             if (existDate.length < 1) {
                 containers.push({
                     type: 'separator',
-                    value: date
+                    value: date,
+                    isFirst: containers.length < 1 ? true : false
                 });
             }
             containers.push({
@@ -212,8 +265,13 @@ const ModemLog = (props) => {
 
     const Line = ({ container }) => {
         if (container.type == 'separator') {
+            const style = {
+                width: '100%',
+                marginBottom: '10px',
+                marginTop: !container.isFirst ? '20px' : '0'
+            };
             return (
-                <Grid item style={{ width: '100%', marginBottom: '10px' }}>
+                <Grid item style={style}>
                     <Grid container justifyContent="center" alignItems="center" direction="column">
                         <Grid item>
                             <SeparatorDate>{container.value}</SeparatorDate>
@@ -244,7 +302,7 @@ const ModemLog = (props) => {
     };
 
     return (
-        <Paper elevation={0} sx={{ borderRadius: 0 }} style={{ position: 'absolute', height: '100%' }}>
+        <Paper elevation={0} sx={{ borderRadius: 0 }} style={{ position: 'absolute', height: '100%', width: '100%' }}>
             <Card style={{ backgroundColor: '#f0f0f0', borderRadius: '0', position: 'relative', height: '100%', overflowY: 'auto' }}>
                 <CardContent>
                     <Grid container justifyContent="end" alignItems="end" direction="column" style={{ width: '100%' }}>

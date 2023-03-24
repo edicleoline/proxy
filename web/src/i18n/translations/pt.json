@@ -13,7 +13,11 @@
     "app.components.modem.Task.help.stopping.title": "Cancelando tarefa",
     "app.components.modem.Task.help.stopping.description": "Algumas tarefas podem demorar para serem canceladas.\nIsso porque elas são executadas de forma independente. Além disso, para ter melhor performance, nós subdividimos essas tarefas em tarefas menores, e essas por sua vez não podem ser interrompidas a qualquer momento.\nAssim, se uma subtarefa estiver pendente, precisamos aguardá-la finalizar para interromper todo o processo.",
 
+    "app.log.modem.rotate.start": "Rotacionar IP",
     "app.log.modem.rotate.starting": "Iniciando rotacionamento",
+    "app.log.modem.rotate.stopped.by_user": "Processo interrompido pelo usuário",
+    "app.log.modem.rotate.stop.by_user": "Cancelar rotacionamento",
+    "app.log.modem.rotate.done.success": "Tarefa finalizada. IP rotacionado com sucesso",
 
     "app.log.modem.params.ipv4": "IPv4",
     "app.log.modem.params.hard_reset": "Hard-reset",
@@ -25,6 +29,20 @@
     "app.log.modem.params.filters": "Filtros",
     "app.log.modem.params.network_provider": "Operadora",
     "app.log.modem.params.network_type": "Conexão",
-    "app.log.modem.params.signalbar": "Nível do sinal"
+    "app.log.modem.params.signalbar": "Nível do sinal",
+    "app.log.modem.params.ip": "IPv4",
+    "app.log.modem.middleware.starting": "Iniciando middleware",
+    "app.log.modem.middleware.error.not_found": "Middleware não encontrado",
+    "app.log.modem.usb.rebooted_wait_modem": "Porta USB reiniciada. Aguardando modem",
+    "app.log.modem.rebooted_wait_provider": "Modem reiniciado. Aguardando conexão com a operadora",
+    "app.log.modem.middleware.rebooting": "Reiniciando conexão com a operadora usando middleware",
+    "app.log.modem.middleware.error.connection_reboot": "Erro ao reiniciar conexão com a operadora usando middleware",
+    "app.log.modem.ip.new.success": "Novo IP recebido com sucesso",
+    "app.log.modem.rotate.ip.new.reserved_other_user": "Vamos rotacionar novamente porque este IP está reservado para outro usuário",
+    "app.log.modem.rotate.ip.new.filter_not_match": "Vamos rotacionar novamente porque este IP não combina com nenhum filtro fornecido",
+    "app.log.modem.rotate.ip.new.not_change": "Vamos rotacionar novamente porque o IP recebido pela operadora não foi alterado",
+    "app.log.modem.rotate.ip.new.not_valid": "Vamos rotacionar novamente porque não conseguimos obter um IP válido",
+    "app.log.modem.rotate.stop.ip.not_change": "Interrompemos a tarefa porque depois de algumas tentativas a operadora insiste atribuir o mesmo IP para este modem. Considere utilizar a opção hard-reset ativada",
+    "app.log.modem.rotate.stop.ip.not_valid": "Interrompemos a tarefa porque depois de algumas tentativas não conseguimos receber um IP válido. Verifique seu plano de dados"
 
 }

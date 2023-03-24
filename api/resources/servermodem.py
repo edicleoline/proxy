@@ -153,7 +153,7 @@ class ServerModemRotate(Resource):
                 modem_id=modem_id,
                 owner=ModemLogOwner.USER, 
                 type=ModemLogType.WARNING, 
-                message='Cancelar rotacionamento',
+                message='app.log.modem.rotate.stop.by_user',
                 logged_at = datetime.now()
             )
             modem_log_model.save_to_db()
@@ -181,7 +181,7 @@ class ServerModemRotate(Resource):
             modem_id=modem_id,
             owner=ModemLogOwner.USER, 
             type=ModemLogType.INFO, 
-            message='Iniciar rotacionamento',
+            message='app.log.modem.rotate.start',
             logged_at = datetime.now()
         )
         modem_log_model.save_to_db()

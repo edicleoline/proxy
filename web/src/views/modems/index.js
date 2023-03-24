@@ -55,6 +55,8 @@ import { testProxyIPv4HTTP } from 'utils/proxy';
 import io from 'socket.io-client';
 import objectHash from 'object-hash';
 
+import config from 'config';
+
 const Modems = () => {
     // const [isLoading, setLoading] = useState(true);
 
@@ -128,8 +130,7 @@ const Modems = () => {
     const [socketConnected, setSocketConnected] = useState(false);
 
     useEffect(() => {
-        // const socket = io('http://192.168.15.10:5000');
-        const socket = io('http://192.168.15.20:5000');
+        const socket = io(config.socketio.baseURL);
 
         socket.on('connect', () => {
             setSocketConnected(true);
@@ -368,7 +369,7 @@ const Modems = () => {
                     <Grid item>{ip}</Grid>
                     <Grid item>:</Grid>
                     <Grid item>{port}</Grid>
-                    <Grid item>{icon}</Grid>
+                    {/* <Grid item>{icon}</Grid> */}
                 </Grid>
             </>
         );
