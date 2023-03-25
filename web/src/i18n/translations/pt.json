@@ -20,6 +20,7 @@
     "app.log.modem.rotate.done.success": "Tarefa finalizada. IP rotacionado com sucesso",
     "app.log.modem.reboot.start": "Reiniciar",
     "app.log.modem.rebooting": "Reiniciando modem",
+    "app.log.modem.reboot.done.success": "Tarefa finalizada. Modem reiniciado com sucesso",
 
     "app.log.modem.params.ipv4": "IPv4",
     "app.log.modem.params.hard_reset": "Hard-reset",

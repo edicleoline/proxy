@@ -107,6 +107,20 @@ class Modem:
         if self.callback: self.callback(log)
 
     def reboot(self, hard_reset = False, write_params = True):
+        rebooted = self.reboot_and_wait(hard_reset=hard_reset, write_params=write_params)
+        if rebooted == True:
+            modem_log_model = ModemLogModel(
+                modem_id=self.modem.id, 
+                owner=ModemLogOwner.SYSTEM, 
+                type=ModemLogType.SUCCESS, 
+                message='app.log.modem.reboot.done.success'
+            )
+            modem_log_model.save_to_db()
+            self.log(modem_log_model)
+
+        return rebooted
+
+    def reboot_and_wait(self, hard_reset = False, write_params = True):
         modem_log_model = ModemLogModel(
             modem_id=self.modem.id, 
             owner=ModemLogOwner.SYSTEM, 
@@ -232,7 +246,7 @@ class Modem:
                 break
         
             if hard_reset == True:
-                if self.reboot(hard_reset=True, write_params=False) == False:
+                if self.reboot_and_wait(hard_reset=True, write_params=False) == False:
                     break
 
                 if self.event_stop_is_set() == True: break
