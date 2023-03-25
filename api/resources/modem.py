@@ -36,6 +36,10 @@ class Modems(Resource):
         return {"items": items}, 200
     
 
+_modem_put_parser = reqparse.RequestParser()
+_modem_put_parser.add_argument("proxy_ipv4_http_port", type=int, required=False)
+_modem_put_parser.add_argument("proxy_ipv4_socks_port", type=int, required=False)
+
 class Modem(Resource):
     # @jwt_required()
     def get(self, modem_id):
@@ -93,6 +97,28 @@ class Modem(Resource):
             json['proxy_dns'] = ['8.8.8.8', '8.8.4.4']
 
         return json
+
+    # @jwt_required()
+    def put(self, modem_id):
+        server_modem = ServerModemModel.find_by_modem_id(modem_id)
+        #modem = server_modem.modem()
+
+        data = _modem_put_parser.parse_args()
+        
+        proxy_ipv4_http_port = data['proxy_ipv4_http_port']
+        if proxy_ipv4_http_port != None:
+            server_modem.proxy_ipv4_http_port = proxy_ipv4_http_port
+
+        proxy_ipv4_socks_port = data['proxy_ipv4_socks_port']
+        if proxy_ipv4_socks_port != None:
+            server_modem.proxy_ipv4_socks_port = proxy_ipv4_socks_port
+
+        
+        server_modem.save_to_db()
+
+        app.modems_service.reload_modems()
+
+        return {"message": "OK"}, 200
 
 
 _server_modem_reboot_parser = reqparse.RequestParser()

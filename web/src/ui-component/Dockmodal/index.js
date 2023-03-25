@@ -24,6 +24,7 @@ import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { IconChevronUp, IconChevronDown } from '@tabler/icons';
+import styled from 'styled-components';
 
 import { useState, useEffect, useRef, createRef } from 'react';
 import PropTypes from 'prop-types';
@@ -247,6 +248,10 @@ DockItem.propTypes = {
     onClose: PropTypes.func.isRequired
 };
 
+const DockWrapperW = styled.div`
+    padding: 0 25px;
+`;
+
 export const Dock = (props) => {
     const { open, onClose, items, ...other } = props;
 
@@ -264,9 +269,12 @@ export const Dock = (props) => {
     };
 
     const [innerHeight, setInnerHeight] = useState(0);
+    const [innerWidth, setInnerWidth] = useState(0);
     const _resize = () => {
         const ih = window.innerHeight;
+        const iw = window.innerWidth;
         setInnerHeight(ih);
+        setInnerWidth(iw);
     };
     useEffect(() => {
         _resize();
@@ -281,7 +289,7 @@ export const Dock = (props) => {
     return (
         <div style={styles.container}>
             <div>
-                <div style={{ width: '1872px' }}>
+                <DockWrapperW style={{ width: `${innerWidth}px` }}>
                     <div style={{ height: `${innerHeight}px` }}>
                         <div style={{ float: 'right' }}>
                             <div style={styles.item}></div>
@@ -306,7 +314,7 @@ export const Dock = (props) => {
                             <div style={styles.item}></div>
                         </div>
                     </div>
-                </div>
+                </DockWrapperW>
             </div>
         </div>
     );

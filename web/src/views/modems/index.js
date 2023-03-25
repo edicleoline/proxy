@@ -181,6 +181,13 @@ const Modems = () => {
                                 changed = true;
                                 modem.lock = item.lock;
                             }
+
+                            const modemProxyHash = objectHash.MD5(modem.proxy);
+                            const itemProxyHash = objectHash.MD5(item.proxy);
+                            if (modemProxyHash != itemProxyHash) {
+                                modem.proxy = item.proxy;
+                                changed = true;
+                            }
                         });
 
                         return modem;

@@ -268,8 +268,8 @@ class ServerModemModel():
                 ))
             self.id = conn.last_insert_rowid()
         else:
-            conn.execute("update modem_server set server_id=?, modem_id=?, usb_port_id=?, proxy_ipv4_http_port=? where id = ?", (
-                self.server_id, self.modem_id, self.usb_port_id, self.proxy_ipv4_http_port, self.id
+            conn.execute("update modem_server set usb_port_id=?, proxy_ipv4_http_port=?, proxy_ipv4_socks_port=? where id = ?", (
+                self.usb_port_id, self.proxy_ipv4_http_port, self.proxy_ipv4_socks_port, self.id
                 ))
 
         conn.close(True)

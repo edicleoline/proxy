@@ -88,6 +88,16 @@ class Modem:
 
             time.sleep(1)
 
+    def wait_until_modem_disconnection(self):
+        while(True):
+            if self.event_stop_is_set(log = False): break
+
+            inframodem_iface = self.iface()
+            if inframodem_iface == None:
+                break
+
+            time.sleep(1)
+
     def event_stop_is_set(self, log = True):
         if self.event_stop and self.event_stop.is_set():
             if log == True:
@@ -137,6 +147,7 @@ class Modem:
         if hard_reset == True:
             try:
                 self.hard_reboot()
+                self.wait_until_modem_disconnection()
             except OSError as error:
                 modem_log_model = ModemLogModel(
                     modem_id=self.modem.id, 

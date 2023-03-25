@@ -19,10 +19,6 @@ from random import random
 from threading import Thread, Event, Lock
 from time import sleep
 
-from socketservice.modems import ModemsService
-from framework.models.server import ServerModel
-from framework.manager.modem import ModemManager
-
 from app import app
 
 async_mode = None
@@ -115,19 +111,14 @@ api.add_resource(ProxyUsers, "/proxy-users")
 api.add_resource(ProxyUserByUsername, "/proxy-user/by-username/<string:username>")
 api.add_resource(ProxyUserModemFilters, "/proxy-user/<int:proxy_user_id>/modem/<int:modem_id>/filters")
 
-app.modems_manager = ModemManager()
-
 #https://github.com/ajaichemmanam/react-flask-socketio/blob/7cdfe2c76a8ad4eb36e097dd30e2b273882a08fb/server.py
-
-server_model = ServerModel.find_by_id(1)
-modems_service = ModemsService(server_model = server_model)
 
 modems_status_thread = None
 modems_status_thread_lock = Lock()
 
 def background_thread_modems_status():
     while True:
-        modems = modems_service.modems_status()
+        modems = app.modems_service.modems_status()
         app.socketio.emit('modems', modems, broadcast=True)
         app.socketio.sleep(1)
 
@@ -143,7 +134,7 @@ class ModemsDetailsThread(Thread):
     def run_forever(self):
         try:
             while not modems_details_thread_stop_event.isSet():
-                modems = modems_service.modems_details()
+                modems = app.modems_service.modems_details()
                 app.socketio.emit('modems_details', modems, broadcast=True)
                 sleep(self.delay)
 
