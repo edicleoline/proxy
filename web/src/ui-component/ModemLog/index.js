@@ -7,12 +7,14 @@ import moment from 'moment';
 import { useState, useEffect, createRef } from 'react';
 import PropTypes, { bool } from 'prop-types';
 
-import { modemLog } from 'storage/modem/log';
+import { modemLog, bulkStoreModemLog } from 'storage/modem/log';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { FormattedMessage } from 'react-intl';
 import IntlMessageFormat from 'intl-messageformat';
 import { locale, messages } from 'i18n';
+
+import { logs } from 'services/api/modem/log';
 
 const MessageWrapperSystem = styled.div`
     border-radius: 4px 4px 4px 4px;
@@ -68,7 +70,7 @@ const MessageText = styled.div`
     }
     ,
     &.success {
-        background-color: #b9f6cc69;
+        background-color: #b9f6ca8c;
     }
     ,
     &.info {
@@ -112,7 +114,7 @@ const ParamsWrapper = styled.div`
     }
     ,
     &.success {
-        background-color: #b9f6d4a1;
+        background-color: #b9f6ca;
         border-color: #9ddfb15e;
     }
     ,
@@ -200,8 +202,6 @@ const ModemLog = (props) => {
             return null;
         }
 
-        console.log(log);
-
         return (
             <ParamsWrapper className={logClassName(log)}>
                 <Grid container justifyContent="end" alignItems="flex-start" direction="column">
@@ -248,10 +248,35 @@ const ModemLog = (props) => {
         setContainers(containers);
     };
 
-    const logs = useLiveQuery(() => modemLog.where({ modem_id: modem.modem.id }).toArray());
+    const _logs = useLiveQuery(() => modemLog.where({ modem_id: modem.modem.id }).toArray());
     useEffect(() => {
-        _makeContainers(logs);
-    }, [logs]);
+        _makeContainers(_logs);
+
+        if (_logs != undefined && _logs.length < 1) {
+            console.log('empty logs!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+            _loadFromApi();
+        }
+    }, [_logs]);
+
+    const _loadFromApi = () => {
+        logs(modem.id, 0, 50, 'next', 'desc')
+            .then(
+                (response) => {
+                    console.log(response);
+                    bulkStoreModemLog(response);
+                },
+                (err) => {
+                    const message =
+                        err.response && err.response.data && err.response.data.error && err.response.data.error.message
+                            ? err.response.data.error.message
+                            : err.message;
+                    console.log(message);
+                }
+            )
+            .finally(() => {
+                //console.log();
+            });
+    };
 
     const contentEndAnchor = createRef();
 
@@ -262,6 +287,14 @@ const ModemLog = (props) => {
     useEffect(() => {
         scrollToBottom();
     }, [containers]);
+
+    /*const [_firstRender, _setFirstRender] = useState(true);
+    useEffect(() => {
+        if (_firstRender) {
+            console.log('firstttttttttttttttt render log');
+            _setFirstRender(false);
+        }
+    }, [_firstRender]);*/
 
     const Line = ({ container }) => {
         if (container.type == 'separator') {

@@ -21,7 +21,7 @@ import Switch from '@mui/material/Switch';
 
 import { FormattedMessage } from 'react-intl';
 
-import { reboot } from 'services/api/server/modem';
+import { reboot } from 'services/api/modem';
 import { BootstrapDialogTitle } from 'ui-component/extended/BootstrapDialog';
 
 const Alert = React.forwardRef(function Alert(props, ref) {

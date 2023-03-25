@@ -31,6 +31,7 @@
     "app.log.modem.params.network_type": "Conexão",
     "app.log.modem.params.signalbar": "Nível do sinal",
     "app.log.modem.params.ip": "IPv4",
+    "app.log.modem.params.usb_port": "Porta",
     "app.log.modem.middleware.starting": "Iniciando middleware",
     "app.log.modem.middleware.error.not_found": "Middleware não encontrado",
     "app.log.modem.usb.rebooted_wait_modem": "Porta USB reiniciada. Aguardando modem",

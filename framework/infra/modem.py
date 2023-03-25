@@ -251,14 +251,14 @@ class Modem:
 
                 # new_ip = '189.40.89.35' #TESTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT  
                 
-            if self.event_stop_is_set(event_stop) == True: break              
+            if self.event_stop_is_set(event_stop) == True: break   
+
+            modem_details = device_middleware.details()
+            network_type = modem_details['network_type'] if modem_details else None
+            network_provider = modem_details['network_provider'] if modem_details else None
+            signalbar = modem_details['signalbar'] if modem_details else None
 
             if new_ip != None and new_ip != old_ip:
-                modem_details = device_middleware.details()
-                network_type = modem_details['network_type'] if modem_details else None
-                network_provider = modem_details['network_provider'] if modem_details else None
-                signalbar = modem_details['signalbar'] if modem_details else None
-
                 modem_ip_history = ModemIPHistoryModel(modem_id = self.modem.id, ip = new_ip, network_type = network_type, network_provider = network_provider, signalbar = signalbar)
                 modem_ip_history.save_to_db()
 
@@ -323,11 +323,7 @@ class Modem:
 
                     route = Route(gateway=modem_gateway, interface=inframodem_iface.interface, ip=modem_ifaddress['addr'], table=self.modem.id)
                     route.resolve_route()
-
-                    modem_details = device_middleware.details()
-                    network_type = modem_details['network_type'] if modem_details else None
-                    network_provider = modem_details['network_provider'] if modem_details else None
-                    signalbar = modem_details['signalbar'] if modem_details else None
+                    
                     modem_log_model = ModemLogModel(
                         modem_id=self.modem.id, 
                         owner=ModemLogOwner.SYSTEM, 
@@ -380,12 +376,7 @@ class Modem:
                     modem_log_model.save_to_db()
                     self.log(modem_log_model)
 
-            if not_changed_count >= not_changed_try_count:
-                modem_details = device_middleware.details()
-                network_type = modem_details['network_type'] if modem_details else None
-                network_provider = modem_details['network_provider'] if modem_details else None
-                signalbar = modem_details['signalbar'] if modem_details else None
-
+            if not_changed_count >= not_changed_try_count:               
                 modem_log_model = ModemLogModel(
                     modem_id=self.modem.id, 
                     owner=ModemLogOwner.SYSTEM, 
@@ -407,11 +398,6 @@ class Modem:
                 break
 
             if not_ip_count >= not_ip_try_count:
-                modem_details = device_middleware.details()
-                network_type = modem_details['network_type'] if modem_details else None
-                network_provider = modem_details['network_provider'] if modem_details else None
-                signalbar = modem_details['signalbar'] if modem_details else None
-
                 modem_log_model = ModemLogModel(
                     modem_id=self.modem.id, 
                     owner=ModemLogOwner.SYSTEM, 

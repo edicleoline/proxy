@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
+from resources.modem import ModemReboot, ModemRotate, Modems, Modem, ModemLogs
 from resources.proxyuser import ProxyUserByUsername, ProxyUserModemFilters, ProxyUsers
 
 from blocklist import BLOCKLIST
@@ -9,9 +10,7 @@ from resources.user import UserRegister, UserLogin, TokenRefresh, UserLogout
 
 from resources.server import Server, ServerUSBPorts
 from resources.serverstatus import ServerStatus
-from resources.servermodems import ServerModems
-from resources.servermodem import ServerModem
-from resources.servermodem import ServerModemReboot, ServerModemRotate
+
 
 from flask_socketio import SocketIO, emit
 from gevent.pywsgi import WSGIServer
@@ -104,13 +103,13 @@ api.add_resource(TokenRefresh, "/refresh")
 
 api.add_resource(Server, "/server")
 api.add_resource(ServerStatus, "/server/status")
-
 api.add_resource(ServerUSBPorts, "/server/usb-ports")
 
-api.add_resource(ServerModems, "/server/modem")
-api.add_resource(ServerModem, "/server/modem/<int:modem_id>")
-api.add_resource(ServerModemReboot, "/server/modem/<int:modem_id>/reboot")
-api.add_resource(ServerModemRotate, "/server/modem/<int:modem_id>/rotate")
+api.add_resource(Modems, "/modem")
+api.add_resource(Modem, "/modem/<int:modem_id>")
+api.add_resource(ModemReboot, "/modem/<int:modem_id>/reboot")
+api.add_resource(ModemRotate, "/modem/<int:modem_id>/rotate")
+api.add_resource(ModemLogs, "/modem/<int:modem_id>/log")
 
 api.add_resource(ProxyUsers, "/proxy-users")
 api.add_resource(ProxyUserByUsername, "/proxy-user/by-username/<string:username>")

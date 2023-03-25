@@ -1,9 +1,10 @@
 import { db } from 'storage/db';
+import Dexie from 'dexie';
 
 export const modemLog = db.modemLog;
 
 export const storeModemLog = (log) => {
-    const id = modemLog.add({
+    return modemLog.add({
         id: log.id,
         modem_id: log.modem_id,
         owner: log.owner,
@@ -13,4 +14,8 @@ export const storeModemLog = (log) => {
         params: log.params,
         logged_at: log.logged_at
     });
+};
+
+export const bulkStoreModemLog = (logs) => {
+    return modemLog.bulkAdd(logs);
 };

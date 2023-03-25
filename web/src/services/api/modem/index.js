@@ -1,8 +1,8 @@
-import api from '../../../api';
+import api from '..';
 
 export function getModems() {
     return new Promise((resolve, reject) => {
-        api.get('/server/modem').then(
+        api.get('/modem').then(
             (response) => {
                 resolve(response.data.items);
             },
@@ -15,7 +15,7 @@ export function getModems() {
 
 export function getModem(id) {
     return new Promise((resolve, reject) => {
-        api.get('/server/modem/' + id).then(
+        api.get(`/modem/${id}`).then(
             (response) => {
                 resolve(response.data);
             },
@@ -31,7 +31,7 @@ export function reboot(id, hardReset = false) {
         hard_reset: hardReset
     };
     return new Promise((resolve, reject) => {
-        api.post(`/server/modem/${id}/reboot`, data).then(
+        api.post(`/modem/${id}/reboot`, data).then(
             (response) => {
                 resolve(response.data);
             },
@@ -49,7 +49,7 @@ export function rotate(id, hardReset = false, proxy_username = null, filters = n
         filters: filters
     };
     return new Promise((resolve, reject) => {
-        api.post(`/server/modem/${id}/rotate`, data).then(
+        api.post(`/modem/${id}/rotate`, data).then(
             (response) => {
                 resolve(response.data);
             },
@@ -62,7 +62,7 @@ export function rotate(id, hardReset = false, proxy_username = null, filters = n
 
 export function stopRotate(id) {
     return new Promise((resolve, reject) => {
-        api.delete(`/server/modem/${id}/rotate`).then(
+        api.delete(`/modem/${id}/rotate`).then(
             (response) => {
                 resolve(response.data);
             },

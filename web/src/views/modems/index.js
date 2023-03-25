@@ -8,7 +8,7 @@ import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
 import { useEffect, useState, useRef, useLayoutEffect, useMemo } from 'react';
 
 import { getServer } from 'services/api/server';
-import { stopRotate } from 'services/api/server/modem';
+import { stopRotate } from 'services/api/modem';
 
 import { bytesToSize } from 'utils/format';
 

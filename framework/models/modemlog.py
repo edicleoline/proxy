@@ -6,6 +6,8 @@ from datetime import datetime
 from marshmallow import fields
 import json
 
+from framework.helper.database.pagination import PaginateDirection, PaginateOrder
+
 class ModemLogOwnerField(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
         return value.name
@@ -64,7 +66,8 @@ class ModemLogModel():
         )
     )
 
-    def __init__(self, modem_id = None, owner = None, type = None, message = None, code = None, params = None, logged_at = datetime.now(), created_at = None):
+    def __init__(self, id = None, modem_id = None, owner = None, type = None, message = None, code = None, params = None, logged_at = datetime.now(), created_at = None):
+        self.id = id
         self.modem_id = modem_id
         self.owner = owner
         self.type = type
@@ -74,17 +77,46 @@ class ModemLogModel():
         self.params_json = json.dumps(params) if params else None
         self.logged_at = logged_at
         self.created_at = created_at    
-    
-    def json(self):
-        return {
-            'id': self.id,
-            'owner': self.owner.name,
-            'type': self.type.name,
-            'message': self.message,
-            'code': self.code,
-            'params_json': self.params_json,
-            'logged_at': self.logged_at
-        }        
+
+    @classmethod
+    def paginate_by_id(cls, id, cursor = None, limit = 20, direction: PaginateDirection = PaginateDirection.NEXT, order: PaginateOrder = PaginateOrder.ASC):
+        conn = connection()
+        cursor_sql = None
+        if cursor:
+            cursor_sql = 'and id {0} {1}'.format(
+                    ('>' if direction == PaginateDirection.NEXT else '<'),
+                    cursor
+                )
+        else:
+            cursor_sql = ''
+
+        rows = conn.execute("""
+                select id, modem_id, owner, type, message, code, params_json, logged_at 
+                    from modem_log 
+                    where modem_id = {0} {1} 
+                    order by id {2} 
+                    limit {3}
+            """.format(id, cursor_sql, order.value, limit)).fetchall()
+        conn.close(True)
+
+        items = []
+        for row in rows:
+            items.append(
+                ModemLogModel(
+                    id = row[0],
+                    modem_id = row[1], 
+                    owner = ModemLogOwner(row[2]), 
+                    type = ModemLogType(row[3]), 
+                    message = row[4],
+                    code = row[5],
+                    params = json.loads(row[6]) if row[6] else None,
+                    logged_at = datetime.strptime(row[7], '%Y-%m-%d %H:%M:%S')
+                )
+            )
+
+        return items
+
+        
 
     def save_to_db(self):
         conn = connection()

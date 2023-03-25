@@ -1,30 +1,44 @@
-from datetime import datetime
-import os
-import requests
-from flask_restful import Resource, reqparse
+from flask_restful import Resource, reqparse, request
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
-from framework.manager.error.exception import ModemLockedByOtherThreadException, NoTaskRunningException
+import requests
+from framework.helper.database.pagination import PaginateDirection, PaginateOrder
+from framework.models.modem import ModemModel
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
-from framework.models.proxyuser import ProxyUserModel
-from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
 from framework.models.server import ServerModel, ServerModemModel
 from framework.infra.modem import Modem as IModem
-from time import sleep
-import threading
+from framework.models.server import ServerModel, ServerModemModel
+from framework.infra.modem import Modem as IModem
 from flask import request
 import json
-
+from app import app
+from datetime import datetime
+from framework.manager.error.exception import ModemLockedByOtherThreadException, NoTaskRunningException
+from framework.models.proxyuser import ProxyUserModel
+from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
 from app import app
 
-class ServerModem(Resource):
+class Modems(Resource):
     # @jwt_required()
-    def get(self, modem_id):
-        
+    def get(self):
         server = ServerModel.find_by_id(1)
 
         if not server:
             return {"message": "Item not found"}, 404
 
+        modems = server.modems()
+        
+        items = [item.json() for item in modems]
+
+        for x, item in enumerate(items):
+            imodem = IModem(modems[x])
+            item['is_connected'] = imodem.is_connected()
+    
+        return {"items": items}, 200
+    
+
+class Modem(Resource):
+    # @jwt_required()
+    def get(self, modem_id):
         server_modem = ServerModemModel.find_by_modem_id(modem_id)
         imodem = IModem(server_modem)           
 
@@ -85,14 +99,9 @@ _server_modem_reboot_parser = reqparse.RequestParser()
 _server_modem_reboot_parser.add_argument(
     "hard_reset", type=bool, required=True, help=""
 )
-class ServerModemReboot(Resource):
+class ModemReboot(Resource):
     # @jwt_required()
     def post(self, modem_id): 
-        server = ServerModel.find_by_id(1)
-
-        if not server:
-            return {"message": "Item not found"}, 404
-
         server_modem = ServerModemModel.find_by_modem_id(modem_id)
         imodem = IModem(server_modem)   
 
@@ -120,7 +129,7 @@ class ServerModemReboot(Resource):
             }, 500
 
         return {"message": "OK"}, 200
-    
+
 
 def filters_type(value, name):
     full_json_data = request.get_json()
@@ -132,6 +141,7 @@ def filters_type(value, name):
     filters = ProxyUserIPFilterModel.schema().load(filters_json, many=True)
     return filters
 
+
 _server_modem_rotate_parser = reqparse.RequestParser()
 _server_modem_rotate_parser.add_argument(
     "hard_reset", type=bool, required=True, help=""
@@ -142,7 +152,7 @@ _server_modem_rotate_parser.add_argument(
 _server_modem_rotate_parser.add_argument(
     "filters", type=filters_type, location="json", required=False, help=""
 )
-class ServerModemRotate(Resource):
+class ModemRotate(Resource):
     def delete(self, modem_id):
         server_modem = ServerModemModel.find_by_modem_id(modem_id)
         imodem = IModem(server_modem)
@@ -152,7 +162,7 @@ class ServerModemRotate(Resource):
             modem_log_model = ModemLogModel(
                 modem_id=modem_id,
                 owner=ModemLogOwner.USER, 
-                type=ModemLogType.WARNING, 
+                type=ModemLogType.INFO, 
                 message='app.log.modem.rotate.stop.by_user',
                 logged_at = datetime.now()
             )
@@ -170,11 +180,6 @@ class ServerModemRotate(Resource):
 
     # @jwt_required()
     def post(self, modem_id): 
-        server = ServerModel.find_by_id(1)
-
-        if not server:
-            return {"message": "Item not found"}, 404
-        
         server_modem_model = ServerModemModel.find_by_modem_id(modem_id)
 
         modem_log_model = ModemLogModel(
@@ -230,5 +235,28 @@ class ServerModemRotate(Resource):
             }, 400        
 
         return {"message": "OK"}, 200
+
+
+class ModemLogs(Resource):
+    # @jwt_required()
+    def get(self, modem_id):
+        modem_model = ModemModel.find_by_id(modem_id)
+
+        if not modem_model:
+            return {"message": "Modem not found"}, 404
+        
+        args = request.args
+        cursor = args['cursor'] if 'cursor' in args else None
+        limit = args['limit'] if 'limit' in args else None
+        direction = PaginateDirection(args['direction']) if 'direction' in args else PaginateDirection.NEXT
+        order = PaginateOrder(args['order']) if 'order' in args else PaginateOrder.ASC
+        
+        logs = ModemLogModel.paginate_by_id(id = modem_id, cursor = cursor, limit = limit, direction = direction, order = order)
+
+        items = ModemLogModel.schema().dump(logs, many=True)
+    
+        return {"items": items}, 200
+
+        
 
     
