@@ -8,39 +8,26 @@ class ModemManager():
     def __init__(self):
         self.threads = []
 
-    def reboot(self, infra_modem: IModem, hard_reset = False, callback = None):
+    def reboot(self, infra_modem: IModem, hard_reset = False):
         thread_running = self.running(infra_modem)
 
         if thread_running:
             raise ModemLockedByOtherThreadException('We could running this task now because this modem is locked by another thread.')
         
         event_stop = Event()
+        infra_modem.event_stop = event_stop
 
-        if hard_reset == True:
-            try:
-                process_thread = Thread(
-                    target=infra_modem.hard_reboot_and_wait
-                )
-                process_thread.start()
+        process_thread = Thread(
+            target=infra_modem.reboot,
+            args=(
+                hard_reset,
+            )
+        )
+        process_thread.start()
 
-                self.threads.append(
-                    ModemThreadData(infra_modem, ModemThreadAction.REBOOT, process_thread, event_stop)
-                )
-            except OSError as error:
-                raise ModemRebootException(str(error))
-        else:
-            device_middleware = infra_modem.get_device_middleware()
-            if device_middleware:
-                process_thread = Thread(
-                    target=device_middleware.reboot_and_wait
-                )
-                process_thread.start()
-
-                self.threads.append(
-                    ModemThreadData(infra_modem, ModemThreadAction.REBOOT, process_thread, event_stop)
-                )
-            else:
-                raise ModemRebootException('Modem is offline. Try hard-reset')
+        self.threads.append(
+            ModemThreadData(infra_modem, ModemThreadAction.REBOOT, process_thread, event_stop)
+        )        
 
     def rotate(
             self, 

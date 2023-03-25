@@ -102,16 +102,27 @@ _server_modem_reboot_parser.add_argument(
 class ModemReboot(Resource):
     # @jwt_required()
     def post(self, modem_id): 
-        server_modem = ServerModemModel.find_by_modem_id(modem_id)
-        imodem = IModem(server_modem)   
+        server_modem_model = ServerModemModel.find_by_modem_id(modem_id)
+
+        modem_log_model = ModemLogModel(
+            modem_id=modem_id,
+            owner=ModemLogOwner.USER, 
+            type=ModemLogType.INFO, 
+            message='app.log.modem.reboot.start',
+            logged_at = datetime.now()
+        )
+        modem_log_model.save_to_db()
+        app.socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
+
+        callback = lambda modem_log_model: app.socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
+        imodem = IModem(server_modem_model=server_modem_model, callback=callback)
 
         data = _server_modem_reboot_parser.parse_args()
 
         try:
             app.modems_manager.reboot(
                 infra_modem = imodem, 
-                hard_reset = data['hard_reset'], 
-                callback = None
+                hard_reset = data['hard_reset']
             )     
         except ModemLockedByOtherThreadException as err:
             return {
