@@ -35,16 +35,18 @@ class Error(Enum):
     MIDDLEWARE_IP_RELEASE_FAIL = 202
     NOT_CHANGED_IP_TRY_COUNT_EXCEEDED = 303
     NO_IP_TRY_COUNT_EXCEEDED = 306
+    USB_HARD_RESET_EXCEPTION = 408
 
 class Owner(Enum):
     SYSTEM  = 1
     USER    = 2
 
 class Modem:
-    def __init__(self, server_modem_model: ServerModemModel, callback = None):
+    def __init__(self, server_modem_model: ServerModemModel, event_stop: Event = None, callback = None):
         self.server_modem_model = server_modem_model
         self.modem = self.server_modem_model.modem()
         self.usb_port = server_modem_model.usb_port()
+        self.event_stop = event_stop
         self.callback = callback
 
     def iface(self):
@@ -52,26 +54,10 @@ class Modem:
         return NetIface.get_iface_by_addr_id(addr_id)        
 
     def hard_reboot(self):
-        """Reboot USB port by cut power.       
-        """                
-        sys.stdout.write('{0}[!] Let''s reboot USB port {1}...{2}'.format(CYELLOW, self.usb_port.port, CEND))
-        sys.stdout.flush()
         USB(server=self.server_modem_model.server()).hard_reboot(usb_port=self.usb_port)
-        sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
-        sys.stdout.flush()
-
-    def hard_reboot_and_wait(self):
-        self.hard_reboot()
-        self.wait_until_modem_connection(print_alert = False)
 
     def hard_turn_off(self):
-        """Turn off USB port.
-        """        
-        sys.stdout.write('{0}[!] Let''s turn off USB port {1}...{2}'.format(CYELLOW, self.usb_port.port, CEND))
-        sys.stdout.flush()
         USB(server=self.server_modem_model.server()).hard_turn_off(usb_port=self.usb_port)
-        sys.stdout.write('{0} OK{1}\n'.format(CGREEN, CEND))
-        sys.stdout.flush()
 
     def get_device_middleware(self, retries_ip = 5):
         middleware = None
@@ -92,23 +78,18 @@ class Modem:
 
         return middleware
 
-    def wait_until_modem_connection(self, print_alert = False):
-        write_alert = True
+    def wait_until_modem_connection(self):
         while(True):
+            if self.event_stop_is_set(): break
+            
             inframodem_iface = self.iface()
-
             if inframodem_iface != None:
                 break
-            else:
-                if print_alert and write_alert:
-                    sys.stdout.write('{0}[!] This modem is offline. Let''s wait until get online back...{1}\n'.format(CRED, CEND))
-                    sys.stdout.flush()
 
-            write_alert = False
             time.sleep(1)
 
-    def event_stop_is_set(self, event_stop: Event):
-        if event_stop and event_stop.is_set():
+    def event_stop_is_set(self):
+        if self.event_stop and self.event_stop.is_set():
             modem_log_model = ModemLogModel(
                 modem_id=self.modem.id, 
                 owner=ModemLogOwner.SYSTEM, 
@@ -124,6 +105,76 @@ class Modem:
     def log(self, log: ModemLogModel):
         if self.callback: self.callback(log)
 
+    def reboot(self, hard_reset = False, write_params = True):
+        modem_log_model = ModemLogModel(
+            modem_id=self.modem.id, 
+            owner=ModemLogOwner.SYSTEM, 
+            type=ModemLogType.INFO, 
+            message='app.log.modem.rebooting',
+            params={
+                'hard_reset': hard_reset
+            } if write_params == True else None,
+            logged_at = datetime.now()
+        )
+        modem_log_model.save_to_db()
+        self.log(modem_log_model)
+
+        if hard_reset == True:
+            try:
+                self.hard_reboot()
+            except OSError as error:
+                modem_log_model = ModemLogModel(
+                    modem_id=self.modem.id, 
+                    owner=ModemLogOwner.SYSTEM, 
+                    type=ModemLogType.ERROR, 
+                    message='app.log.modem.reboot.stop.error.hard_reboot',
+                    code=Error.USB_HARD_RESET_EXCEPTION.value,
+                    logged_at = datetime.now(),
+                    params={
+                        'usb_port': self.usb_port.port,
+                        'error': str(error)
+                    }
+                )
+                modem_log_model.save_to_db()
+                self.log(modem_log_model)
+
+                return False
+            
+            modem_log_model = ModemLogModel(
+                modem_id=self.modem.id, 
+                owner=ModemLogOwner.SYSTEM, 
+                type=ModemLogType.INFO, 
+                message='app.log.modem.usb.rebooted_wait_modem', 
+                params={
+                    'usb_port': self.usb_port.port
+                },
+                logged_at = datetime.now()
+            )
+            modem_log_model.save_to_db()
+            self.log(modem_log_model)
+
+        else:
+            device_middleware = self.get_device_middleware()
+            if device_middleware == None:
+                modem_log_model = ModemLogModel(
+                    modem_id=self.modem.id, 
+                    owner=ModemLogOwner.SYSTEM, 
+                    type=ModemLogType.ERROR, 
+                    message='app.log.modem.reboot.stop.error.middleware_not_found',
+                    code=Error.MIDDLEWARE_NOT_FOUND.value,
+                    logged_at = datetime.now()
+                )
+                modem_log_model.save_to_db()
+                self.log(modem_log_model)
+
+                return False
+            else:
+                device_middleware.reboot_and_wait()
+
+        self.wait_until_modem_connection()
+        return True
+
+        
     def rotate(
             self, 
             filters = None, 
@@ -131,8 +182,7 @@ class Modem:
             proxy_username = None,
             hard_reset = False, 
             not_changed_try_count = 3, 
-            not_ip_try_count = 3, 
-            event_stop: Event = None):
+            not_ip_try_count = 3):
 
         modem_log_model = ModemLogModel(
             modem_id=self.modem.id, 
@@ -172,7 +222,7 @@ class Modem:
                     modem_id=self.modem.id, 
                     owner=ModemLogOwner.SYSTEM, 
                     type=ModemLogType.ERROR, 
-                    message='app.log.modem.middleware.error.not_found',
+                    message='app.log.modem.rotate.stop.error.middleware_not_found',
                     code=Error.MIDDLEWARE_NOT_FOUND.value,
                     logged_at = datetime.now()
                 )
@@ -181,25 +231,10 @@ class Modem:
                 break
         
             if hard_reset == True:
-                self.hard_reboot()
+                if self.reboot(hard_reset=True, write_params=False) == False:
+                    break
 
-                modem_log_model = ModemLogModel(
-                    modem_id=self.modem.id, 
-                    owner=ModemLogOwner.SYSTEM, 
-                    type=ModemLogType.INFO, 
-                    message='app.log.modem.usb.rebooted_wait_modem', 
-                    params={
-                        'usb_port': self.usb_port.port
-                    },
-                    logged_at = datetime.now()
-                )
-                modem_log_model.save_to_db()
-                self.log(modem_log_model)
-
-                #verificar event thread cancel neste metodo, pois chegou a travar
-                self.wait_until_modem_connection(False)
-
-                if self.event_stop_is_set(event_stop) == True: break
+                if self.event_stop_is_set() == True: break
 
                 modem_log_model = ModemLogModel(
                     modem_id=self.modem.id, 
@@ -210,18 +245,15 @@ class Modem:
                 )
                 modem_log_model.save_to_db()
                 self.log(modem_log_model)
-
-                time.sleep(30)
-
-                self.wait_until_modem_connection(True)
                 
                 device_middleware = self.get_device_middleware()
-                new_ip = device_middleware.wan.try_get_current_ip(retries=30)
+                new_ip = device_middleware.wan.try_get_current_ip(retries=60*3)
 
             else:
-                if self.event_stop_is_set(event_stop) == True: break            
-                self.wait_until_modem_connection(True)                                
-                if self.event_stop_is_set(event_stop) == True: break                            
+                if self.event_stop_is_set() == True: break            
+                self.wait_until_modem_connection()                                
+                if self.event_stop_is_set() == True: break   
+                                         
                 device_middleware = self.get_device_middleware()
 
                 modem_log_model = ModemLogModel(
@@ -234,14 +266,14 @@ class Modem:
                 modem_log_model.save_to_db()
                 self.log(modem_log_model)
 
-                try:                    
+                try:
                     new_ip = device_middleware.release()
                 except ConnectException as e:
                     modem_log_model = ModemLogModel(
                         modem_id=self.modem.id, 
                         owner=ModemLogOwner.SYSTEM, 
                         type=ModemLogType.ERROR, 
-                        message='app.log.modem.middleware.error.connection_reboot',
+                        message='app.log.modem.reboot.stop.error.middleware_reboot',
                         code=Error.MIDDLEWARE_IP_RELEASE_FAIL.value,
                         logged_at = datetime.now()
                     )
@@ -251,7 +283,7 @@ class Modem:
 
                 # new_ip = '189.40.89.35' #TESTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT  
                 
-            if self.event_stop_is_set(event_stop) == True: break   
+            if self.event_stop_is_set() == True: break   
 
             modem_details = device_middleware.details()
             network_type = modem_details['network_type'] if modem_details else None
@@ -269,7 +301,7 @@ class Modem:
                 if proxy_user_id:
                     is_ip_reserved_for_other = ProxyUserIPHistoryModel.is_ip_reserved_for_other(ip=new_ip, proxy_user_id=proxy_user_id)
 
-                    if self.event_stop_is_set(event_stop) == True: break
+                    if self.event_stop_is_set() == True: break
 
                     if is_ip_reserved_for_other:
                         modem_log_model = ModemLogModel(
@@ -418,7 +450,7 @@ class Modem:
 
                 break
 
-            if self.event_stop_is_set(event_stop) == True: break
+            if self.event_stop_is_set() == True: break
             # time.sleep(1)
 
     def external_ip_through_device(self, silence_mode = False, retries=2):

@@ -58,6 +58,7 @@ class ModemManager():
             raise ModemLockedByOtherThreadException('We could running this task now because this modem is locked by another thread.')
 
         event_stop = Event()
+        infra_modem.event_stop = event_stop
 
         process_thread = Thread(
             target=infra_modem.rotate, 
@@ -67,8 +68,7 @@ class ModemManager():
                 proxy_username,
                 hard_reset, 
                 not_changed_try_count, 
-                not_ip_try_count,
-                event_stop
+                not_ip_try_count
             )
         )
         process_thread.start()

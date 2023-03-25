@@ -252,10 +252,10 @@ const ModemLog = (props) => {
     useEffect(() => {
         _makeContainers(_logs);
 
-        if (_logs != undefined && _logs.length < 1) {
-            console.log('empty logs!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-            _loadFromApi();
-        }
+        // if (_logs != undefined && _logs.length < 1) {
+        //     console.log('empty logs!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+        //     _loadFromApi();
+        // }
     }, [_logs]);
 
     const _loadFromApi = () => {
