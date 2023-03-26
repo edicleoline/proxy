@@ -268,13 +268,12 @@ export const Dock = (props) => {
         }
     };
 
-    const [innerHeight, setInnerHeight] = useState(0);
-    const [innerWidth, setInnerWidth] = useState(0);
+    const [_window, _setWindow] = useState({ width: 0, height: 0 });
+
     const _resize = () => {
         const ih = window.innerHeight;
         const iw = window.innerWidth;
-        setInnerHeight(ih);
-        setInnerWidth(iw);
+        _setWindow({ width: iw, height: ih });
     };
     useEffect(() => {
         _resize();
@@ -289,8 +288,8 @@ export const Dock = (props) => {
     return (
         <div style={styles.container}>
             <div>
-                <DockWrapperW style={{ width: `${innerWidth}px` }}>
-                    <div style={{ height: `${innerHeight}px` }}>
+                <DockWrapperW style={{ width: `${_window.width}px` }}>
+                    <div style={{ height: `${_window.height}px` }}>
                         <div style={{ float: 'right' }}>
                             <div style={styles.item}></div>
                             {items

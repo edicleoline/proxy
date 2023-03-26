@@ -257,20 +257,44 @@ class ServerModemModel():
         conn = connection()
 
         if self.id == None:
-            conn.execute("insert into modem_server (server_id, modem_id, usb_port_id, proxy_ipv4_http_port, proxy_ipv4_socks_port, proxy_ipv6_http_port, proxy_ipv6_socks_port) values (?, ?, ?, ?, ?, ?, ?)", (
-                self.server_id, 
-                self.modem_id, 
-                self.usb_port_id, 
-                self.proxy_ipv4_http_port,
-                self.proxy_ipv4_socks_port,
-                self.proxy_ipv6_http_port,
-                self.proxy_ipv6_socks_port
-                ))
+            conn.execute("""
+                INSERT INTO
+                    modem_server (
+                        server_id, 
+                        modem_id, 
+                        usb_port_id, 
+                        proxy_ipv4_http_port, 
+                        proxy_ipv4_socks_port, 
+                        proxy_ipv6_http_port, 
+                        proxy_ipv6_socks_port
+                    ) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)""", 
+                (
+                    self.server_id, 
+                    self.modem_id, 
+                    self.usb_port_id, 
+                    self.proxy_ipv4_http_port,
+                    self.proxy_ipv4_socks_port,
+                    self.proxy_ipv6_http_port,
+                    self.proxy_ipv6_socks_port
+                )
+            )
             self.id = conn.last_insert_rowid()
         else:
-            conn.execute("update modem_server set usb_port_id=?, proxy_ipv4_http_port=?, proxy_ipv4_socks_port=? where id = ?", (
-                self.usb_port_id, self.proxy_ipv4_http_port, self.proxy_ipv4_socks_port, self.id
-                ))
+            conn.execute("""
+                UPDATE 
+                    modem_server SET
+                        usb_port_id=?, 
+                        proxy_ipv4_http_port=?, 
+                        proxy_ipv4_socks_port=? 
+                            WHERE id = ?""", 
+                (
+                    self.usb_port_id, 
+                    self.proxy_ipv4_http_port, 
+                    self.proxy_ipv4_socks_port, 
+                    self.id
+                )
+            )
 
         conn.close(True)
 

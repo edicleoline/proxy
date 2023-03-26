@@ -37,8 +37,9 @@ class Modems(Resource):
     
 
 _modem_put_parser = reqparse.RequestParser()
-_modem_put_parser.add_argument("proxy_ipv4_http_port", type=int, required=False)
-_modem_put_parser.add_argument("proxy_ipv4_socks_port", type=int, required=False)
+_modem_put_parser.add_argument("proxy", type=dict, required=False)
+_modem_put_parser.add_argument("modem", type=dict, required=False)
+_modem_put_parser.add_argument("usb", type=dict, required=False)
 
 class Modem(Resource):
     # @jwt_required()
@@ -101,22 +102,36 @@ class Modem(Resource):
     # @jwt_required()
     def put(self, modem_id):
         server_modem = ServerModemModel.find_by_modem_id(modem_id)
-        #modem = server_modem.modem()
 
         data = _modem_put_parser.parse_args()
-        
-        proxy_ipv4_http_port = data['proxy_ipv4_http_port']
-        if proxy_ipv4_http_port != None:
-            server_modem.proxy_ipv4_http_port = proxy_ipv4_http_port
 
-        proxy_ipv4_socks_port = data['proxy_ipv4_socks_port']
-        if proxy_ipv4_socks_port != None:
-            server_modem.proxy_ipv4_socks_port = proxy_ipv4_socks_port
+        data_modem = data['modem']
+        if data_modem != None:
+            modem = server_modem.modem()            
+            if 'addr_id' in data_modem and data_modem['addr_id'] != None:
+                modem.addr_id = data_modem['addr_id']
+                
+            modem.save_to_db()
 
+        data_proxy = data['proxy']
+        if data_proxy != None:
+            if 'ipv4' in data_proxy and 'http' in data_proxy['ipv4'] and 'port' in data_proxy['ipv4']['http'] and data_proxy['ipv4']['http']['port'] != None:
+                server_modem.proxy_ipv4_http_port = data_proxy['ipv4']['http']['port']
+
+            if 'ipv4' in data_proxy and 'socks' in data_proxy['ipv4'] and 'port' in data_proxy['ipv4']['socks'] and data_proxy['ipv4']['socks']['port'] != None:
+                server_modem.proxy_ipv4_socks_port = data_proxy['ipv4']['socks']['port']
         
+        data_usb = data['usb']
+        if data_usb != None:
+            if 'id' in data_usb and data_usb['id'] != None:
+                server_modem.usb_port_id = data_usb['id']
+
+
         server_modem.save_to_db()
 
         app.modems_service.reload_modems()
+        # app.socketio.emit('server_control', { 'action': 'reload_modems' }, broadcast=True)
+        app.socketio.emit('server_control', { 'action': 'reload_modem', 'id': modem_id }, broadcast=True)
 
         return {"message": "OK"}, 200
 

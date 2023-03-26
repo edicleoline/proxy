@@ -27,44 +27,84 @@ import PropTypes from 'prop-types';
 import { BootstrapDialogTitle } from 'ui-component/extended/BootstrapDialog';
 
 import { getUSBPorts } from 'services/api/server';
+import { saveModem } from 'services/api/modem';
+import cloneDeep from 'lodash/cloneDeep';
 
 const SettingsDialog = (props) => {
     const { modem, open, onClose, onConfirm, ...other } = props;
 
-    const handleApplyClick = () => {
-        onClose();
+    const [_modem, _setModem] = useState(cloneDeep(modem));
+
+    useEffect(() => {
+        _setModem(cloneDeep(modem));
+    }, [modem]);
+
+    const handleChangeProxyIpv4Http = (port) => {
+        const http = { ..._modem.proxy.ipv4.http };
+        http.port = parseInt(port);
+        const cloned = cloneDeep(_modem);
+        cloned.proxy.ipv4.http = http;
+        _setModem(cloned);
     };
+
+    const handleChangeProxyIpv4Socks = (port) => {
+        const socks = { ..._modem.proxy.ipv4.socks };
+        socks.port = parseInt(port);
+        const cloned = cloneDeep(_modem);
+        cloned.proxy.ipv4.socks = socks;
+        _setModem(cloned);
+    };
+
+    const handleChangeModemAddrId = (addrId) => {
+        const modem = { ..._modem.modem };
+        modem.addr_id = addrId;
+        const cloned = cloneDeep(_modem);
+        cloned.modem = modem;
+        _setModem(cloned);
+    };
+
+    const handleChangeUSBPort = (portId) => {
+        const modem = { ..._modem.modem };
+        modem.usb = { id: portId };
+        const cloned = cloneDeep(_modem);
+        cloned.usb = modem.usb;
+        _setModem(cloned);
+    };
+
+    const handleApplyClick = () => {
+        saveModem(_modem)
+            .then(
+                (response) => {
+                    console.log(response);
+                },
+                (err) => {
+                    const message =
+                        err.response && err.response.data && err.response.data.error && err.response.data.error.message
+                            ? err.response.data.error.message
+                            : err.message;
+                    console.log('saveModem error', err);
+                }
+            )
+            .finally(() => {
+                // setLoading(false);
+                // onClose();
+            });
+    };
+
+    useEffect(() => {
+        console.log(_modem);
+    }, [_modem]);
 
     const [isUSBPortsLoading, setIsUSBPortsLoading] = useState(false);
     const [usbPorts, setUSBPorts] = useState([]);
-
-    const [general, setGeneral] = useState({
-        addrId: '',
-        usbPort: ''
-    });
 
     const [rotate, setRotate] = useState({
         autoRotate: false,
         preventSameIPUsers: true
     });
 
-    const [proxy, setProxy] = useState({
-        ipv4HTTPPort: '',
-        ipv4SocksPort: ''
-    });
-
     useEffect(() => {
         if (open == true) {
-            setProxy({
-                ...proxy,
-                ipv4HTTPPort: modem && modem.proxy && modem.proxy.ipv4 ? modem.proxy.ipv4.http.port : '',
-                ipv4SocksPort: modem && modem.proxy && modem.proxy.ipv4 ? modem.proxy.ipv4.socks.port : ''
-            });
-            setGeneral({
-                ...general,
-                addrId: modem && modem.modem ? modem.modem.addr_id : ''
-            });
-
             setIsUSBPortsLoading(true);
             getUSBPorts()
                 .then(
@@ -82,10 +122,6 @@ const SettingsDialog = (props) => {
                 });
         }
     }, [open]);
-
-    useEffect(() => {
-        setGeneral({ ...general, usbPort: modem && modem.usb ? modem.usb.id : '' });
-    }, [usbPorts]);
 
     return (
         <Dialog
@@ -107,10 +143,10 @@ const SettingsDialog = (props) => {
                         <Select
                             labelId="modem-setting-port-label"
                             id="modem-setting-port-select"
-                            value={general.usbPort}
+                            value={_modem ? _modem.usb.id : ''}
                             label="Porta USB"
                             onChange={(event) => {
-                                setGeneral({ ...general, usbPort: event.target.value });
+                                handleChangeUSBPort(event.target.value);
                             }}
                         >
                             {usbPorts.map((usbPort) => (
@@ -125,9 +161,9 @@ const SettingsDialog = (props) => {
                         id="ip-id"
                         label="IP-ID"
                         variant="outlined"
-                        value={general.addrId}
+                        value={_modem ? _modem.modem.addr_id : ''}
                         onChange={(event) => {
-                            setGeneral({ ...general, addrId: event.target.value });
+                            handleChangeModemAddrId(event.target.value);
                         }}
                     />
                     <Divider />
@@ -139,9 +175,9 @@ const SettingsDialog = (props) => {
                         id="proxy-ipv4-http-port"
                         label="Porta HTTP/HTTPS"
                         variant="outlined"
-                        value={proxy.ipv4HTTPPort}
+                        value={_modem ? _modem.proxy.ipv4.http.port : ''}
                         onChange={(event) => {
-                            setProxy({ ...proxy, ipv4HTTPPort: event.target.value });
+                            handleChangeProxyIpv4Http(event.target.value);
                         }}
                     />
                     <TextField
@@ -149,9 +185,9 @@ const SettingsDialog = (props) => {
                         id="proxy-ipv4-http-socks"
                         label="Porta SOCKS"
                         variant="outlined"
-                        value={proxy.ipv4SocksPort}
+                        value={_modem ? _modem.proxy.ipv4.socks.port : ''}
                         onChange={(event) => {
-                            setProxy({ ...proxy, ipv4SocksPort: event.target.value });
+                            handleChangeProxyIpv4Socks(event.target.value);
                         }}
                     />
                     <Divider />

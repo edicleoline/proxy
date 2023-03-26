@@ -129,6 +129,8 @@ const Modems = () => {
 
     const [socketConnected, setSocketConnected] = useState(false);
 
+    const _serverControl = useRef(null);
+
     useEffect(() => {
         const socket = io(config.socketio.baseURL);
 
@@ -147,20 +149,39 @@ const Modems = () => {
             handleStoreModemLog(message);
         });
 
+        socket.on('server_control', (serverControl) => {
+            console.log(serverControl);
+            _serverControl.current = serverControl;
+        });
+
         socket.on('modems', (items) => {
             //console.log('socket.io server: modems', items);
             const itemsHash = objectHash.MD5(items);
 
-            if (!_modems.current) {
+            if (!_modems.current || (_serverControl.current && _serverControl.current.action === 'reload_modems')) {
                 _modems.current = items;
                 _modemsHash.current = itemsHash;
                 setModems(_modems.current);
+                if (_serverControl.current && _serverControl.current.action === 'reload_modems') {
+                    _serverControl.current = null;
+                }
             } else {
                 if (_modemsHash.current !== itemsHash) {
                     let changed = false;
                     const remodems = _modems.current.map(function (modem) {
                         items.forEach((item) => {
                             if (modem.id !== item.id) {
+                                return;
+                            }
+
+                            if (
+                                _serverControl.current &&
+                                _serverControl.current.action === 'reload_modem' &&
+                                _serverControl.current.id == item.id
+                            ) {
+                                _serverControl.current = null;
+                                modem = item;
+                                changed = true;
                                 return;
                             }
 
@@ -180,13 +201,6 @@ const Modems = () => {
                             if (modem.lock !== item.lock) {
                                 changed = true;
                                 modem.lock = item.lock;
-                            }
-
-                            const modemProxyHash = objectHash.MD5(modem.proxy);
-                            const itemProxyHash = objectHash.MD5(item.proxy);
-                            if (modemProxyHash != itemProxyHash) {
-                                modem.proxy = item.proxy;
-                                changed = true;
                             }
                         });
 

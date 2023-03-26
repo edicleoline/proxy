@@ -26,6 +26,19 @@ export function getModem(id) {
     });
 }
 
+export function saveModem(modem) {
+    return new Promise((resolve, reject) => {
+        api.put(`/modem/${modem.id}`, modem).then(
+            (response) => {
+                resolve(response.data);
+            },
+            (error) => {
+                reject(error);
+            }
+        );
+    });
+}
+
 export function reboot(id, hardReset = false) {
     const data = {
         hard_reset: hardReset
