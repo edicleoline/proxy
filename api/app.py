@@ -115,17 +115,16 @@ api.add_resource(ProxyUserModemFilters, "/proxy-user/<int:proxy_user_id>/modem/<
 
 modems_status_thread = None
 modems_status_thread_lock = Lock()
-
 def background_thread_modems_status():
     while True:
         modems = app.modems_service.modems_status()
         app.socketio.emit('modems', modems, broadcast=True)
         app.socketio.sleep(1)
 
+
 modems_details_thread_lock = Lock()
 modems_details_thread = Thread()
 modems_details_thread_stop_event = Event()
-
 class ModemsDetailsThread(Thread):
     def __init__(self):
         self.delay = 1
@@ -136,6 +135,28 @@ class ModemsDetailsThread(Thread):
             while not modems_details_thread_stop_event.isSet():
                 modems = app.modems_service.modems_details()
                 app.socketio.emit('modems_details', modems, broadcast=True)
+                sleep(self.delay)
+
+        except KeyboardInterrupt:
+            # kill()
+            pass
+
+    def run(self):
+        self.run_forever()
+
+
+modems_auto_rotate_thread_lock = Lock()
+modems_auto_rotate_thread = Thread()
+modems_auto_rotate_thread_stop_event = Event()
+class ModemsAutoRotateThread(Thread):
+    def __init__(self):
+        self.delay = 1
+        super(ModemsAutoRotateThread, self).__init__()
+
+    def run_forever(self):
+        try:
+            while True:
+                app.modems_auto_rotate_service.check_and_rotate()
                 sleep(self.delay)
 
         except KeyboardInterrupt:
@@ -160,6 +181,12 @@ def connect():
         if not modems_details_thread.is_alive():
             modems_details_thread = ModemsDetailsThread()
             modems_details_thread.start()
+
+    global modems_auto_rotate_thread
+    with modems_auto_rotate_thread_lock:
+        if not modems_auto_rotate_thread.is_alive():
+            modems_auto_rotate_thread = ModemsAutoRotateThread()
+            modems_auto_rotate_thread.start()
 
 @app.socketio.on_error_default
 def default_error_handler(e):

@@ -40,6 +40,9 @@ _modem_put_parser = reqparse.RequestParser()
 _modem_put_parser.add_argument("proxy", type=dict, required=False)
 _modem_put_parser.add_argument("modem", type=dict, required=False)
 _modem_put_parser.add_argument("usb", type=dict, required=False)
+_modem_put_parser.add_argument("prevent_same_ip_users", type=bool, required=False)
+_modem_put_parser.add_argument("auto_rotate", type=bool, required=False)
+_modem_put_parser.add_argument("auto_rotate_time", type=int, required=False)
 
 class Modem(Resource):
     # @jwt_required()
@@ -126,6 +129,17 @@ class Modem(Resource):
             if 'id' in data_usb and data_usb['id'] != None:
                 server_modem.usb_port_id = data_usb['id']
 
+        data_prevent_same_ip_users = data['prevent_same_ip_users']
+        if data_prevent_same_ip_users != None:
+            server_modem.prevent_same_ip_users = data_prevent_same_ip_users
+
+        data_auto_rotate = data['auto_rotate']
+        if data_auto_rotate != None:
+            server_modem.auto_rotate = data_auto_rotate
+
+        data_auto_rotate_time = data['auto_rotate_time']
+        if data_auto_rotate_time != None:
+            server_modem.auto_rotate_time = data_auto_rotate_time
 
         server_modem.save_to_db()
 

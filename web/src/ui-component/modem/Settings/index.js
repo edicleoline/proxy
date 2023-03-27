@@ -71,6 +71,24 @@ const SettingsDialog = (props) => {
         _setModem(cloned);
     };
 
+    const handleChangePreventSameIPUsers = (enabled) => {
+        const cloned = cloneDeep(_modem);
+        cloned.prevent_same_ip_users = enabled;
+        _setModem(cloned);
+    };
+
+    const handleChangeAutoRotate = (enabled) => {
+        const cloned = cloneDeep(_modem);
+        cloned.auto_rotate = enabled;
+        _setModem(cloned);
+    };
+
+    const handleChangeAutoRotateTime = (time) => {
+        const cloned = cloneDeep(_modem);
+        cloned.auto_rotate_time = time ? parseInt(time) : null;
+        _setModem(cloned);
+    };
+
     const handleApplyClick = () => {
         saveModem(_modem)
             .then(
@@ -97,11 +115,6 @@ const SettingsDialog = (props) => {
 
     const [isUSBPortsLoading, setIsUSBPortsLoading] = useState(false);
     const [usbPorts, setUSBPorts] = useState([]);
-
-    const [rotate, setRotate] = useState({
-        autoRotate: false,
-        preventSameIPUsers: true
-    });
 
     useEffect(() => {
         if (open == true) {
@@ -143,7 +156,7 @@ const SettingsDialog = (props) => {
                         <Select
                             labelId="modem-setting-port-label"
                             id="modem-setting-port-select"
-                            value={_modem ? _modem.usb.id : ''}
+                            value={_modem ? _modem.usb?.id : ''}
                             label="Porta USB"
                             onChange={(event) => {
                                 handleChangeUSBPort(event.target.value);
@@ -161,7 +174,7 @@ const SettingsDialog = (props) => {
                         id="ip-id"
                         label="IP-ID"
                         variant="outlined"
-                        value={_modem ? _modem.modem.addr_id : ''}
+                        value={_modem ? _modem.modem?.addr_id : ''}
                         onChange={(event) => {
                             handleChangeModemAddrId(event.target.value);
                         }}
@@ -175,7 +188,7 @@ const SettingsDialog = (props) => {
                         id="proxy-ipv4-http-port"
                         label="Porta HTTP/HTTPS"
                         variant="outlined"
-                        value={_modem ? _modem.proxy.ipv4.http.port : ''}
+                        value={_modem ? _modem.proxy?.ipv4?.http?.port : ''}
                         onChange={(event) => {
                             handleChangeProxyIpv4Http(event.target.value);
                         }}
@@ -185,7 +198,7 @@ const SettingsDialog = (props) => {
                         id="proxy-ipv4-http-socks"
                         label="Porta SOCKS"
                         variant="outlined"
-                        value={_modem ? _modem.proxy.ipv4.socks.port : ''}
+                        value={_modem ? _modem.proxy?.ipv4?.socks?.port : ''}
                         onChange={(event) => {
                             handleChangeProxyIpv4Socks(event.target.value);
                         }}
@@ -196,35 +209,39 @@ const SettingsDialog = (props) => {
                     </Typography>
                     <FormGroup style={{ marginBottom: '-16px' }}>
                         <FormControlLabel
-                            control={<Switch checked={rotate.preventSameIPUsers} />}
+                            control={<Switch checked={_modem ? _modem.prevent_same_ip_users : false} />}
                             label="Evitar mesmo IP para diferentes usuários"
                             onChange={(event) => {
-                                setRotate({ ...rotate, preventSameIPUsers: event.target.checked });
+                                handleChangePreventSameIPUsers(event.target.checked);
                             }}
                         />
                     </FormGroup>
                     <FormGroup style={{ marginBottom: '-10px' }}>
                         <FormControlLabel
-                            control={<Switch checked={rotate.autoRotate} />}
+                            control={<Switch checked={_modem ? _modem.auto_rotate : false} />}
                             label="Rotacionamento automático"
                             onChange={(event) => {
-                                setRotate({ ...rotate, autoRotate: event.target.checked });
+                                handleChangeAutoRotate(event.target.checked);
                             }}
                         />
                     </FormGroup>
-                    {rotate.autoRotate ? (
+                    {_modem && _modem.auto_rotate == true ? (
                         <FormControl sx={{ m: 1, maxWidth: 250 }} variant="outlined">
                             <TextField
                                 id="auto-rotate-value"
                                 InputProps={{
-                                    endAdornment: <InputAdornment position="end">minutos</InputAdornment>
+                                    endAdornment: <InputAdornment position="end">segundos</InputAdornment>
                                 }}
                                 aria-describedby="auto-rotate-value-helper-text"
                                 inputProps={{
-                                    'aria-label': 'minutos'
+                                    'aria-label': 'segundos'
                                 }}
                                 label="Intervalo"
                                 type="number"
+                                value={_modem && _modem.auto_rotate_time != null ? _modem.auto_rotate_time : ''}
+                                onChange={(event) => {
+                                    handleChangeAutoRotateTime(event.target.value);
+                                }}
                             />
                         </FormControl>
                     ) : (

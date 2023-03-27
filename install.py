@@ -109,6 +109,9 @@ if __name__ == '__main__':
             proxy_ipv4_socks_port INTEGER,
             proxy_ipv6_http_port INTEGER,
             proxy_ipv6_socks_port INTEGER,
+            prevent_same_ip_users INTEGER NOT NULL DEFAULT 1,
+            auto_rotate INTEGER NOT NULL DEFAULT 0,
+            auto_rotate_time INTEGER,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
             PRIMARY KEY (id), 
             FOREIGN KEY(server_id) REFERENCES server (id), 
@@ -284,7 +287,10 @@ if __name__ == '__main__':
                 proxy_ipv4_http_port = s['proxy_ipv4_http_port'],
                 proxy_ipv4_socks_port = s['proxy_ipv4_socks_port'],
                 proxy_ipv6_http_port = s['proxy_ipv6_http_port'],
-                proxy_ipv6_socks_port = s['proxy_ipv6_socks_port']
+                proxy_ipv6_socks_port = s['proxy_ipv6_socks_port'],
+                prevent_same_ip_users=True,
+                auto_rotate=False,
+                auto_rotate_time=None
                 )            
             server_modem_model.save_to_db()
 

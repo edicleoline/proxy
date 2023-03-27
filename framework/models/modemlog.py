@@ -39,8 +39,9 @@ modem_log_type_field = {
 }
     
 class ModemLogOwner(Enum):
-    SYSTEM  = 1
-    USER    = 2
+    SYSTEM    = 1
+    USER      = 2
+    USER_AUTO = 3
 
 class ModemLogType(Enum):
     SUCCESS    = 0

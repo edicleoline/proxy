@@ -324,7 +324,7 @@ class Modem:
                 modem_ifaddress = inframodem_iface.ifaddresses[0]
                 modem_gateway = NetIface.get_gateway_from_ipv4(ipv4 = modem_ifaddress['addr'])
 
-                if proxy_user_id:
+                if proxy_user_id and self.server_modem_model.prevent_same_ip_users == True:
                     is_ip_reserved_for_other = ProxyUserIPHistoryModel.is_ip_reserved_for_other(ip=new_ip, proxy_user_id=proxy_user_id)
 
                     if self.event_stop_is_set() == True: break

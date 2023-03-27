@@ -157,6 +157,9 @@ class ServerModemModel():
             proxy_ipv4_socks_port = None, 
             proxy_ipv6_http_port = None, 
             proxy_ipv6_socks_port = None, 
+            prevent_same_ip_users = True,
+            auto_rotate = False,
+            auto_rotate_time = None,
             created_at = None
         ):
         self.id = id
@@ -167,6 +170,9 @@ class ServerModemModel():
         self.proxy_ipv4_socks_port = proxy_ipv4_socks_port
         self.proxy_ipv6_http_port = proxy_ipv6_http_port
         self.proxy_ipv6_socks_port = proxy_ipv6_socks_port
+        self.prevent_same_ip_users = prevent_same_ip_users
+        self.auto_rotate = auto_rotate
+        self.auto_rotate_time = auto_rotate_time
         self.created_at = created_at
 
     def json(self):
@@ -208,14 +214,35 @@ class ServerModemModel():
                     'model': device.model,
                     'type': device.type
                 },
-            }
-            # 'created_at': self.created_at
+            },
+            'prevent_same_ip_users': self.prevent_same_ip_users,
+            'auto_rotate': self.auto_rotate,
+            'auto_rotate_time': self.auto_rotate_time
         }
 
     @classmethod
     def find_by_id(cls, id: int):
         conn = connection()
-        row = conn.execute("select id, server_id, modem_id, usb_port_id, proxy_ipv4_http_port, proxy_ipv4_socks_port, proxy_ipv6_http_port, proxy_ipv6_socks_port, created_at from modem_server where id=?", (id, )).fetchone()
+        row = conn.execute("""
+            SELECT 
+                id, 
+                server_id, 
+                modem_id, 
+                usb_port_id, 
+                proxy_ipv4_http_port, 
+                proxy_ipv4_socks_port, 
+                proxy_ipv6_http_port, 
+                proxy_ipv6_socks_port, 
+                prevent_same_ip_users,
+                auto_rotate,
+                auto_rotate_time,
+                created_at 
+                    FROM modem_server 
+                    WHERE id=?""", 
+            (
+                id, 
+            )
+        ).fetchone()
         conn.close(True)
 
         if row == None:
@@ -230,8 +257,11 @@ class ServerModemModel():
             proxy_ipv4_socks_port=row[5], 
             proxy_ipv6_http_port=row[6], 
             proxy_ipv6_socks_port=row[7], 
-            created_at=row[3]
-            )
+            prevent_same_ip_users=True if row[8] and int(row[8]) == 1 else False,
+            auto_rotate=True if row[9] and int(row[9]) == 1 else False,
+            auto_rotate_time=row[10],
+            # created_at=row[11]
+        )
 
     @classmethod
     def find_by_modem_id(cls, id: int):
@@ -266,9 +296,12 @@ class ServerModemModel():
                         proxy_ipv4_http_port, 
                         proxy_ipv4_socks_port, 
                         proxy_ipv6_http_port, 
-                        proxy_ipv6_socks_port
+                        proxy_ipv6_socks_port,
+                        prevent_same_ip_users,
+                        auto_rotate,
+                        auto_rotate_time
                     ) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?)""", 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", 
                 (
                     self.server_id, 
                     self.modem_id, 
@@ -276,7 +309,10 @@ class ServerModemModel():
                     self.proxy_ipv4_http_port,
                     self.proxy_ipv4_socks_port,
                     self.proxy_ipv6_http_port,
-                    self.proxy_ipv6_socks_port
+                    self.proxy_ipv6_socks_port,
+                    True if self.prevent_same_ip_users and self.prevent_same_ip_users == True else 0,
+                    True if self.auto_rotate and self.auto_rotate == True else 0,
+                    int(self.auto_rotate_time) if self.auto_rotate_time else None,
                 )
             )
             self.id = conn.last_insert_rowid()
@@ -286,12 +322,18 @@ class ServerModemModel():
                     modem_server SET
                         usb_port_id=?, 
                         proxy_ipv4_http_port=?, 
-                        proxy_ipv4_socks_port=? 
+                        proxy_ipv4_socks_port=?, 
+                        prevent_same_ip_users=?,
+                        auto_rotate=?,
+                        auto_rotate_time=?
                             WHERE id = ?""", 
                 (
                     self.usb_port_id, 
                     self.proxy_ipv4_http_port, 
                     self.proxy_ipv4_socks_port, 
+                    1 if self.prevent_same_ip_users and self.prevent_same_ip_users == True else 0,
+                    1 if self.auto_rotate and self.auto_rotate == True else 0,
+                    int(self.auto_rotate_time) if self.auto_rotate_time else None,
                     self.id
                 )
             )

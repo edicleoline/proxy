@@ -1,3 +1,4 @@
+from datetime import datetime
 from framework.infra.modem import Modem as IModem
 from threading import Thread
 from threading import Event
@@ -102,3 +103,4 @@ class ModemThreadData():
         self.action = action
         self.thread = thread
         self.event_stop = event_stop
+        self.started_at = datetime.now()
