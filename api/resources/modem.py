@@ -17,6 +17,16 @@ from framework.models.proxyuser import ProxyUserModel
 from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
 from app import app
 
+def filters_type(value, name):
+    full_json_data = request.get_json()
+    filters_json = full_json_data[name]
+
+    if(not isinstance(filters_json, (list))):
+        raise ValueError("The parameter " + name + " is not a valid array")
+    
+    filters = ProxyUserIPFilterModel.schema().load(filters_json, many=True)
+    return filters
+
 class Modems(Resource):
     # @jwt_required()
     def get(self):
@@ -43,6 +53,8 @@ _modem_put_parser.add_argument("usb", type=dict, required=False)
 _modem_put_parser.add_argument("prevent_same_ip_users", type=bool, required=False)
 _modem_put_parser.add_argument("auto_rotate", type=bool, required=False)
 _modem_put_parser.add_argument("auto_rotate_time", type=int, required=False)
+_modem_put_parser.add_argument("auto_rotate_hard_reset", type=bool, required=False)
+_modem_put_parser.add_argument("auto_rotate_filter", type=filters_type, location="json", required=False)
 
 class Modem(Resource):
     # @jwt_required()
@@ -141,6 +153,13 @@ class Modem(Resource):
         if data_auto_rotate_time != None:
             server_modem.auto_rotate_time = data_auto_rotate_time
 
+        data_auto_rotate_hard_reset = data['auto_rotate_hard_reset']
+        if data_auto_rotate_hard_reset != None:
+            server_modem.auto_rotate_hard_reset = data_auto_rotate_hard_reset
+
+        data_auto_rotate_filter = data['auto_rotate_filter']
+        server_modem.auto_rotate_filter = data_auto_rotate_filter
+
         server_modem.save_to_db()
 
         app.modems_service.reload_modems()
@@ -195,17 +214,6 @@ class ModemReboot(Resource):
             }, 500
 
         return {"message": "OK"}, 200
-
-
-def filters_type(value, name):
-    full_json_data = request.get_json()
-    filters_json = full_json_data[name]
-
-    if(not isinstance(filters_json, (list))):
-        raise ValueError("The parameter " + name + " is not a valid array")
-    
-    filters = ProxyUserIPFilterModel.schema().load(filters_json, many=True)
-    return filters
 
 
 _server_modem_rotate_parser = reqparse.RequestParser()

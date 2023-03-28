@@ -112,6 +112,8 @@ if __name__ == '__main__':
             prevent_same_ip_users INTEGER NOT NULL DEFAULT 1,
             auto_rotate INTEGER NOT NULL DEFAULT 0,
             auto_rotate_time INTEGER,
+            auto_rotate_hard_reset INTEGER NOT NULL DEFAULT 1,
+            auto_rotate_filter VARCHAR(240),
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
             PRIMARY KEY (id), 
             FOREIGN KEY(server_id) REFERENCES server (id), 

@@ -22,7 +22,7 @@ import Switch from '@mui/material/Switch';
 import { FormattedMessage } from 'react-intl';
 
 import { reboot } from 'services/api/modem';
-import { BootstrapDialogTitle } from 'ui-component/extended/BootstrapDialog';
+import { BootstrapDialogTitle, BootstrapDialogActions } from 'ui-component/extended/BootstrapDialog';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -118,14 +118,11 @@ const RebootDialog = (props) => {
                         />
                     </FormGroup>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={onClose} disabled={isLoading}>
-                        <FormattedMessage id="app.labels.no" />
-                    </Button>
-                    <Button onClick={handleConfirmClick} disabled={isLoading}>
+                <BootstrapDialogActions>
+                    <Button onClick={handleConfirmClick} disabled={isLoading} variant="outlined">
                         <FormattedMessage id="app.labels.reboot" />
                     </Button>
-                </DialogActions>
+                </BootstrapDialogActions>
             </Dialog>
             <Snackbar
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}

@@ -1,5 +1,7 @@
 from enum import Enum
+import json
 from framework.models.installation import InstallationModel
+from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
 import psutil
 
 from framework.models.modem import ModemModel
@@ -160,6 +162,8 @@ class ServerModemModel():
             prevent_same_ip_users = True,
             auto_rotate = False,
             auto_rotate_time = None,
+            auto_rotate_hard_reset = True,
+            auto_rotate_filter = None,
             created_at = None
         ):
         self.id = id
@@ -173,6 +177,8 @@ class ServerModemModel():
         self.prevent_same_ip_users = prevent_same_ip_users
         self.auto_rotate = auto_rotate
         self.auto_rotate_time = auto_rotate_time
+        self.auto_rotate_hard_reset = auto_rotate_hard_reset
+        self.auto_rotate_filter = auto_rotate_filter
         self.created_at = created_at
 
     def json(self):
@@ -217,7 +223,9 @@ class ServerModemModel():
             },
             'prevent_same_ip_users': self.prevent_same_ip_users,
             'auto_rotate': self.auto_rotate,
-            'auto_rotate_time': self.auto_rotate_time
+            'auto_rotate_time': self.auto_rotate_time,
+            'auto_rotate_hard_reset': self.auto_rotate_hard_reset,
+            'auto_rotate_filter': json.loads(ProxyUserIPFilterModel.schema().dumps(self.auto_rotate_filter, many=True)) if self.auto_rotate_filter else None
         }
 
     @classmethod
@@ -236,6 +244,8 @@ class ServerModemModel():
                 prevent_same_ip_users,
                 auto_rotate,
                 auto_rotate_time,
+                auto_rotate_hard_reset,
+                auto_rotate_filter,
                 created_at 
                     FROM modem_server 
                     WHERE id=?""", 
@@ -260,6 +270,8 @@ class ServerModemModel():
             prevent_same_ip_users=True if row[8] and int(row[8]) == 1 else False,
             auto_rotate=True if row[9] and int(row[9]) == 1 else False,
             auto_rotate_time=row[10],
+            auto_rotate_hard_reset=True if row[11] and int(row[11]) == 1 else False,
+            auto_rotate_filter=ProxyUserIPFilterModel.schema().loads(row[12], many=True) if row[12] != None else None
             # created_at=row[11]
         )
 
@@ -299,9 +311,11 @@ class ServerModemModel():
                         proxy_ipv6_socks_port,
                         prevent_same_ip_users,
                         auto_rotate,
-                        auto_rotate_time
+                        auto_rotate_time,
+                        auto_rotate_hard_reset,
+                        auto_rotate_filter
                     ) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", 
                 (
                     self.server_id, 
                     self.modem_id, 
@@ -310,9 +324,11 @@ class ServerModemModel():
                     self.proxy_ipv4_socks_port,
                     self.proxy_ipv6_http_port,
                     self.proxy_ipv6_socks_port,
-                    True if self.prevent_same_ip_users and self.prevent_same_ip_users == True else 0,
-                    True if self.auto_rotate and self.auto_rotate == True else 0,
+                    True if self.prevent_same_ip_users == True else 0,
+                    True if self.auto_rotate == True else 0,
                     int(self.auto_rotate_time) if self.auto_rotate_time else None,
+                    True if self.auto_rotate_hard_reset == True else 0,
+                    ProxyUserIPFilterModel.schema().dumps(self.auto_rotate_filter, many=True) if self.auto_rotate_filter else None
                 )
             )
             self.id = conn.last_insert_rowid()
@@ -325,15 +341,19 @@ class ServerModemModel():
                         proxy_ipv4_socks_port=?, 
                         prevent_same_ip_users=?,
                         auto_rotate=?,
-                        auto_rotate_time=?
+                        auto_rotate_time=?,
+                        auto_rotate_hard_reset=?,
+                        auto_rotate_filter=?
                             WHERE id = ?""", 
                 (
                     self.usb_port_id, 
                     self.proxy_ipv4_http_port, 
                     self.proxy_ipv4_socks_port, 
-                    1 if self.prevent_same_ip_users and self.prevent_same_ip_users == True else 0,
-                    1 if self.auto_rotate and self.auto_rotate == True else 0,
+                    1 if self.prevent_same_ip_users == True else 0,
+                    1 if self.auto_rotate == True else 0,
                     int(self.auto_rotate_time) if self.auto_rotate_time else None,
+                    1 if self.auto_rotate_hard_reset == True else 0,
+                    ProxyUserIPFilterModel.schema().dumps(self.auto_rotate_filter, many=True) if self.auto_rotate_filter else None,
                     self.id
                 )
             )

@@ -123,6 +123,11 @@ class ModemsAutoRotateSchedule():
                 continue
 
             in_agenda = self.in_agenda_items(server_modem)
+
+            if in_agenda:
+                in_agenda.server_modem_model.auto_rotate_hard_reset = server_modem.auto_rotate_hard_reset
+                in_agenda.server_modem_model.auto_rotate_filter = server_modem.auto_rotate_filter
+
             if in_agenda and in_agenda.server_modem_model.auto_rotate_time != server_modem.auto_rotate_time:
                 print('removed from agenda because changed {0}'.format(server_modem.id))
                 self.remove_from_agenda_items(server_modem)
@@ -187,8 +192,9 @@ class ModemsAutoRotateService():
     def check_and_rotate(self):
         agenda_items = self.schedule.check()
         for agenda_item in agenda_items:
-            ready_to_run = agenda_item.ready_to_run()            
-            print('agenda_item {0}, ready {1}'.format(agenda_item.server_modem_model.id, ready_to_run))
+            ready_to_run = agenda_item.ready_to_run()  
+            # print('agenda_item {0} autorotate = {1}'.format(agenda_item.server_modem_model.id, agenda_item.server_modem_model.auto_rotate_hard_reset))          
+            # print('agenda_item {0}, ready {1}'.format(agenda_item.server_modem_model.id, ready_to_run))
 
             if ready_to_run == True:
                 self.schedule.remove_from_agenda_items(agenda_item.server_modem_model)

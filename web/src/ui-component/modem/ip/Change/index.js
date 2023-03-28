@@ -28,7 +28,7 @@ import { FormattedMessage } from 'react-intl';
 import { rotate } from 'services/api/modem';
 import { getProxyUsers, getProxyUserByUsername, getProxyUserFilters } from 'services/api/proxy-user';
 
-import { BootstrapDialogTitle } from 'ui-component/extended/BootstrapDialog';
+import { BootstrapDialogTitle, BootstrapDialogActions } from 'ui-component/extended/BootstrapDialog';
 
 const ChangeDialog = (props) => {
     const { modem, open, onClose, onConfirm, ...other } = props;
@@ -227,9 +227,11 @@ const ChangeDialog = (props) => {
                         </FormGroup>
                     </Stack>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleConfirmClick}>Rotacionar</Button>
-                </DialogActions>
+                <BootstrapDialogActions>
+                    <Button onClick={handleConfirmClick} variant="outlined">
+                        Rotacionar
+                    </Button>
+                </BootstrapDialogActions>
             </Dialog>
             <Snackbar
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}

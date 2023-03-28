@@ -22,9 +22,9 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Divider from '@mui/material/Divider';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { BootstrapDialogTitle } from 'ui-component/extended/BootstrapDialog';
+import { BootstrapDialogTitle, BootstrapDialogActions } from 'ui-component/extended/BootstrapDialog';
 
 import { getUSBPorts } from 'services/api/server';
 import { saveModem } from 'services/api/modem';
@@ -89,6 +89,37 @@ const SettingsDialog = (props) => {
         _setModem(cloned);
     };
 
+    const handleChangeAutoRotateHardReset = (enabled) => {
+        const cloned = cloneDeep(_modem);
+        cloned.auto_rotate_hard_reset = enabled;
+        _setModem(cloned);
+    };
+
+    const [autoRotateFilter, setAutoRotateFilter] = useState('');
+
+    const handleChangeAutoRotateFilter = (value) => {
+        setAutoRotateFilter(value);
+
+        let filters = null;
+        const ipv4FilterArray = value ? value.split(',') : null;
+        if (ipv4FilterArray) {
+            filters = [];
+            ipv4FilterArray.forEach((ipv4Filter) => {
+                ipv4Filter = ipv4Filter.replace(/\s/g, '');
+                filters.push({
+                    type: 'ip',
+                    value: ipv4Filter
+                });
+            });
+        }
+
+        if (_modem) {
+            const cloned = cloneDeep(_modem);
+            cloned.auto_rotate_filter = filters;
+            _setModem(cloned);
+        }
+    };
+
     const handleApplyClick = () => {
         saveModem(_modem)
             .then(
@@ -110,7 +141,15 @@ const SettingsDialog = (props) => {
     };
 
     useEffect(() => {
-        console.log(_modem);
+        if (_modem && _modem.auto_rotate_filter) {
+            let filtersExp = '';
+            _modem.auto_rotate_filter.forEach((item) => {
+                filtersExp += item.value + ', ';
+            });
+            setAutoRotateFilter(filtersExp.slice(0, -2));
+        } else {
+            setAutoRotateFilter('');
+        }
     }, [_modem]);
 
     const [isUSBPortsLoading, setIsUSBPortsLoading] = useState(false);
@@ -216,7 +255,7 @@ const SettingsDialog = (props) => {
                             }}
                         />
                     </FormGroup>
-                    <FormGroup style={{ marginBottom: '-10px' }}>
+                    <FormGroup style={{ marginBottom: '-16px' }}>
                         <FormControlLabel
                             control={<Switch checked={_modem ? _modem.auto_rotate : false} />}
                             label="Rotacionamento automático"
@@ -226,32 +265,56 @@ const SettingsDialog = (props) => {
                         />
                     </FormGroup>
                     {_modem && _modem.auto_rotate == true ? (
-                        <FormControl sx={{ m: 1, maxWidth: 250 }} variant="outlined">
+                        <Box sx={{ maxWidth: 350 }}>
+                            <FormGroup style={{ marginBottom: '16px' }}>
+                                <FormControlLabel
+                                    control={<Switch checked={_modem ? _modem.auto_rotate_hard_reset : false} />}
+                                    label="Ativar hard-reset"
+                                    onChange={(event) => {
+                                        handleChangeAutoRotateHardReset(event.target.checked);
+                                    }}
+                                />
+                            </FormGroup>
+                            <FormControl sx={{ maxWidth: 250 }} variant="outlined">
+                                <TextField
+                                    id="auto-rotate-value"
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">segundos</InputAdornment>
+                                    }}
+                                    aria-describedby="auto-rotate-value-helper-text"
+                                    inputProps={{
+                                        'aria-label': 'segundos'
+                                    }}
+                                    label="Intervalo"
+                                    type="number"
+                                    value={_modem && _modem.auto_rotate_time != null ? _modem.auto_rotate_time : ''}
+                                    onChange={(event) => {
+                                        handleChangeAutoRotateTime(event.target.value);
+                                    }}
+                                />
+                            </FormControl>
                             <TextField
-                                id="auto-rotate-value"
-                                InputProps={{
-                                    endAdornment: <InputAdornment position="end">segundos</InputAdornment>
-                                }}
-                                aria-describedby="auto-rotate-value-helper-text"
-                                inputProps={{
-                                    'aria-label': 'segundos'
-                                }}
-                                label="Intervalo"
-                                type="number"
-                                value={_modem && _modem.auto_rotate_time != null ? _modem.auto_rotate_time : ''}
+                                style={{ marginTop: '20px' }}
+                                id="modem-settings-filter"
+                                label="Filtro IPv4"
+                                variant="outlined"
+                                helperText="Você pode informar mais de um filtro, separados por vírgula."
+                                value={autoRotateFilter}
                                 onChange={(event) => {
-                                    handleChangeAutoRotateTime(event.target.value);
+                                    handleChangeAutoRotateFilter(event.target.value);
                                 }}
                             />
-                        </FormControl>
+                        </Box>
                     ) : (
                         <></>
                     )}
                 </Stack>
             </DialogContent>
-            <DialogActions>
-                <Button onClick={handleApplyClick}>Aplicar</Button>
-            </DialogActions>
+            <BootstrapDialogActions>
+                <Button onClick={handleApplyClick} variant="outlined">
+                    Aplicar
+                </Button>
+            </BootstrapDialogActions>
         </Dialog>
     );
 };
