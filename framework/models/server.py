@@ -298,6 +298,9 @@ class ServerModemModel():
     def save_to_db(self):
         conn = connection()
 
+        if self.auto_rotate_filter:
+            self.auto_rotate_filter[:] = [x for x in self.auto_rotate_filter if not x.value]
+
         if self.id == None:
             conn.execute("""
                 INSERT INTO
