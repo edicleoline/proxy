@@ -83,6 +83,9 @@ class ProxyUserIPFilterModel():
     def save_to_db(self):
         conn = connection()
 
+        if not self.value or not self.type:
+            return False
+
         if self.id == None:
             conn.execute("insert into proxy_user_ip_filter (proxy_user_id, modem_id, filter_type, filter_value) values (?, ?, ?, ?)", (
                 self.proxy_user_id, self.modem_id, self.type, self.value,

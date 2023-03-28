@@ -27,34 +27,21 @@ import { FormattedMessage } from 'react-intl';
 
 import { rotate } from 'services/api/modem';
 import { getProxyUsers, getProxyUserByUsername, getProxyUserFilters } from 'services/api/proxy-user';
-
 import { BootstrapDialogTitle, BootstrapDialogActions } from 'ui-component/extended/BootstrapDialog';
+import { IpFilter } from 'ui-component/IpFilter';
 
 const ChangeDialog = (props) => {
     const { modem, open, onClose, onConfirm, ...other } = props;
 
     const [isLoading, setLoading] = useState(false);
     const [proxyUser, setProxyUser] = useState(null);
-    const [ipv4Filter, setIPv4Filter] = useState('');
+    const [ipv4Filter, setIPv4Filter] = useState(null);
     const [hardReset, setHardReset] = useState(true);
 
     const handleConfirmClick = () => {
         setLoading(true);
 
-        let filters = null;
-        const ipv4FilterArray = ipv4Filter ? ipv4Filter.split(',') : null;
-        if (ipv4FilterArray) {
-            filters = [];
-            ipv4FilterArray.forEach((ipv4Filter) => {
-                ipv4Filter = ipv4Filter.replace(/\s/g, '');
-                filters.push({
-                    type: 'ip',
-                    value: ipv4Filter
-                });
-            });
-        }
-
-        rotate(modem.id, hardReset, proxyUser, filters)
+        rotate(modem.id, hardReset, proxyUser, ipv4Filter)
             .then(
                 (response) => {
                     console.log(response);
@@ -75,7 +62,7 @@ const ChangeDialog = (props) => {
             .finally(() => {
                 setLoading(false);
                 onClose();
-                setIPv4Filter('');
+                setIPv4Filter(null);
                 setProxyUser(null);
             });
     };
@@ -126,12 +113,7 @@ const ChangeDialog = (props) => {
                             .then(
                                 (response) => {
                                     if (response && response.items) {
-                                        let filtersExp = '';
-                                        response.items.forEach((item) => {
-                                            filtersExp += item.value + ', ';
-                                        });
-                                        console.log(filtersExp);
-                                        setIPv4Filter(filtersExp.slice(0, -2));
+                                        setIPv4Filter(response.items);
                                     }
                                 },
                                 (err) => {
@@ -155,6 +137,10 @@ const ChangeDialog = (props) => {
     useEffect(() => {
         loadFilters(proxyUser);
     }, [proxyUser]);
+
+    const handleIpv4FilterChange = (obj, str) => {
+        setIPv4Filter(obj);
+    };
 
     return (
         <div>
@@ -206,16 +192,7 @@ const ChangeDialog = (props) => {
                             )}
                             loading={true}
                         />
-                        <TextField
-                            id="modem-ip-change-filter"
-                            label="Filtro IPv4"
-                            variant="outlined"
-                            helperText="Você pode informar mais de um filtro, separados por vírgula."
-                            value={ipv4Filter}
-                            onChange={(event) => {
-                                setIPv4Filter(event.target.value);
-                            }}
-                        />
+                        <IpFilter value={ipv4Filter} onChange={handleIpv4FilterChange} />
                         <FormGroup>
                             <FormControlLabel
                                 control={<Switch checked={hardReset} />}

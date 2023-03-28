@@ -25,6 +25,7 @@ import Divider from '@mui/material/Divider';
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { BootstrapDialogTitle, BootstrapDialogActions } from 'ui-component/extended/BootstrapDialog';
+import { IpFilter } from 'ui-component/IpFilter';
 
 import { getUSBPorts } from 'services/api/server';
 import { saveModem } from 'services/api/modem';
@@ -95,30 +96,22 @@ const SettingsDialog = (props) => {
         _setModem(cloned);
     };
 
-    const [autoRotateFilter, setAutoRotateFilter] = useState('');
-
+    const [autoRotateFilter, setAutoRotateFilter] = useState(null);
     const handleChangeAutoRotateFilter = (value) => {
         setAutoRotateFilter(value);
-
-        let filters = null;
-        const ipv4FilterArray = value ? value.split(',') : null;
-        if (ipv4FilterArray) {
-            filters = [];
-            ipv4FilterArray.forEach((ipv4Filter) => {
-                ipv4Filter = ipv4Filter.replace(/\s/g, '');
-                filters.push({
-                    type: 'ip',
-                    value: ipv4Filter
-                });
-            });
-        }
-
         if (_modem) {
             const cloned = cloneDeep(_modem);
-            cloned.auto_rotate_filter = filters;
+            cloned.auto_rotate_filter = value;
             _setModem(cloned);
         }
     };
+
+    useEffect(() => {
+        if (_modem) {
+            setAutoRotateFilter(_modem.auto_rotate_filter);
+        }
+        console.log(_modem);
+    }, [_modem]);
 
     const handleApplyClick = () => {
         saveModem(_modem)
@@ -139,18 +132,6 @@ const SettingsDialog = (props) => {
                 // onClose();
             });
     };
-
-    useEffect(() => {
-        if (_modem && _modem.auto_rotate_filter) {
-            let filtersExp = '';
-            _modem.auto_rotate_filter.forEach((item) => {
-                filtersExp += item.value + ', ';
-            });
-            setAutoRotateFilter(filtersExp.slice(0, -2));
-        } else {
-            setAutoRotateFilter('');
-        }
-    }, [_modem]);
 
     const [isUSBPortsLoading, setIsUSBPortsLoading] = useState(false);
     const [usbPorts, setUSBPorts] = useState([]);
@@ -275,7 +256,7 @@ const SettingsDialog = (props) => {
                                     }}
                                 />
                             </FormGroup>
-                            <FormControl sx={{ maxWidth: 250 }} variant="outlined">
+                            <FormControl sx={{ maxWidth: 250 }} style={{ marginBottom: '20px' }} variant="outlined">
                                 <TextField
                                     id="auto-rotate-value"
                                     InputProps={{
@@ -293,17 +274,7 @@ const SettingsDialog = (props) => {
                                     }}
                                 />
                             </FormControl>
-                            <TextField
-                                style={{ marginTop: '20px' }}
-                                id="modem-settings-filter"
-                                label="Filtro IPv4"
-                                variant="outlined"
-                                helperText="Você pode informar mais de um filtro, separados por vírgula."
-                                value={autoRotateFilter}
-                                onChange={(event) => {
-                                    handleChangeAutoRotateFilter(event.target.value);
-                                }}
-                            />
+                            <IpFilter value={autoRotateFilter} onChange={handleChangeAutoRotateFilter} />
                         </Box>
                     ) : (
                         <></>

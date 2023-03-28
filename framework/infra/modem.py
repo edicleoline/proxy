@@ -348,7 +348,7 @@ class Modem:
                 if filters != None and len(filters) > 0:
                     ip_match_found = False
                     for filter in filters:                        
-                        if filter.type == 'ip' and new_ip.startswith(filter.value.strip()):
+                        if filter.type == 'ip' and filter.value and new_ip.startswith(filter.value.strip()):
                             done = True
                             ip_match_found = True
                         
