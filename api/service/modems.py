@@ -235,8 +235,8 @@ class ModemsAutoRotateService():
             infra_modem = infra_modem, 
             proxy_user_id = None,
             proxy_username = None,
-            filters = None, 
-            hard_reset = True, 
+            filters = server_modem_model.auto_rotate_filter, 
+            hard_reset = server_modem_model.auto_rotate_hard_reset, 
             not_changed_try_count = 3, 
             not_ip_try_count = 6
         )
