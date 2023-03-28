@@ -299,7 +299,7 @@ class ServerModemModel():
         conn = connection()
 
         if self.auto_rotate_filter:
-            self.auto_rotate_filter[:] = [x for x in self.auto_rotate_filter if not x.value]
+            self.auto_rotate_filter[:] = [x for x in self.auto_rotate_filter if x.value]
 
         if self.id == None:
             conn.execute("""
