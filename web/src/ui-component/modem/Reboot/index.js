@@ -83,7 +83,6 @@ const RebootDialog = (props) => {
         } else if (modem && modem.is_connected) {
             setDisableHardResetCheckbox(false);
         }
-        console.log('started!!');
     }, [open]);
 
     return (

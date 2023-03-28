@@ -150,7 +150,7 @@ const Modems = () => {
         });
 
         socket.on('server_control', (serverControl) => {
-            console.log(serverControl);
+            // console.log(serverControl);
             _serverControl.current = serverControl;
         });
 
@@ -386,9 +386,9 @@ const Modems = () => {
                     sx={{ p: 0.2, px: 0.8, borderRadius: 1, minWidth: '160px' }}
                 >
                     <Grid item>{type}</Grid>
-                    <Grid item>/</Grid>
-                    <Grid item>{ip}</Grid>
-                    <Grid item>:</Grid>
+                    {/* <Grid item>/</Grid> */}
+                    {/* <Grid item>{ip}</Grid> */}
+                    <Grid item>:&nbsp;</Grid>
                     <Grid item>{port}</Grid>
                     {/* <Grid item>{icon}</Grid> */}
                 </Grid>
