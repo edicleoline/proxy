@@ -41,7 +41,6 @@ modem_log_type_field = {
 class ModemLogOwner(Enum):
     SYSTEM    = 1
     USER      = 2
-    USER_AUTO = 3
 
 class ModemLogType(Enum):
     SUCCESS    = 0
@@ -59,6 +58,8 @@ class ModemLogModel():
     message: str
     code: str
     params: object
+    auto: bool
+    description: str
     logged_at: datetime = field(
         metadata=config(
             encoder=datetime.isoformat,
@@ -67,7 +68,20 @@ class ModemLogModel():
         )
     )
 
-    def __init__(self, id = None, modem_id = None, owner = None, type = None, message = None, code = None, params = None, logged_at = datetime.now(), created_at = None):
+    def __init__(
+            self, 
+            id = None, 
+            modem_id = None, 
+            owner = None, 
+            type = None, 
+            message = None, 
+            code = None, 
+            params = None, 
+            auto = False,
+            description = None,
+            logged_at = datetime.now(),             
+            created_at = None
+        ):
         self.id = id
         self.modem_id = modem_id
         self.owner = owner
@@ -76,6 +90,8 @@ class ModemLogModel():
         self.code = code
         self.params = params
         self.params_json = json.dumps(params) if params else None
+        self.auto = auto
+        self.description = description
         self.logged_at = logged_at
         self.created_at = created_at    
 
@@ -92,7 +108,7 @@ class ModemLogModel():
             cursor_sql = ''
 
         rows = conn.execute("""
-                select id, modem_id, owner, type, message, code, params_json, logged_at 
+                select id, modem_id, owner, type, message, code, params_json, auto, description, logged_at 
                     from modem_log 
                     where modem_id = {0} {1} 
                     order by id {2} 
@@ -111,7 +127,9 @@ class ModemLogModel():
                     message = row[4],
                     code = row[5],
                     params = json.loads(row[6]) if row[6] else None,
-                    logged_at = datetime.strptime(row[7], '%Y-%m-%d %H:%M:%S')
+                    auto = True if row[7] and int(row[7]) == 1 else False,
+                    description = row[8],
+                    logged_at = datetime.strptime(row[9], '%Y-%m-%d %H:%M:%S')
                 )
             )
 
@@ -121,8 +139,30 @@ class ModemLogModel():
 
     def save_to_db(self):
         conn = connection()
-        conn.execute("insert into modem_log (modem_id, owner, type, message, code, params_json, logged_at) values (?, ?, ?, ?, ?, ?, ?)", (
-            self.modem_id, self.owner.value, self.type.value, self.message, self.code, self.params_json, self.logged_at.strftime("%Y-%m-%d %H:%M:%S")
-            ))
+        conn.execute("""
+            INSERT INTO 
+                modem_log (
+                    modem_id, 
+                    owner, 
+                    type, 
+                    message, 
+                    code, 
+                    params_json, 
+                    auto, 
+                    description,
+                    logged_at
+                ) values (?, ?, ?, ?, ?, ?, ?, ?)""", 
+            (
+                self.modem_id, 
+                self.owner.value, 
+                self.type.value, 
+                self.message, 
+                self.code, 
+                self.params_json, 
+                1 if self.auto == True else 0, 
+                self.description,
+                self.logged_at.strftime("%Y-%m-%d %H:%M:%S")
+            )
+        )
         self.id = conn.last_insert_rowid()
         conn.close(True)

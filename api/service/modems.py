@@ -215,9 +215,11 @@ class ModemsAutoRotateService():
         modem = server_modem_model.modem()
         modem_log_model = ModemLogModel(
             modem_id=modem.id,
-            owner=ModemLogOwner.USER_AUTO, 
+            owner=ModemLogOwner.USER, 
             type=ModemLogType.INFO, 
             message='app.log.modem.rotate.start',
+            auto=True,
+            description='app.log.modem.rotate.automated',
             logged_at = datetime.now()
         )
         modem_log_model.save_to_db()

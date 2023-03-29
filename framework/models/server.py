@@ -327,10 +327,10 @@ class ServerModemModel():
                     self.proxy_ipv4_socks_port,
                     self.proxy_ipv6_http_port,
                     self.proxy_ipv6_socks_port,
-                    True if self.prevent_same_ip_users == True else 0,
-                    True if self.auto_rotate == True else 0,
+                    1 if self.prevent_same_ip_users == True else 0,
+                    1 if self.auto_rotate == True else 0,
                     int(self.auto_rotate_time) if self.auto_rotate_time else None,
-                    True if self.auto_rotate_hard_reset == True else 0,
+                    1 if self.auto_rotate_hard_reset == True else 0,
                     ProxyUserIPFilterModel.schema().dumps(self.auto_rotate_filter, many=True) if self.auto_rotate_filter else None
                 )
             )

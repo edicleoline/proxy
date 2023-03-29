@@ -15,6 +15,8 @@ import IntlMessageFormat from 'intl-messageformat';
 import { locale, messages } from 'i18n';
 
 import { logs } from 'services/api/modem/log';
+import { IconRotateClockwise2 } from '@tabler/icons';
+import Tooltip from '@mui/material/Tooltip';
 
 const MessageWrapperSystem = styled.div`
     border-radius: 4px 4px 4px 4px;
@@ -127,6 +129,19 @@ const ParamsWrapper = styled.div`
         background-color: #f6e3b9a1;
         border-color: #e3d1a078;
     }
+`;
+
+const AutomatedFlagWrapper = styled.div`
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 22px;
+    height: 24px;
+    background: #f0f0f0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `;
 
 const logClassName = (message) => {
@@ -296,6 +311,18 @@ const ModemLog = (props) => {
         }
     }, [_firstRender]);*/
 
+    const AutomatedFlag = () => {
+        return (
+            <AutomatedFlagWrapper>
+                <Tooltip title="Automatizado">
+                    <div style={{ display: 'flex' }}>
+                        <IconRotateClockwise2 size="18" />
+                    </div>
+                </Tooltip>
+            </AutomatedFlagWrapper>
+        );
+    };
+
     const Line = ({ container }) => {
         if (container.type == 'separator') {
             const style = {
@@ -317,16 +344,27 @@ const ModemLog = (props) => {
         const message = container.value;
         return (
             <Grid item style={{ width: '100%', marginBottom: '10px' }}>
-                <Grid container justifyContent="end" alignItems={message.owner == 'SYSTEM' ? 'flex-start' : 'flex-end'} direction="column">
+                <Grid
+                    container
+                    justifyContent="end"
+                    alignItems={message.owner == 'SYSTEM' ? 'flex-start' : 'flex-end'}
+                    direction="column"
+                    sx={{ position: 'relative' }}
+                >
                     <Grid item style={{ maxWidth: '85%' }}>
                         {message.owner == 'SYSTEM' ? (
                             <MessageWrapperSystem>
                                 <Message message={message} />
                             </MessageWrapperSystem>
                         ) : (
-                            <MessageWrapperUser>
-                                <Message message={message} />
-                            </MessageWrapperUser>
+                            <Grid container justifyContent="end" alignItems="flex-end" direction="column">
+                                <Grid item>
+                                    <MessageWrapperUser>
+                                        <Message message={message} />
+                                    </MessageWrapperUser>
+                                    {message.owner == 'USER_AUTO' ? <AutomatedFlag /> : null}
+                                </Grid>
+                            </Grid>
                         )}
                     </Grid>
                 </Grid>

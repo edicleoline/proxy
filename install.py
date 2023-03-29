@@ -195,6 +195,8 @@ if __name__ == '__main__':
             message VARCHAR(240) NOT NULL, 
             code INTEGER, 
             params_json VARCHAR(240), 
+            auto INTEGER NOT NULL DEFAULT 0,
+            description VARCHAR(240), 
             logged_at DATETIME NOT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,                    
             PRIMARY KEY (id), 
