@@ -180,6 +180,7 @@ class ServerModemModel():
         self.auto_rotate_hard_reset = auto_rotate_hard_reset
         self.auto_rotate_filter = auto_rotate_filter
         self.created_at = created_at
+        self.auto_rotate_time_left_to_run = None
 
     def json(self):
         usb_port = self.usb_port()
@@ -225,7 +226,8 @@ class ServerModemModel():
             'auto_rotate': self.auto_rotate,
             'auto_rotate_time': self.auto_rotate_time,
             'auto_rotate_hard_reset': self.auto_rotate_hard_reset,
-            'auto_rotate_filter': json.loads(ProxyUserIPFilterModel.schema().dumps(self.auto_rotate_filter, many=True)) if self.auto_rotate_filter else None
+            'auto_rotate_filter': json.loads(ProxyUserIPFilterModel.schema().dumps(self.auto_rotate_filter, many=True)) if self.auto_rotate_filter else None,
+            'auto_rotate_time_left_to_run': self.auto_rotate_time_left_to_run
         }
 
     @classmethod
