@@ -122,10 +122,7 @@ class ModemsAutoRotateSchedule():
                 self.remove_from_agenda_items(server_modem)
                 continue
 
-            in_agenda = self.in_agenda_items(server_modem)
-
-            if in_agenda:
-                in_agenda.server_modem_model = server_modem
+            in_agenda = self.in_agenda_items(server_modem)            
 
             if in_agenda and in_agenda.server_modem_model.auto_rotate_time != server_modem.auto_rotate_time:
                 print('removed from agenda because changed {0}'.format(server_modem.id))
@@ -133,6 +130,9 @@ class ModemsAutoRotateSchedule():
 
             if server_modem.auto_rotate_time <= 0:
                 continue
+
+            if in_agenda:
+                in_agenda.server_modem_model = server_modem
 
             self.add_to_agenda_items(server_modem)
 

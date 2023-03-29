@@ -30,14 +30,22 @@ import { IpFilter } from 'ui-component/IpFilter';
 import { getUSBPorts } from 'services/api/server';
 import { saveModem } from 'services/api/modem';
 import cloneDeep from 'lodash/cloneDeep';
+import objectHash from 'object-hash';
 
 const SettingsDialog = (props) => {
     const { modem, open, onClose, onConfirm, ...other } = props;
 
     const [_modem, _setModem] = useState(cloneDeep(modem));
+    const [_originalModemHash, _setOriginalModemHash] = useState(null);
+    const [_modemChanged, _setModemChanged] = useState(false);
 
     useEffect(() => {
-        _setModem(cloneDeep(modem));
+        const m = cloneDeep(modem);
+        _setModem(m);
+        console.log('changedddddddddddddd');
+
+        _setOriginalModemHash(objectHash.MD5(m));
+        _setModemChanged(false);
     }, [modem]);
 
     const handleChangeProxyIpv4Http = (port) => {
@@ -108,7 +116,11 @@ const SettingsDialog = (props) => {
 
     useEffect(() => {
         if (_modem) {
-            setAutoRotateFilter(_modem.auto_rotate_filter);
+            if (objectHash.MD5(_modem) !== _originalModemHash) {
+                _setModemChanged(true);
+            } else {
+                _setModemChanged(false);
+            }
         }
         console.log(_modem);
     }, [_modem]);
@@ -282,7 +294,7 @@ const SettingsDialog = (props) => {
                 </Stack>
             </DialogContent>
             <BootstrapDialogActions>
-                <Button onClick={handleApplyClick} variant="outlined">
+                <Button onClick={handleApplyClick} variant="outlined" disabled={!_modemChanged}>
                     Aplicar
                 </Button>
             </BootstrapDialogActions>

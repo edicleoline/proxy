@@ -312,9 +312,10 @@ const ModemLog = (props) => {
     }, [_firstRender]);*/
 
     const AutomatedFlag = ({ message }) => {
+        const translatedDescription = new IntlMessageFormat(messages[locale()][message.description], locale());
         return (
             <AutomatedFlagWrapper>
-                <Tooltip title={message.description}>
+                <Tooltip title={translatedDescription.format()}>
                     <div style={{ display: 'flex' }}>
                         <IconRotateClockwise2 size="18" />
                     </div>

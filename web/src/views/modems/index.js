@@ -34,10 +34,13 @@ import DialogTitle from '@mui/material/DialogTitle';
 
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import IntlMessageFormat from 'intl-messageformat';
+import { locale, messages } from 'i18n';
 
 import { IconDotsVertical, IconAccessPoint, IconAccessPointOff } from '@tabler/icons';
 import { IconAntennaBars1, IconAntennaBars2, IconAntennaBars3, IconAntennaBars4, IconAntennaBars5 } from '@tabler/icons';
 import { IconCheck, IconChecks, IconBan, IconArrowUp, IconArrowDown, IconAlertCircle } from '@tabler/icons';
+import { IconRotateClockwise2 } from '@tabler/icons';
 import CloseIcon from '@mui/icons-material/Close';
 
 import ChangeDialog from 'ui-component/modem/ip/Change';
@@ -56,6 +59,26 @@ import io from 'socket.io-client';
 import objectHash from 'object-hash';
 
 import config from 'config';
+import styled from 'styled-components';
+
+const AutomatedFlagWrapper = styled.div`
+    position: absolute;
+    top: -3px;
+    width: 22px;
+    height: 24px;
+    background: rgb(240, 240, 240);
+    border-radius: 50%;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    justify-content: center;
+    margin-left: 24px;
+`;
+
+const ModemIdWrapper = styled.div`
+    position: relative;
+`;
 
 const Modems = () => {
     // const [isLoading, setLoading] = useState(true);
@@ -567,6 +590,19 @@ const Modems = () => {
         );
     };
 
+    const AutomatedFlag = ({ modem }) => {
+        const title = new IntlMessageFormat(messages[locale()][`app.components.modem.rotate.automated.tooltip`], locale());
+        return (
+            <AutomatedFlagWrapper>
+                <Tooltip title={title.format()}>
+                    <div style={{ display: 'flex' }}>
+                        <IconRotateClockwise2 size="18" />
+                    </div>
+                </Tooltip>
+            </AutomatedFlagWrapper>
+        );
+    };
+
     return (
         <MainCard
             title="Modems"
@@ -605,17 +641,27 @@ const Modems = () => {
                                                     key={row.modem.id}
                                                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                                 >
-                                                    <TableCell component="th" scope="row" sx={{ minWidth: '100px' }}>
-                                                        <IconButton
-                                                            id={`modem-button-${row.modem.id}`}
-                                                            aria-label="Modem Options"
-                                                            size="small"
-                                                            aria-controls={`modem-menu-${row.modem.id}`}
-                                                            aria-haspopup="true"
-                                                            onClick={handleModemOpenMenuClick(row.modem.id)}
-                                                        >
-                                                            <IconDotsVertical />
-                                                        </IconButton>
+                                                    <TableCell component="th" scope="row" sx={{ minWidth: '100px', position: 'relative' }}>
+                                                        <Grid container justifyContent="flex-start" alignItems="center" direction="row">
+                                                            <Grid item>
+                                                                <IconButton
+                                                                    id={`modem-button-${row.modem.id}`}
+                                                                    aria-label="Modem Options"
+                                                                    size="small"
+                                                                    aria-controls={`modem-menu-${row.modem.id}`}
+                                                                    aria-haspopup="true"
+                                                                    onClick={handleModemOpenMenuClick(row.modem.id)}
+                                                                >
+                                                                    <IconDotsVertical />
+                                                                </IconButton>
+                                                            </Grid>
+                                                            <Grid item>
+                                                                <ModemIdWrapper>
+                                                                    {row.auto_rotate == true ? <AutomatedFlag modem={row} /> : null}
+                                                                    &nbsp;&nbsp;{row.modem.id}
+                                                                </ModemIdWrapper>
+                                                            </Grid>
+                                                        </Grid>
                                                         <Menu
                                                             id={`modem-menu-${row.modem.id}`}
                                                             anchorEl={anchorModemMenuEl}
@@ -692,7 +738,6 @@ const Modems = () => {
                                                                 Desligar
                                                             </MenuItem>
                                                         </Menu>
-                                                        &nbsp;&nbsp;{row.modem.id}
                                                     </TableCell>
                                                     <TableCell align="left">{row.modem.device.model}</TableCell>
                                                     <TableCell align="left">{row.usb.port}</TableCell>

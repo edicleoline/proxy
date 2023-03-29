@@ -7,6 +7,7 @@
     "app.components.modem.Reboot.modal.body.question": "Tem certeza de que deseja reiniciar o modem {modemId}?",
     "app.components.modem.Reboot.modal.body.alert": "Antes de continuar, considere pausar quaiquer serviços que estiverem usando-o como proxy.",
     "app.components.modem.Reboot.error": "O modem {modemId} não pôde ser reiniciado. {error}",
+    "app.components.modem.rotate.automated.tooltip": "Rotacionamento automático ativado",
 
     "app.components.modem.Rotate.error": "{error}",
     "app.components.modem.Rotate.warning.inUse": "Antes de continuar, considere pausar quaiquer serviços que estiverem usando o modem {modemId} como proxy, ele poderá ficar indisponível durante o processo.",
@@ -50,6 +51,7 @@
     "app.log.modem.rotate.stop.ip.not_valid": "Interrompemos a tarefa porque depois de algumas tentativas não conseguimos receber um IP válido. Verifique seu sinal e plano de dados",
     "app.log.modem.reboot.stop.error.hard_reboot": "Interrompemos a tarefa porque não conseguimos reiniciar a porta USB. Considere utilizar a opção hard-reset desativada",
     "app.log.modem.reboot.stop.error.middleware_reboot": "Interrompemos a tarefa porque não conseguimos reiniciar conexão com a operadora usando middleware",
-    "app.log.modem.reboot.stop.error.middleware_not_found": "Interrompemos a tarefa porque não conseguimos ininiciar middleware"
+    "app.log.modem.reboot.stop.error.middleware_not_found": "Interrompemos a tarefa porque não conseguimos ininiciar middleware",
+    "app.log.modem.rotate.automated": "Automatizado de acordo com suas configurações"
 
 }

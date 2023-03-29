@@ -12,6 +12,8 @@ export const storeModemLog = (log) => {
         message: log.message,
         code: log.code,
         params: log.params,
+        auto: log.auto,
+        description: log.description,
         logged_at: log.logged_at
     });
 };
