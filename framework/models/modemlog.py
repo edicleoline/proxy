@@ -151,7 +151,7 @@ class ModemLogModel():
                     auto, 
                     description,
                     logged_at
-                ) values (?, ?, ?, ?, ?, ?, ?, ?)""", 
+                ) values (?, ?, ?, ?, ?, ?, ?, ?, ?)""", 
             (
                 self.modem_id, 
                 self.owner.value, 

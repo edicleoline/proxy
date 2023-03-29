@@ -311,10 +311,10 @@ const ModemLog = (props) => {
         }
     }, [_firstRender]);*/
 
-    const AutomatedFlag = () => {
+    const AutomatedFlag = ({ message }) => {
         return (
             <AutomatedFlagWrapper>
-                <Tooltip title="Automatizado">
+                <Tooltip title={message.description}>
                     <div style={{ display: 'flex' }}>
                         <IconRotateClockwise2 size="18" />
                     </div>
@@ -362,7 +362,7 @@ const ModemLog = (props) => {
                                     <MessageWrapperUser>
                                         <Message message={message} />
                                     </MessageWrapperUser>
-                                    {message.owner == 'USER_AUTO' ? <AutomatedFlag /> : null}
+                                    {message.auto == true ? <AutomatedFlag message={message} /> : null}
                                 </Grid>
                             </Grid>
                         )}
