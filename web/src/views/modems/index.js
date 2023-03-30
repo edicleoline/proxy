@@ -1,6 +1,6 @@
-import { Grid, Box, Card, Typography } from '@mui/material';
+import * as React from 'react';
 
-// project imports
+import { Grid, Box, Card, Typography } from '@mui/material';
 import SubCard from 'ui-component/cards/SubCard';
 import MainCard from 'ui-component/cards/MainCard';
 import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
@@ -31,6 +31,8 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import CircularProgress from '@mui/material/CircularProgress';
+import Popover from '@mui/material/Popover';
 
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
@@ -43,7 +45,8 @@ import { IconCheck, IconChecks, IconBan, IconArrowUp, IconArrowDown, IconAlertCi
 import { IconRotateClockwise2 } from '@tabler/icons';
 import CloseIcon from '@mui/icons-material/Close';
 
-import ChangeDialog from 'ui-component/modem/ip/Change';
+import RotateDialog from 'ui-component/modem/Rotate';
+import AutoRotateInfoDialog from 'ui-component/modem/AutoRotateInfoDialog';
 import RebootDialog from 'ui-component/modem/Reboot';
 import SettingsDialog from 'ui-component/modem/Settings';
 import DiagnoseDialog from 'ui-component/modem/Diagnose';
@@ -64,9 +67,8 @@ import styled from 'styled-components';
 const AutomatedFlagWrapper = styled.div`
     position: absolute;
     top: -3px;
-    width: 22px;
+    width: 24px;
     height: 24px;
-    background: rgb(240, 240, 240);
     border-radius: 50%;
     display: flex;
     -webkit-box-align: center;
@@ -78,9 +80,10 @@ const AutomatedFlagWrapper = styled.div`
 
 const AutomatedFlagIcon = styled.div`
     position: relative;
-    width: 22px;
+    width: 24px;
     height: 24px;
-    background: rgb(240, 240, 240);
+    // background: #ede7f6;
+    background: transparent;
     border-radius: 50%;
     display: flex;
     -webkit-box-align: center;
@@ -109,8 +112,8 @@ const AutomatedFlagBadgeWrapper = styled.span`
     transition: transform 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
     background-color: rgb(156, 39, 176);
     color: rgb(255, 255, 255);
-    top: -2px;
-    margin-left: 4px;
+    top: 1px;
+    margin-left: 0px;
     transform: scale(1) translate(50%, -50%);
     transform-origin: 100% 0%;
 `;
@@ -217,7 +220,7 @@ const Modems = () => {
         });
 
         socket.on('modems', (items) => {
-            console.log('socket.io server: modems', items);
+            // console.log('socket.io server: modems', items);
             const itemsHash = objectHash.MD5(items);
 
             if (!_modems.current || (_serverControl.current && _serverControl.current.action === 'reload_modems')) {
@@ -276,7 +279,6 @@ const Modems = () => {
 
                     _modemsHash.current = itemsHash;
                     if (changed) {
-                        console.log('changed!!!');
                         _modems.current = remodems;
                         setModems(_modems.current);
                     }
@@ -635,19 +637,31 @@ const Modems = () => {
         );
     };
 
-    const AutomatedFlag = ({ modem }) => {
+    const [autoRotateInfoModem, setAutoRotateInfoModem] = useState(null);
+    const [autoRotateInfoOpen, setAutoRotateInfoOpen] = useState(false);
+
+    const handleModemAutoRotateFlagClick = (modem) => (event) => {
+        setAutoRotateInfoModem(modem);
+        setAutoRotateInfoOpen(true);
+    };
+
+    const handleAutoRotateInfoOnClose = () => {
+        setAutoRotateInfoOpen(false);
+    };
+
+    const ModemAutoRotateFlag = ({ modem }) => {
         const title = new IntlMessageFormat(messages[locale()][`app.components.modem.rotate.automated.tooltip`], locale());
-        console.log(modem.auto_rotate_time_left_to_run);
         return (
             <AutomatedFlagWrapper>
                 <AutomatedFlagIcon>
                     <Tooltip title={title.format()}>
-                        <div style={{ display: 'flex' }}>
+                        <IconButton color="secondary" onClick={handleModemAutoRotateFlagClick(modem)}>
                             <IconRotateClockwise2 size="18" />
-                        </div>
+                        </IconButton>
                     </Tooltip>
+                    {/* <CircularProgress variant="determinate" color="secondary" value="80" /> */}
                 </AutomatedFlagIcon>
-                {modem.auto_rotate_time_left_to_run ? (
+                {modem.lock == null && modem.auto_rotate_time_left_to_run ? (
                     <AutomatedFlagBadgeWrapper>{modem.auto_rotate_time_left_to_run}</AutomatedFlagBadgeWrapper>
                 ) : null}
             </AutomatedFlagWrapper>
@@ -708,7 +722,7 @@ const Modems = () => {
                                                             </Grid>
                                                             <Grid item>
                                                                 <ModemIdWrapper>
-                                                                    {row.auto_rotate == true ? <AutomatedFlag modem={row} /> : null}
+                                                                    {row.auto_rotate == true ? <ModemAutoRotateFlag modem={row} /> : null}
                                                                     &nbsp;&nbsp;{row.modem.id}
                                                                 </ModemIdWrapper>
                                                             </Grid>
@@ -764,7 +778,6 @@ const Modems = () => {
                                                             </MenuItem>
                                                             <MenuItem
                                                                 onClick={() => {
-                                                                    console.log('modem log');
                                                                     handleModemCloseMenu();
                                                                     addDockLog(row);
                                                                 }}
@@ -906,7 +919,7 @@ const Modems = () => {
                 onClose={handleModemSettingsClose}
                 onConfirm={handleModemSettingsClose}
             />
-            <ChangeDialog
+            <RotateDialog
                 open={modemChangeIPDialog.open}
                 modem={modemChangeIPDialog.modem}
                 onClose={handleModemChangeIPClose}
@@ -961,6 +974,7 @@ const Modems = () => {
             </Dialog>
             <Dock items={dockLogItems} onClose={handleCloseDock} />
             {/* {dockLog} */}
+            <AutoRotateInfoDialog modem={autoRotateInfoModem} open={autoRotateInfoOpen} onClose={handleAutoRotateInfoOnClose} />
         </MainCard>
     );
 };

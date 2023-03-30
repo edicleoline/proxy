@@ -87,14 +87,20 @@ const RebootDialog = (props) => {
 
     return (
         <div>
-            <Dialog open={open} onClose={onClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-                <BootstrapDialogTitle id="customized-dialog-title" onClose={onClose}>
+            <Dialog
+                open={open}
+                onClose={onClose}
+                aria-labelledby="modem-reboot-dialog-title"
+                aria-describedby="modem-reboot-dialog-description"
+                fullWidth={true}
+            >
+                <BootstrapDialogTitle id="modem-reboot-dialog-title" onClose={onClose}>
                     <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
                         <FormattedMessage id="app.components.modem.Reboot.modal.header.title" />
                     </Typography>
                 </BootstrapDialogTitle>
                 <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
+                    <DialogContentText id="modem-reboot-dialog-description">
                         <FormattedMessage
                             id="app.components.modem.Reboot.modal.body.question"
                             values={{ modemId: modem ? ' ' + modem.id : '' }}
@@ -102,11 +108,9 @@ const RebootDialog = (props) => {
                         <br />
                         {modem && modem.is_connected === true ? (
                             <FormattedMessage id="app.components.modem.Reboot.modal.body.alert" />
-                        ) : (
-                            <></>
-                        )}
+                        ) : null}
                     </DialogContentText>
-                    <FormGroup>
+                    <FormGroup sx={{ marginTop: '16px' }}>
                         <FormControlLabel
                             control={<Switch checked={hardReset} />}
                             label="Ativar hard-reset"

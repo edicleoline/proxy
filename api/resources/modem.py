@@ -1,6 +1,7 @@
 from flask_restful import Resource, reqparse, request
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
 import requests
+from api.service.modems import ModemsAutoRotateAgendaItem
 from framework.helper.database.pagination import PaginateDirection, PaginateOrder
 from framework.models.modem import ModemModel
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
@@ -332,5 +333,18 @@ class ModemLogs(Resource):
         return {"items": items}, 200
 
         
+class ModemScheduleAutoRotate(Resource):
+    # @jwt_required()
+    def get(self, modem_id):
+        server_modem_model = ServerModemModel.find_by_modem_id(modem_id)
 
-    
+        if not server_modem_model:
+            return {"message": "Modem not found"}, 404
+        
+        agenda_item = app.modems_auto_rotate_service.schedule.in_agenda_items(server_modem_model)
+
+        if not agenda_item:
+            return None, 200
+        
+        agenda_item.now = datetime.now()
+        return ModemsAutoRotateAgendaItem.schema().dump(agenda_item), 200

@@ -3,6 +3,10 @@ import json
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 from framework.models.server import ServerModel
 from framework.infra.modem import Modem as IModem
+from dataclasses import dataclass, field
+from dataclasses_json import dataclass_json, config
+from marshmallow import fields
+import json
 
 class ModemsService():
     def __init__(self, server_model: ServerModel, modems_manager):
@@ -104,12 +108,36 @@ class ModemsService():
 
         return result
 
-
+@dataclass_json
+@dataclass
 class ModemsAutoRotateAgendaItem():
-    def __init__(self, server_modem_model, added_at, run_at):
+    added_at: datetime = field(
+        metadata=config(
+            encoder=datetime.isoformat,
+            decoder=datetime.fromisoformat,
+            mm_field=fields.DateTime(format='iso')
+        )
+    )
+    run_at: datetime = field(
+        metadata=config(
+            encoder=datetime.isoformat,
+            decoder=datetime.fromisoformat,
+            mm_field=fields.DateTime(format='iso')
+        )
+    )
+    now: datetime = field(
+        metadata=config(
+            encoder=datetime.isoformat,
+            decoder=datetime.fromisoformat,
+            mm_field=fields.DateTime(format='iso')
+        )
+    )
+
+    def __init__(self, server_modem_model, added_at, run_at, now = None):
         self.server_modem_model = server_modem_model
         self.added_at = added_at
         self.run_at = run_at
+        self.now = None
 
     def ready_to_run(self):
         return True if self.time_left_to_run().total_seconds() <=0 else False
@@ -158,11 +186,13 @@ class ModemsAutoRotateSchedule():
         return run_at
 
     def in_agenda_items(self, server_modem_model):
+        return self.in_agenda_items_by_server_modem_model_id(server_modem_model.id)
+    
+    def in_agenda_items_by_server_modem_model_id(self, server_modem_model_id):
         if not self.agenda_items: return None
 
         for agenda_item in self.agenda_items:
-            if agenda_item.server_modem_model.id == server_modem_model.id:
-                # print('in agenda {0}'.format(server_modem_model.id))
+            if agenda_item.server_modem_model.id == server_modem_model_id:
                 return agenda_item
 
         return None    
@@ -187,7 +217,7 @@ class ModemsAutoRotateSchedule():
 
         # print('removed from agenda {0}'.format(server_modem_model.id))
         self.agenda_items[:] = [x for x in self.agenda_items if not x.server_modem_model.id == server_modem_model.id]
-        return True
+        return True    
 
 
 class ModemsAutoRotateService():

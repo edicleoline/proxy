@@ -85,3 +85,16 @@ export function stopRotate(id) {
         );
     });
 }
+
+export function scheduleAutoRotate(id) {
+    return new Promise((resolve, reject) => {
+        api.get(`/modem/${id}/schedule/auto-rotate`).then(
+            (response) => {
+                resolve(response.data);
+            },
+            (error) => {
+                reject(error);
+            }
+        );
+    });
+}

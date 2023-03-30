@@ -9,6 +9,8 @@
     "app.components.modem.Reboot.error": "O modem {modemId} não pôde ser reiniciado. {error}",
     "app.components.modem.rotate.automated.tooltip": "Rotacionamento automático ativado",
 
+    "app.components.modem.rotate.automated.info.description": "Rotacionamento automático ativado para este modem ({modemId}).\nPróximo rotacionamento {formattedDateTime}",
+
     "app.components.modem.Rotate.error": "{error}",
     "app.components.modem.Rotate.warning.inUse": "Antes de continuar, considere pausar quaiquer serviços que estiverem usando o modem {modemId} como proxy, ele poderá ficar indisponível durante o processo.",
     "app.components.modem.Task.help.stopping.title": "Cancelando tarefa",

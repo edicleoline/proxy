@@ -30,7 +30,7 @@ import { getProxyUsers, getProxyUserByUsername, getProxyUserFilters } from 'serv
 import { BootstrapDialogTitle, BootstrapDialogActions } from 'ui-component/extended/BootstrapDialog';
 import { IpFilter } from 'ui-component/IpFilter';
 
-const ChangeDialog = (props) => {
+const RotateDialog = (props) => {
     const { modem, open, onClose, onConfirm, ...other } = props;
 
     const [isLoading, setLoading] = useState(false);
@@ -232,9 +232,9 @@ const ChangeDialog = (props) => {
     );
 };
 
-ChangeDialog.propTypes = {
+RotateDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
     onConfirm: PropTypes.func.isRequired
 };
 
-export default ChangeDialog;
+export default RotateDialog;
