@@ -210,7 +210,7 @@ const Modems = () => {
         });
 
         socket.on('modem_log', (message) => {
-            console.log('socket.io server: message', message);
+            // console.log('socket.io server: message', message);
             handleStoreModemLog(message);
         });
 
