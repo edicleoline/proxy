@@ -43,21 +43,33 @@ class Owner(Enum):
 
 class Modem:
     def __init__(self, server_modem_model: ServerModemModel, event_stop: Event = None, callback = None):
-        self.server_modem_model = server_modem_model
-        self.modem = self.server_modem_model.modem()
-        self.usb_port = server_modem_model.usb_port()
+        self.server_modem_model = server_modem_model        
         self.event_stop = event_stop
         self.callback = callback
+        self._modem = None
+        self._usb_port = None
+
+    def modem(self):
+        if not self._modem:
+            self._modem = self.server_modem_model.modem()
+
+        return self._modem
+
+    def usb_port(self):
+        if not self._usb_port:
+            self._usb_port = self.server_modem_model.usb_port()
+
+        return self._usb_port
 
     def iface(self):
-        addr_id = self.modem.addr_id
+        addr_id = self.modem().addr_id
         return NetIface.get_iface_by_addr_id(addr_id)        
 
     def hard_reboot(self):
-        USB(server=self.server_modem_model.server()).hard_reboot(usb_port=self.usb_port)
+        USB(server=self.server_modem_model.server()).hard_reboot(usb_port=self.usb_port())
 
     def hard_turn_off(self):
-        USB(server=self.server_modem_model.server()).hard_turn_off(usb_port=self.usb_port)
+        USB(server=self.server_modem_model.server()).hard_turn_off(usb_port=self.usb_port())
 
     def get_device_middleware(self, retries_ip = 5):
         middleware = None
@@ -74,7 +86,7 @@ class Modem:
 
         if True:#device != None:
             if True:#modem.model == 'MF79S':
-                middleware = MF79S(addr_id = self.modem.addr_id, interface = iface.interface, gateway = gateway, password = 'vivo', retries_ip = retries_ip)
+                middleware = MF79S(addr_id = self.modem().addr_id, interface = iface.interface, gateway = gateway, password = 'vivo', retries_ip = retries_ip)
 
         return middleware
 
@@ -102,7 +114,7 @@ class Modem:
         if self.event_stop and self.event_stop.is_set():
             if log == True:
                 modem_log_model = ModemLogModel(
-                    modem_id=self.modem.id, 
+                    modem_id=self.modem().id, 
                     owner=ModemLogOwner.SYSTEM, 
                     type=ModemLogType.WARNING, 
                     message='app.log.modem.rotate.stopped.by_user'
@@ -120,7 +132,7 @@ class Modem:
         rebooted = self.reboot_and_wait(hard_reset=hard_reset, write_params=write_params)
         if rebooted == True:
             modem_log_model = ModemLogModel(
-                modem_id=self.modem.id, 
+                modem_id=self.modem().id, 
                 owner=ModemLogOwner.SYSTEM, 
                 type=ModemLogType.SUCCESS, 
                 message='app.log.modem.reboot.done.success'
@@ -132,7 +144,7 @@ class Modem:
 
     def reboot_and_wait(self, hard_reset = False, write_params = True):
         modem_log_model = ModemLogModel(
-            modem_id=self.modem.id, 
+            modem_id=self.modem().id, 
             owner=ModemLogOwner.SYSTEM, 
             type=ModemLogType.INFO, 
             message='app.log.modem.rebooting',
@@ -150,14 +162,14 @@ class Modem:
                 self.wait_until_modem_disconnection()
             except OSError as error:
                 modem_log_model = ModemLogModel(
-                    modem_id=self.modem.id, 
+                    modem_id=self.modem().id, 
                     owner=ModemLogOwner.SYSTEM, 
                     type=ModemLogType.ERROR, 
                     message='app.log.modem.reboot.stop.error.hard_reboot',
                     code=Error.USB_HARD_RESET_EXCEPTION.value,
                     logged_at = datetime.now(),
                     params={
-                        'usb_port': self.usb_port.port,
+                        'usb_port': self.usb_port().port,
                         'error': str(error)
                     }
                 )
@@ -167,12 +179,12 @@ class Modem:
                 return False
             
             modem_log_model = ModemLogModel(
-                modem_id=self.modem.id, 
+                modem_id=self.modem().id, 
                 owner=ModemLogOwner.SYSTEM, 
                 type=ModemLogType.INFO, 
                 message='app.log.modem.usb.rebooted_wait_modem', 
                 params={
-                    'usb_port': self.usb_port.port
+                    'usb_port': self.usb_port().port
                 },
                 logged_at = datetime.now()
             )
@@ -183,7 +195,7 @@ class Modem:
             device_middleware = self.get_device_middleware()
             if device_middleware == None:
                 modem_log_model = ModemLogModel(
-                    modem_id=self.modem.id, 
+                    modem_id=self.modem().id, 
                     owner=ModemLogOwner.SYSTEM, 
                     type=ModemLogType.ERROR, 
                     message='app.log.modem.reboot.stop.error.middleware_not_found',
@@ -211,7 +223,7 @@ class Modem:
             not_ip_try_count = 3):
 
         modem_log_model = ModemLogModel(
-            modem_id=self.modem.id, 
+            modem_id=self.modem().id, 
             owner=ModemLogOwner.SYSTEM, 
             type=ModemLogType.INFO, 
             message='app.log.modem.rotate.starting',
@@ -231,7 +243,7 @@ class Modem:
             old_ip, new_ip, done = None, None, False
 
             modem_log_model = ModemLogModel(
-                modem_id=self.modem.id, 
+                modem_id=self.modem().id, 
                 owner=ModemLogOwner.SYSTEM, 
                 type=ModemLogType.INFO, 
                 message='app.log.modem.middleware.starting',
@@ -245,7 +257,7 @@ class Modem:
                 old_ip = device_middleware.wan.try_get_current_ip(retries=2)
             else:
                 modem_log_model = ModemLogModel(
-                    modem_id=self.modem.id, 
+                    modem_id=self.modem().id, 
                     owner=ModemLogOwner.SYSTEM, 
                     type=ModemLogType.ERROR, 
                     message='app.log.modem.rotate.stop.error.middleware_not_found',
@@ -263,7 +275,7 @@ class Modem:
                 if self.event_stop_is_set() == True: break
 
                 modem_log_model = ModemLogModel(
-                    modem_id=self.modem.id, 
+                    modem_id=self.modem().id, 
                     owner=ModemLogOwner.SYSTEM, 
                     type=ModemLogType.INFO, 
                     message='app.log.modem.rebooted_wait_provider',
@@ -283,7 +295,7 @@ class Modem:
                 device_middleware = self.get_device_middleware()
 
                 modem_log_model = ModemLogModel(
-                    modem_id=self.modem.id, 
+                    modem_id=self.modem().id, 
                     owner=ModemLogOwner.SYSTEM, 
                     type=ModemLogType.INFO, 
                     message='app.log.modem.middleware.rebooting',
@@ -296,7 +308,7 @@ class Modem:
                     new_ip = device_middleware.release()
                 except ConnectException as e:
                     modem_log_model = ModemLogModel(
-                        modem_id=self.modem.id, 
+                        modem_id=self.modem().id, 
                         owner=ModemLogOwner.SYSTEM, 
                         type=ModemLogType.ERROR, 
                         message='app.log.modem.reboot.stop.error.middleware_reboot',
@@ -317,7 +329,7 @@ class Modem:
             signalbar = modem_details['signalbar'] if modem_details else None
 
             if new_ip != None and new_ip != old_ip:
-                modem_ip_history = ModemIPHistoryModel(modem_id = self.modem.id, ip = new_ip, network_type = network_type, network_provider = network_provider, signalbar = signalbar)
+                modem_ip_history = ModemIPHistoryModel(modem_id = self.modem().id, ip = new_ip, network_type = network_type, network_provider = network_provider, signalbar = signalbar)
                 modem_ip_history.save_to_db()
 
                 inframodem_iface = self.iface()
@@ -331,7 +343,7 @@ class Modem:
 
                     if is_ip_reserved_for_other:
                         modem_log_model = ModemLogModel(
-                            modem_id=self.modem.id, 
+                            modem_id=self.modem().id, 
                             owner=ModemLogOwner.SYSTEM, 
                             type=ModemLogType.WARNING, 
                             message='app.log.modem.rotate.ip.new.reserved_other_user',
@@ -354,7 +366,7 @@ class Modem:
                         
                     if ip_match_found == False:
                         modem_log_model = ModemLogModel(
-                            modem_id=self.modem.id, 
+                            modem_id=self.modem().id, 
                             owner=ModemLogOwner.SYSTEM, 
                             type=ModemLogType.WARNING, 
                             message='app.log.modem.rotate.ip.new.filter_not_match',
@@ -379,11 +391,11 @@ class Modem:
                     proxyService = ProxyService(ip=modem_ifaddress['addr'], proxy_ipv4_http_port=self.server_modem_model.proxy_ipv4_http_port)
                     proxyService.resolve_proxy()
 
-                    route = Route(gateway=modem_gateway, interface=inframodem_iface.interface, ip=modem_ifaddress['addr'], table=self.modem.id)
+                    route = Route(gateway=modem_gateway, interface=inframodem_iface.interface, ip=modem_ifaddress['addr'], table=self.modem().id)
                     route.resolve_route()
                     
                     modem_log_model = ModemLogModel(
-                        modem_id=self.modem.id, 
+                        modem_id=self.modem().id, 
                         owner=ModemLogOwner.SYSTEM, 
                         type=ModemLogType.SUCCESS, 
                         message='app.log.modem.rotate.done.success',
@@ -405,7 +417,7 @@ class Modem:
 
                 if not_changed_count < not_changed_try_count:
                     modem_log_model = ModemLogModel(
-                        modem_id=self.modem.id, 
+                        modem_id=self.modem().id, 
                         owner=ModemLogOwner.SYSTEM, 
                         type=ModemLogType.WARNING, 
                         message='app.log.modem.rotate.ip.new.not_change',
@@ -422,7 +434,7 @@ class Modem:
                 
                 if not_ip_count < not_ip_try_count:
                     modem_log_model = ModemLogModel(
-                        modem_id=self.modem.id, 
+                        modem_id=self.modem().id, 
                         owner=ModemLogOwner.SYSTEM, 
                         type=ModemLogType.WARNING, 
                         message='app.log.modem.rotate.ip.new.not_valid',
@@ -436,7 +448,7 @@ class Modem:
 
             if not_changed_count >= not_changed_try_count:               
                 modem_log_model = ModemLogModel(
-                    modem_id=self.modem.id, 
+                    modem_id=self.modem().id, 
                     owner=ModemLogOwner.SYSTEM, 
                     type=ModemLogType.ERROR, 
                     message='app.log.modem.rotate.stop.ip.not_change',
@@ -457,7 +469,7 @@ class Modem:
 
             if not_ip_count >= not_ip_try_count:
                 modem_log_model = ModemLogModel(
-                    modem_id=self.modem.id, 
+                    modem_id=self.modem().id, 
                     owner=ModemLogOwner.SYSTEM, 
                     type=ModemLogType.ERROR, 
                     message='app.log.modem.rotate.stop.ip.not_valid',

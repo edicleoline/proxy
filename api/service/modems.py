@@ -153,6 +153,9 @@ class ModemsAutoRotateSchedule():
         self.modems_manager = modems_manager
         self.agenda_items = []
 
+    def get_lock(self, infra_modem: IModem):
+        return self.modems_manager.running(infra_modem)
+
     def check(self):
         server_modems = self.modems_service.server_modems
         if server_modems == None:
@@ -163,7 +166,13 @@ class ModemsAutoRotateSchedule():
                 self.remove_from_agenda_items(server_modem)
                 continue
 
-            in_agenda = self.in_agenda_items(server_modem)            
+            in_agenda = self.in_agenda_items(server_modem)   
+
+            infra_modem=IModem(server_modem_model=server_modem)
+            lock = self.get_lock(infra_modem)
+            if lock != None:
+                if in_agenda: self.remove_from_agenda_items(in_agenda.server_modem_model)
+                continue        
 
             if in_agenda and in_agenda.server_modem_model.auto_rotate_time != server_modem.auto_rotate_time:
                 print('removed from agenda because changed {0}'.format(server_modem.id))
@@ -175,7 +184,7 @@ class ModemsAutoRotateSchedule():
             if in_agenda:
                 in_agenda.server_modem_model = server_modem
 
-            self.add_to_agenda_items(server_modem)
+            self.add_to_agenda_items(server_modem, infra_modem)
 
         return self.agenda_items
 
@@ -198,14 +207,14 @@ class ModemsAutoRotateSchedule():
 
         return None    
 
-    def add_to_agenda_items(self, server_modem_model):
+    def add_to_agenda_items(self, server_modem_model, infra_modem):
         if self.in_agenda_items(server_modem_model): return False
 
         now = datetime.now()
         self.agenda_items.append(
             ModemsAutoRotateAgendaItem(
                 server_modem_model=server_modem_model,
-                infra_modem=IModem(server_modem_model=server_modem_model),
+                infra_modem=infra_modem,
                 added_at=now,
                 run_at=self.calc_time_to_run(date_time=now, server_modem_model=server_modem_model)
             )
@@ -229,17 +238,9 @@ class ModemsAutoRotateService():
         self.socketio = socketio
         self.schedule = ModemsAutoRotateSchedule(modems_service=modems_service, modems_manager=modems_manager)
 
-    def get_lock(self, infra_modem: IModem):
-        return self.modems_manager.running(infra_modem)
-
     def check_and_rotate(self):
         agenda_items = self.schedule.check()
         for agenda_item in agenda_items:
-            lock = self.get_lock(agenda_item.infra_modem)
-            if lock != None:
-                self.schedule.remove_from_agenda_items(agenda_item.server_modem_model)
-                continue
-
             ready_to_run = agenda_item.ready_to_run()  
             # print('agenda_item {0} auto_rotate_hard_reset = {1}'.format(agenda_item.server_modem_model.id, agenda_item.server_modem_model.auto_rotate_hard_reset))          
             # print('agenda_item {0} auto_rotate_filter = {1}'.format(agenda_item.server_modem_model.id, agenda_item.server_modem_model.auto_rotate_filter))          

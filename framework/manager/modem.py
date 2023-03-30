@@ -75,7 +75,7 @@ class ModemManager():
 
     def running(self, infra_modem: IModem):
         for t in self.threads:
-            if t.infra_modem.modem.id != infra_modem.modem.id: continue
+            if t.infra_modem.modem().id != infra_modem.modem().id: continue
 
             if t.thread.is_alive(): return t
             
