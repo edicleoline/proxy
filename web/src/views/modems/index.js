@@ -58,11 +58,11 @@ import objectHash from 'object-hash';
 import config from 'config';
 import styled from 'styled-components';
 
-import ModemStatus from 'views/modems/ModemStatus';
-import ModemAutoRotateFlag from 'views/modems/ModemAutoRotateFlag';
-import ProxyConnection from 'views/modems/ProxyConnection';
-import DataUsage from 'views/modems/DataUsage';
-import SignalBar from 'views/modems/SignalBar';
+import ModemStatus from './ModemStatus';
+import ModemAutoRotateFlag from './ModemAutoRotateFlag';
+import ProxyConnection from './ProxyConnection';
+import DataUsage from './DataUsage';
+import SignalBar from './SignalBar';
 
 const ModemIdWrapper = styled.div`
     position: relative;
@@ -238,7 +238,7 @@ const Modems = () => {
         });
 
         socket.on('modems_details', (items) => {
-            console.log('socket.io server: modems_details', items);
+            // console.log('socket.io server: modems_details', items);
             const hash = objectHash.MD5(items);
             if (_modems.current && (!_modemsDetailsHash.current || _modemsDetailsHash.current !== hash)) {
                 // console.log('new modems_details hash', hash);
