@@ -7,11 +7,11 @@ const config = {
     fontFamily: `'Roboto', sans-serif`,
     borderRadius: 6,
     api: {
-        baseURL: 'http://192.168.15.138:5000'
+        baseURL: 'http://192.168.15.20:5000'
         // baseURL: 'http://192.168.15.10:5000'
     },
     socketio: {
-        baseURL: 'http://192.168.15.138:5000'
+        baseURL: 'http://192.168.15.20:5000'
         // baseURL: 'http://192.168.15.10:5000'
     }
 };

@@ -10,7 +10,7 @@ import { useEffect, useState, useRef, useLayoutEffect, useMemo } from 'react';
 import { getServer } from 'services/api/server';
 import { stopRotate } from 'services/api/modem';
 
-import { bytesToSize } from 'utils/format';
+// import { bytesToSize } from 'utils/format';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -31,19 +31,12 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import CircularProgress from '@mui/material/CircularProgress';
-import Popover from '@mui/material/Popover';
 import cloneDeep from 'lodash/cloneDeep';
 
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import IntlMessageFormat from 'intl-messageformat';
-import { locale, messages } from 'i18n';
 
 import { IconDotsVertical, IconAccessPoint, IconAccessPointOff } from '@tabler/icons';
-import { IconAntennaBars1, IconAntennaBars2, IconAntennaBars3, IconAntennaBars4, IconAntennaBars5 } from '@tabler/icons';
-import { IconCheck, IconChecks, IconBan, IconArrowUp, IconArrowDown, IconAlertCircle } from '@tabler/icons';
-import { IconRotateClockwise2 } from '@tabler/icons';
 import CloseIcon from '@mui/icons-material/Close';
 
 import RotateDialog from 'ui-component/modem/Rotate';
@@ -65,59 +58,11 @@ import objectHash from 'object-hash';
 import config from 'config';
 import styled from 'styled-components';
 
-const AutomatedFlagWrapper = styled.div`
-    position: absolute;
-    top: -3px;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    -webkit-box-align: center;
-    align-items: center;
-    -webkit-box-pack: center;
-    justify-content: center;
-    margin-left: 24px;
-`;
-
-const AutomatedFlagIcon = styled.div`
-    position: relative;
-    width: 24px;
-    height: 24px;
-    // background: #ede7f6;
-    background: transparent;
-    border-radius: 50%;
-    display: flex;
-    -webkit-box-align: center;
-    align-items: center;
-    -webkit-box-pack: center;
-    justify-content: center;
-`;
-
-const AutomatedFlagBadgeWrapper = styled.span`
-    display: flex;
-    flex-flow: row wrap;
-    -webkit-box-pack: center;
-    place-content: center;
-    -webkit-box-align: center;
-    align-items: center;
-    position: absolute;
-    box-sizing: border-box;
-    font-weight: 500;
-    font-size: 0.75rem;
-    min-width: 20px;
-    line-height: 1;
-    padding: 0px 6px;
-    height: 20px;
-    border-radius: 10px;
-    z-index: 1;
-    transition: transform 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-    background-color: rgb(156, 39, 176);
-    color: rgb(255, 255, 255);
-    top: 1px;
-    margin-left: 0px;
-    transform: scale(1) translate(50%, -50%);
-    transform-origin: 100% 0%;
-`;
+import ModemStatus from 'views/modems/ModemStatus';
+import ModemAutoRotateFlag from 'views/modems/ModemAutoRotateFlag';
+import ProxyConnection from 'views/modems/ProxyConnection';
+import DataUsage from 'views/modems/DataUsage';
+import SignalBar from 'views/modems/SignalBar';
 
 const ModemIdWrapper = styled.div`
     position: relative;
@@ -293,7 +238,7 @@ const Modems = () => {
         });
 
         socket.on('modems_details', (items) => {
-            // console.log('socket.io server: modems_details', items);
+            console.log('socket.io server: modems_details', items);
             const hash = objectHash.MD5(items);
             if (_modems.current && (!_modemsDetailsHash.current || _modemsDetailsHash.current !== hash)) {
                 // console.log('new modems_details hash', hash);
@@ -431,124 +376,6 @@ const Modems = () => {
         setModemDiagnoseDialog({ ...modemDiagnoseDialog, open: false });
     };
 
-    const ProxyConnection = ({ type, ip, port, status }) => {
-        let icon = '';
-
-        if (status === 'fail') {
-            icon = (
-                <Tooltip title="Desconectado">
-                    <div>
-                        <IconBan size={12} style={{ position: 'relative', top: 0, marginLeft: 2, color: '#c62828' }} />
-                    </div>
-                </Tooltip>
-            );
-        } else if (status === 'success') {
-            icon = (
-                <Tooltip title="Conectado">
-                    <div>
-                        <IconCheck size={14} style={{ position: 'relative', top: 1, marginLeft: 2, color: '#00c853' }} />
-                    </div>
-                </Tooltip>
-            );
-        }
-
-        return (
-            <>
-                <Grid
-                    container
-                    justifyContent="flex-start"
-                    alignItems="start"
-                    direction="row"
-                    sx={{ p: 0.2, px: 0.8, borderRadius: 1, minWidth: '160px' }}
-                >
-                    <Grid item>{type}</Grid>
-                    {/* <Grid item>/</Grid> */}
-                    {/* <Grid item>{ip}</Grid> */}
-                    <Grid item>:&nbsp;</Grid>
-                    <Grid item>{port}</Grid>
-                    {/* <Grid item>{icon}</Grid> */}
-                </Grid>
-            </>
-        );
-    };
-
-    const DataUsage = ({ download, upload }) => {
-        const iconProps = {
-            size: 14,
-            style: { position: 'relative', top: 1, marginRight: 2 }
-        };
-        const gridContainerProps = {
-            justifyContent: 'end',
-            alignItems: 'end',
-            direction: 'row',
-            sx: { p: 0.2, px: 0, borderRadius: 1 }
-        };
-        return (
-            <>
-                <Grid container justifyContent="space-between" alignItems="end" direction="column" sx={{ minWidth: '80px' }}>
-                    <Grid item>
-                        <Grid container {...gridContainerProps}>
-                            <Grid item>
-                                <Tooltip title="Download">
-                                    <div>
-                                        <IconArrowDown {...iconProps} />
-                                    </div>
-                                </Tooltip>
-                            </Grid>
-                            <Grid item>{download}</Grid>
-                        </Grid>
-                    </Grid>
-                    <Grid item>
-                        <Grid container {...gridContainerProps}>
-                            <Grid item>
-                                <Tooltip title="Upload">
-                                    <div>
-                                        <IconArrowUp {...iconProps} />
-                                    </div>
-                                </Tooltip>
-                            </Grid>
-                            <Grid item>{upload}</Grid>
-                        </Grid>
-                    </Grid>
-                </Grid>
-            </>
-        );
-    };
-
-    const SignalBar = ({ signal }) => {
-        const icons = {
-            ['0']: <span>-</span>,
-            ['1']: <IconAntennaBars1 title={signal} />,
-            ['2']: <IconAntennaBars2 title={signal} />,
-            ['3']: <IconAntennaBars3 title={signal} />,
-            ['4']: <IconAntennaBars4 title={signal} />,
-            ['5']: <IconAntennaBars5 title={signal} />
-        };
-
-        return icons[signal];
-    };
-
-    const StatusBox = ({ bgcolor, title, dark, children }) => (
-        <>
-            <Card sx={{ mb: 0, width: '100%' }}>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        p: 1,
-                        bgcolor,
-                        color: dark ? 'grey.800' : '#ffffff',
-                        position: 'relative'
-                    }}
-                >
-                    {children}
-                    <span>{title}</span>
-                </Box>
-            </Card>
-        </>
-    );
-
     // const dockLog = useMemo(() => <Dock items={dockLogItems} />, []);
     const _dockLogItems = useRef([]);
 
@@ -589,60 +416,6 @@ const Modems = () => {
         description: ''
     });
 
-    const ModemStatus = ({ lock, connected }) => {
-        if (!lock) {
-            const color = connected ? 'success.light' : 'orange.light';
-            const title = connected ? 'Conectado' : 'Desconectado';
-            return <StatusBox bgcolor={color} title={title} dark style={{ width: '100%' }} />;
-        }
-
-        let lockLabel = lock.task.name;
-        if (lock.task.name === 'ROTATE') {
-            lockLabel = 'Rotacionando';
-        } else if (lock.task.name === 'REBOOT') {
-            lockLabel = 'Reiniciando';
-        }
-
-        return (
-            <>
-                <div>
-                    <StatusBox bgcolor={'#e8e1ff'} title={lockLabel} dark />
-                    {lock.task.stopping == true ? (
-                        <div
-                            style={{
-                                position: 'absolute',
-                                right: '6px',
-                                top: '6px',
-                                backgroundColor: '#ffffff',
-                                borderRadius: '50%'
-                            }}
-                        >
-                            <Tooltip title="Cancelando tarefa">
-                                <IconButton
-                                    aria-label="close"
-                                    onClick={() => {
-                                        setTaskStoppingHelpDialog({
-                                            ...taskStoppingHelpDialog,
-                                            open: true,
-                                            title: <FormattedMessage id="app.components.modem.Task.help.stopping.title" />,
-                                            description: <FormattedMessage id="app.components.modem.Task.help.stopping.description" />
-                                        });
-                                    }}
-                                    sx={{
-                                        color: (theme) => theme.palette.grey[500]
-                                    }}
-                                    size="small"
-                                >
-                                    <IconAlertCircle fontSize="inherit" />
-                                </IconButton>
-                            </Tooltip>
-                        </div>
-                    ) : null}
-                </div>
-            </>
-        );
-    };
-
     const [autoRotateInfoModem, setAutoRotateInfoModem] = useState(null);
     const [autoRotateInfoOpen, setAutoRotateInfoOpen] = useState(false);
 
@@ -666,24 +439,6 @@ const Modems = () => {
             });
         }
     }, [modems]);
-
-    const ModemAutoRotateFlag = ({ modem }) => {
-        const title = new IntlMessageFormat(messages[locale()][`app.components.modem.rotate.automated.tooltip`], locale());
-        return (
-            <AutomatedFlagWrapper>
-                <AutomatedFlagIcon>
-                    <Tooltip title={title.format()}>
-                        <IconButton color="secondary" onClick={handleModemAutoRotateFlagClick(modem)}>
-                            <IconRotateClockwise2 size="18" />
-                        </IconButton>
-                    </Tooltip>
-                </AutomatedFlagIcon>
-                {!modem.lock && modem.schedule?.time_left_to_run <= 30 && modem.schedule?.time_left_to_run > 0 ? (
-                    <AutomatedFlagBadgeWrapper>{modem.schedule?.time_left_to_run}</AutomatedFlagBadgeWrapper>
-                ) : null}
-            </AutomatedFlagWrapper>
-        );
-    };
 
     return (
         <MainCard
@@ -739,7 +494,12 @@ const Modems = () => {
                                                             </Grid>
                                                             <Grid item>
                                                                 <ModemIdWrapper>
-                                                                    {row.auto_rotate == true ? <ModemAutoRotateFlag modem={row} /> : null}
+                                                                    {row.auto_rotate == true ? (
+                                                                        <ModemAutoRotateFlag
+                                                                            modem={row}
+                                                                            onAutoRotateIconClick={handleModemAutoRotateFlagClick}
+                                                                        />
+                                                                    ) : null}
                                                                     &nbsp;&nbsp;{row.modem.id}
                                                                 </ModemIdWrapper>
                                                             </Grid>
@@ -823,7 +583,22 @@ const Modems = () => {
                                                     <TableCell align="left">{row.modem.device.model}</TableCell>
                                                     <TableCell align="left">{row.usb.port}</TableCell>
                                                     <TableCell align="left" sx={{ position: 'relative' }}>
-                                                        <ModemStatus lock={row.lock} connected={row.is_connected} />
+                                                        <ModemStatus
+                                                            lock={row.lock}
+                                                            connected={row.is_connected}
+                                                            onStoppingTaskClick={() => {
+                                                                setTaskStoppingHelpDialog({
+                                                                    ...taskStoppingHelpDialog,
+                                                                    open: true,
+                                                                    title: (
+                                                                        <FormattedMessage id="app.components.modem.Task.help.stopping.title" />
+                                                                    ),
+                                                                    description: (
+                                                                        <FormattedMessage id="app.components.modem.Task.help.stopping.description" />
+                                                                    )
+                                                                });
+                                                            }}
+                                                        />
                                                     </TableCell>
                                                     <TableCell align="left">{row.external_ip ? row.external_ip : '-'}</TableCell>
                                                     <TableCell align="right">
