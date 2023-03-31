@@ -116,6 +116,7 @@ const SettingsDialog = (props) => {
 
     useEffect(() => {
         if (_modem) {
+            setAutoRotateFilter(_modem.auto_rotate_filter);
             if (objectHash.MD5(_modem) !== _originalModemHash) {
                 _setModemChanged(true);
             } else {

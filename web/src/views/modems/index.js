@@ -33,6 +33,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import CircularProgress from '@mui/material/CircularProgress';
 import Popover from '@mui/material/Popover';
+import cloneDeep from 'lodash/cloneDeep';
 
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
@@ -156,7 +157,6 @@ const Modems = () => {
     const [modems, setModems] = useState([]);
     const _modems = useRef(null);
     const _modemsHash = useRef(null);
-
     const _modemsDetailsHash = useRef(null);
 
     const testProxies = (modem, ip) => {
@@ -268,9 +268,15 @@ const Modems = () => {
                                 modem.lock = item.lock;
                             }
 
-                            if (modem.auto_rotate_time_left_to_run != item.auto_rotate_time_left_to_run) {
-                                changed = true;
-                                modem.auto_rotate_time_left_to_run = item.auto_rotate_time_left_to_run;
+                            if (
+                                (!modem.schedule && item.schedule) ||
+                                (modem.schedule && !item.schedule) ||
+                                objectHash.MD5(modem.schedule) != objectHash.MD5(item.schedule)
+                            ) {
+                                if (item.schedule?.time_left_to_run <= 30 || item.schedule?.added_at != modem.schedule?.added_at) {
+                                    modem.schedule = item.schedule;
+                                    changed = true;
+                                }
                             }
                         });
 
@@ -489,7 +495,7 @@ const Modems = () => {
                                     </div>
                                 </Tooltip>
                             </Grid>
-                            <Grid item>{bytesToSize(download)}</Grid>
+                            <Grid item>{download}</Grid>
                         </Grid>
                     </Grid>
                     <Grid item>
@@ -501,7 +507,7 @@ const Modems = () => {
                                     </div>
                                 </Tooltip>
                             </Grid>
-                            <Grid item>{bytesToSize(upload)}</Grid>
+                            <Grid item>{upload}</Grid>
                         </Grid>
                     </Grid>
                 </Grid>
@@ -647,7 +653,19 @@ const Modems = () => {
 
     const handleAutoRotateInfoOnClose = () => {
         setAutoRotateInfoOpen(false);
+        setAutoRotateInfoModem(null);
     };
+
+    useEffect(() => {
+        if (modems && autoRotateInfoModem) {
+            modems.forEach((modem) => {
+                if (modem.id === autoRotateInfoModem.id) {
+                    setAutoRotateInfoModem(cloneDeep(modem));
+                    return false;
+                }
+            });
+        }
+    }, [modems]);
 
     const ModemAutoRotateFlag = ({ modem }) => {
         const title = new IntlMessageFormat(messages[locale()][`app.components.modem.rotate.automated.tooltip`], locale());
@@ -659,10 +677,9 @@ const Modems = () => {
                             <IconRotateClockwise2 size="18" />
                         </IconButton>
                     </Tooltip>
-                    {/* <CircularProgress variant="determinate" color="secondary" value="80" /> */}
                 </AutomatedFlagIcon>
-                {modem.lock == null && modem.auto_rotate_time_left_to_run ? (
-                    <AutomatedFlagBadgeWrapper>{modem.auto_rotate_time_left_to_run}</AutomatedFlagBadgeWrapper>
+                {!modem.lock && modem.schedule?.time_left_to_run <= 30 && modem.schedule?.time_left_to_run > 0 ? (
+                    <AutomatedFlagBadgeWrapper>{modem.schedule?.time_left_to_run}</AutomatedFlagBadgeWrapper>
                 ) : null}
             </AutomatedFlagWrapper>
         );
@@ -898,7 +915,10 @@ const Modems = () => {
                                                     </TableCell>
                                                     <TableCell align="right">
                                                         {row.data && row.data.receive ? (
-                                                            <DataUsage download={row.data.receive.bytes} upload={row.data.transmit.bytes} />
+                                                            <DataUsage
+                                                                download={row.data.receive.formatted}
+                                                                upload={row.data.transmit.formatted}
+                                                            />
                                                         ) : (
                                                             <span>-</span>
                                                         )}

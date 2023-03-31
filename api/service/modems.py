@@ -1,12 +1,15 @@
 from datetime import datetime, timedelta
 import json
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
+from framework.models.schedule import ModemsAutoRotateAgendaItem
 from framework.models.server import ServerModel
 from framework.infra.modem import Modem as IModem
 from dataclasses import dataclass, field
 from dataclasses_json import dataclass_json, config
 from marshmallow import fields
 import json
+
+from framework.util.format import HumanBytes
 
 class ModemsService():
     def __init__(self, server_model: ServerModel, modems_manager):
@@ -92,10 +95,12 @@ class ModemsService():
 
             item['data'] = {
                 'receive': {
-                    'bytes': imodem_iface.rx_bytes              
+                    # 'bytes': imodem_iface.rx_bytes
+                    'formatted': HumanBytes.format(imodem_iface.rx_bytes, True, 1)
                 },
                 'transmit': {
-                    'bytes': imodem_iface.tx_bytes      
+                    # 'bytes': imodem_iface.tx_bytes    
+                    'formatted': HumanBytes.format(imodem_iface.tx_bytes, True, 1)  
                 }
             }
 
@@ -107,45 +112,6 @@ class ModemsService():
             result.append(item)
 
         return result
-
-@dataclass_json
-@dataclass
-class ModemsAutoRotateAgendaItem():
-    added_at: datetime = field(
-        metadata=config(
-            encoder=datetime.isoformat,
-            decoder=datetime.fromisoformat,
-            mm_field=fields.DateTime(format='iso')
-        )
-    )
-    run_at: datetime = field(
-        metadata=config(
-            encoder=datetime.isoformat,
-            decoder=datetime.fromisoformat,
-            mm_field=fields.DateTime(format='iso')
-        )
-    )
-    now: datetime = field(
-        metadata=config(
-            encoder=datetime.isoformat,
-            decoder=datetime.fromisoformat,
-            mm_field=fields.DateTime(format='iso')
-        )
-    )
-
-    def __init__(self, server_modem_model, infra_modem: IModem, added_at, run_at, now = None):
-        self.server_modem_model = server_modem_model
-        self.infra_modem = infra_modem
-        self.added_at = added_at
-        self.run_at = run_at
-        self.now = None
-
-    def ready_to_run(self):
-        return True if self.time_left_to_run().total_seconds() <=0 else False
-
-    def time_left_to_run(self):
-        return self.run_at - datetime.now()
-    
 
 class ModemsAutoRotateSchedule():
     def __init__(self, modems_service: ModemsService, modems_manager):
@@ -252,15 +218,9 @@ class ModemsAutoRotateService():
             else:
                 index = self.modems_service.server_modem_model_index_by_id(agenda_item.server_modem_model.id)
                 if index > -1:
-                    time_left_to_run = int(agenda_item.time_left_to_run().total_seconds())
-                    if time_left_to_run <= 30:
-                        self.modems_service.server_modems[index].auto_rotate_time_left_to_run = time_left_to_run
+                    self.modems_service.server_modems[index].schedule = agenda_item                    
 
     def rotate(self, server_modem_model, infra_modem):
-        # if infra_modem.is_connected() == False:
-        #     print('no rotate because is offline')
-        #     return False
-
         modem = server_modem_model.modem()
         modem_log_model = ModemLogModel(
             modem_id=modem.id,

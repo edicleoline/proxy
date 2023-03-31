@@ -1,3 +1,4 @@
+from math import floor, log
 import string
 from weakref import proxy
 import netifaces
@@ -25,6 +26,8 @@ from framework.models.proxyuser import ProxyUserModel
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 
 from datetime import datetime
+
+from framework.util.format import HumanBytes
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
@@ -93,6 +96,22 @@ CEND = '\033[0m'
 # if filters:
 #     for filter in filters:
 #         print(filter.value)
+
+def bytesToSize(bytes):
+    sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    if bytes == 0:
+        return 'n/a'
+    print(floor(log(abs(bytes)) / log(1024)), 10)
+    i = int(floor(log(abs(bytes)) / log(1024)), 10)
+    if i == 0:
+        return '{0} {1}'.format(bytes, sizes[i])
+    
+    # return `${(bytes / 1024 ** i).toFixed(1)} ${sizes[i]}`;
+    return sizes[i]
+
+# bytesToSize(123421)
+print(HumanBytes.format(12342125, True, 0))
+sys.exit(0)
 
 modem_log_model = ModemLogModel(
     modem_id=1, 

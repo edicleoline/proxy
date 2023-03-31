@@ -3,9 +3,13 @@ import json
 from framework.models.installation import InstallationModel
 from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
 import psutil
-
 from framework.models.modem import ModemModel
+from dataclasses import dataclass, field
+from dataclasses_json import dataclass_json, config
+from datetime import datetime
+from marshmallow import fields
 from db import connection
+from framework.models.schedule import ModemsAutoRotateAgendaItem
 
 class ServerModel():
     def __init__(self, id = None, name = None, installation_id = None, created_at = None):
@@ -164,6 +168,7 @@ class ServerModemModel():
             auto_rotate_time = None,
             auto_rotate_hard_reset = True,
             auto_rotate_filter = None,
+            schedule: ModemsAutoRotateAgendaItem = None,
             created_at = None
         ):
         self.id = id
@@ -179,8 +184,8 @@ class ServerModemModel():
         self.auto_rotate_time = auto_rotate_time
         self.auto_rotate_hard_reset = auto_rotate_hard_reset
         self.auto_rotate_filter = auto_rotate_filter
+        self.schedule = schedule
         self.created_at = created_at
-        self.auto_rotate_time_left_to_run = None
 
     def json(self):
         usb_port = self.usb_port()
@@ -227,7 +232,7 @@ class ServerModemModel():
             'auto_rotate_time': self.auto_rotate_time,
             'auto_rotate_hard_reset': self.auto_rotate_hard_reset,
             'auto_rotate_filter': json.loads(ProxyUserIPFilterModel.schema().dumps(self.auto_rotate_filter, many=True)) if self.auto_rotate_filter else None,
-            'auto_rotate_time_left_to_run': self.auto_rotate_time_left_to_run
+            'schedule': json.loads(ModemsAutoRotateAgendaItem.schema().dumps(self.schedule, many=False)) if self.schedule else None
         }
 
     @classmethod
@@ -364,6 +369,3 @@ class ServerModemModel():
             )
 
         conn.close(True)
-
-
-

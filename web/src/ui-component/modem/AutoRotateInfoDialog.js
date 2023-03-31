@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 import LinearProgress from '@mui/material/LinearProgress';
 import moment from 'moment';
 import { scheduleAutoRotate } from 'services/api/modem';
+import { toMoment, fromNow } from 'utils/calendar';
 
 const AutoRotateInfoDialog = (props) => {
     const { modem, open, onClose, ...other } = props;
@@ -19,42 +20,24 @@ const AutoRotateInfoDialog = (props) => {
     const [runAtFormattedDateTime, setRunAtFormattedDateTime] = useState(null);
 
     useEffect(() => {
-        if (open == true) {
-            scheduleAutoRotate(modem.id)
-                .then(
-                    (response) => {
-                        console.log(response);
-                        setAutoRotateSchedule(response);
-
-                        const runAtTime = moment(response.run_at).fromNow();
-                        setRunAtFormattedDateTime(runAtTime);
-                    },
-                    (err) => {
-                        const message =
-                            err.response && err.response.data && err.response.data.error && err.response.data.error.message
-                                ? err.response.data.error.message
-                                : err.message;
-                        console.log('reboot error', err);
-                    }
-                )
-                .finally(() => {
-                    // setLoading(false);
-                });
-
-            // setAutoRotateSchedule({
-            //     now: '2023-03-29 22:01:40.710990',
-            //     added_at: '2023-03-29 22:01:00.710990',
-            //     run_at: '2023-03-29 22:06:00.710990'
-            // });
+        if (open == true && modem) {
+            if (!autoRotateSchedule || autoRotateSchedule.added_at != modem.schedule.added_at) {
+                setAutoRotateSchedule(modem.schedule);
+            }
         }
-    }, [open]);
+    }, [open, modem]);
+
+    const formatRunAt = (value) => {
+        return fromNow(toMoment(value));
+    };
 
     const [progress, setProgress] = useState(100);
 
     useEffect(() => {
         if (!autoRotateSchedule) return;
 
-        const dateTimeNow = moment(autoRotateSchedule.now);
+        setRunAtFormattedDateTime(formatRunAt(autoRotateSchedule.run_at));
+
         const dateTimeAddedAt = moment(autoRotateSchedule.added_at);
         const dateTimeStart = moment(autoRotateSchedule.run_at);
 
@@ -71,8 +54,7 @@ const AutoRotateInfoDialog = (props) => {
             const percent = (100 * secondsLeftToRun) / total;
             setProgress(percent);
 
-            const runAtTime = moment(autoRotateSchedule.run_at).fromNow();
-            setRunAtFormattedDateTime(runAtTime);
+            setRunAtFormattedDateTime(formatRunAt(autoRotateSchedule.run_at));
 
             now = now.add(1, 'seconds');
         }, 1000);
