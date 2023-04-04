@@ -12,7 +12,7 @@ import Sidebar from './Sidebar';
 import Customization from '../Customization';
 import navigation from 'menu-items';
 import { drawerWidth } from 'store/constant';
-import { SET_MENU } from 'store/actions';
+import { SET_MENU } from 'store/actions/types';
 
 // assets
 import { IconChevronRight } from '@tabler/icons';

@@ -1,8 +1,7 @@
-import * as React from 'react';
 import PropTypes from 'prop-types';
 import { Box, Card } from '@mui/material';
 
-const ModemStatusBox = ({ bgcolor, title, dark, children }) => {
+const ModemStatusBox = ({ bgcolor, title, dark }) => {
     return (
         <>
             <Card sx={{ mb: 0, width: '100%' }}>
@@ -17,7 +16,6 @@ const ModemStatusBox = ({ bgcolor, title, dark, children }) => {
                         position: 'relative'
                     }}
                 >
-                    {children}
                     <span>{title}</span>
                 </Box>
             </Card>
@@ -25,6 +23,10 @@ const ModemStatusBox = ({ bgcolor, title, dark, children }) => {
     );
 };
 
-// ModemStatusBox.propTypes = { };
+ModemStatusBox.propTypes = {
+    bgcolor: PropTypes.string,
+    title: PropTypes.string,
+    dark: PropTypes.bool
+};
 
 export default ModemStatusBox;

@@ -31,6 +31,8 @@ const AutomatedFlag = ({ message }) => {
     );
 };
 
-AutomatedFlag.propTypes = {};
+AutomatedFlag.propTypes = {
+    message: PropTypes.object
+};
 
 export default AutomatedFlag;

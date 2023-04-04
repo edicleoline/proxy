@@ -1,7 +1,5 @@
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { FormattedMessage } from 'react-intl';
-import moment from 'moment';
 import { Grid } from '@mui/material';
 import MessageParamItem from './MessageParamItem';
 
@@ -52,6 +50,8 @@ const MessageParams = ({ message }) => {
     );
 };
 
-MessageParams.propTypes = {};
+MessageParams.propTypes = {
+    message: PropTypes.object
+};
 
 export default MessageParams;

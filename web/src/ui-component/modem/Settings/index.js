@@ -42,7 +42,6 @@ const SettingsDialog = (props) => {
     useEffect(() => {
         const m = cloneDeep(modem);
         _setModem(m);
-        console.log('changedddddddddddddd');
 
         _setOriginalModemHash(objectHash.MD5(m));
         _setModemChanged(false);
@@ -131,6 +130,8 @@ const SettingsDialog = (props) => {
             .then(
                 (response) => {
                     console.log(response);
+                    _setOriginalModemHash(objectHash.MD5(_modem));
+                    _setModemChanged(false);
                 },
                 (err) => {
                     const message =

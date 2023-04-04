@@ -46,6 +46,9 @@ const DataUsage = ({ download, upload }) => {
     );
 };
 
-DataUsage.propTypes = {};
+DataUsage.propTypes = {
+    download: PropTypes.string,
+    upload: PropTypes.string
+};
 
 export default DataUsage;

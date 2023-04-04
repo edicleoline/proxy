@@ -1,7 +1,5 @@
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
-
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { IconAlertCircle } from '@tabler/icons';
@@ -56,7 +54,9 @@ const ModemStatus = ({ lock, connected, onStoppingTaskClick }) => {
 
 ModemStatus.propTypes = {
     connected: PropTypes.bool.isRequired,
-    onStoppingTaskClick: PropTypes.func.isRequired
+    onStoppingTaskClick: PropTypes.func.isRequired,
+    modem: PropTypes.object,
+    lock: PropTypes.object
 };
 
 export default ModemStatus;

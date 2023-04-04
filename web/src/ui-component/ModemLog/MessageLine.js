@@ -101,6 +101,8 @@ const MessageLine = ({ container }) => {
     );
 };
 
-MessageLine.propTypes = {};
+MessageLine.propTypes = {
+    container: PropTypes.object
+};
 
 export default MessageLine;

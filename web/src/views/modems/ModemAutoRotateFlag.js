@@ -7,6 +7,7 @@ import { IconRotateClockwise2 } from '@tabler/icons';
 
 import IntlMessageFormat from 'intl-messageformat';
 import { locale, messages } from 'i18n';
+import config from 'config';
 
 const AutomatedFlagContainer = styled.div`
     position: absolute;
@@ -73,7 +74,9 @@ const ModemAutoRotateFlag = ({ modem, onAutoRotateIconClick }) => {
                     </IconButton>
                 </Tooltip>
             </AutomatedFlagIconWrapper>
-            {!modem.lock && modem.schedule?.time_left_to_run <= 30 && modem.schedule?.time_left_to_run > 0 ? (
+            {!modem.lock &&
+            modem.schedule?.time_left_to_run <= config.options.autoRotateNotifyIn &&
+            modem.schedule?.time_left_to_run > 0 ? (
                 <AutomatedFlagBadgeWrapper>{modem.schedule?.time_left_to_run}</AutomatedFlagBadgeWrapper>
             ) : null}
         </AutomatedFlagContainer>
@@ -81,7 +84,8 @@ const ModemAutoRotateFlag = ({ modem, onAutoRotateIconClick }) => {
 };
 
 ModemAutoRotateFlag.propTypes = {
-    onAutoRotateIconClick: PropTypes.func.isRequired
+    onAutoRotateIconClick: PropTypes.func.isRequired,
+    modem: PropTypes.object
 };
 
 export default ModemAutoRotateFlag;

@@ -9,7 +9,8 @@
     "app.components.modem.Reboot.error": "O modem {modemId} não pôde ser reiniciado. {error}",
     "app.components.modem.rotate.automated.tooltip": "Rotacionamento automático ativado",
 
-    "app.components.modem.rotate.automated.info.description": "Rotacionamento automático ativado para este modem ({modemId}).\nPróximo rotacionamento {formattedDateTime}",
+    "app.components.modem.rotate.automated.info.description": "Rotacionamento automático ativado para este modem ({modemId}).",
+    "app.components.modem.rotate.automated.schedule.task.next": "Próximo rotacionamento {formattedDateTime}",
 
     "app.components.modem.Rotate.error": "{error}",
     "app.components.modem.Rotate.warning.inUse": "Antes de continuar, considere pausar quaiquer serviços que estiverem usando o modem {modemId} como proxy, ele poderá ficar indisponível durante o processo.",
@@ -33,7 +34,7 @@
     "app.log.modem.params.hard_reset.false": "desativado",
     "app.log.modem.params.value.none": "não informado",
     "app.log.modem.params.filters": "Filtros",
-    "app.log.modem.params.network_provider": "Operadora",
+    "app.log.modem.params.network_provider": "Provedor",
     "app.log.modem.params.network_type": "Conexão",
     "app.log.modem.params.signalbar": "Nível do sinal",
     "app.log.modem.params.ip": "IPv4",

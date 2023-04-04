@@ -1,26 +1,16 @@
-import { Grid, Box, Card, Typography, CardContent } from '@mui/material';
-import Button from '@mui/material/Button';
+import { Grid, Card, CardContent } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import styled from 'styled-components';
 import moment from 'moment';
-
 import { useState, useEffect, createRef } from 'react';
-import PropTypes, { bool } from 'prop-types';
+import PropTypes from 'prop-types';
 
 import { modemLog, bulkStoreModemLog } from 'storage/modem/log';
 import { useLiveQuery } from 'dexie-react-hooks';
-
-import { FormattedMessage } from 'react-intl';
-import IntlMessageFormat from 'intl-messageformat';
-import { locale, messages } from 'i18n';
-
 import { logs } from 'services/api/modem/log';
-import Tooltip from '@mui/material/Tooltip';
-
 import MessageLine from './MessageLine';
 
 const ModemLog = (props) => {
-    const { modem, children, ...other } = props;
+    const { modem, children } = props;
 
     const [containers, setContainers] = useState([]);
 
@@ -97,14 +87,6 @@ const ModemLog = (props) => {
         scrollToBottom();
     }, [containers]);
 
-    /*const [_firstRender, _setFirstRender] = useState(true);
-    useEffect(() => {
-        if (_firstRender) {
-            console.log('firstttttttttttttttt render log');
-            _setFirstRender(false);
-        }
-    }, [_firstRender]);*/
-
     return (
         <Paper elevation={0} sx={{ borderRadius: 0 }} style={{ position: 'absolute', height: '100%', width: '100%' }}>
             <Card style={{ backgroundColor: '#f0f0f0', borderRadius: '0', position: 'relative', height: '100%', overflowY: 'auto' }}>
@@ -123,8 +105,8 @@ const ModemLog = (props) => {
 };
 
 ModemLog.propTypes = {
-    // onClose: PropTypes.func.isRequired,
-    // onConfirm: PropTypes.func.isRequired
+    modem: PropTypes.object,
+    children: PropTypes.any
 };
 
 export default ModemLog;

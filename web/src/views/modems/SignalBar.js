@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { IconAntennaBars1, IconAntennaBars2, IconAntennaBars3, IconAntennaBars4, IconAntennaBars5 } from '@tabler/icons';
 
 const SignalBar = ({ signal }) => {

@@ -1,29 +1,28 @@
 import PropTypes from 'prop-types';
 import { Grid } from '@mui/material';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import { IconCheck, IconBan } from '@tabler/icons';
+// import Tooltip from '@mui/material/Tooltip';
+// import { IconCheck, IconBan } from '@tabler/icons';
 
-const ProxyConnection = ({ type, ip, port, status }) => {
-    let icon = '';
+const ProxyConnection = ({ type, port /*, ip, status*/ }) => {
+    // let icon = '';
 
-    if (status === 'fail') {
-        icon = (
-            <Tooltip title="Desconectado">
-                <div>
-                    <IconBan size={12} style={{ position: 'relative', top: 0, marginLeft: 2, color: '#c62828' }} />
-                </div>
-            </Tooltip>
-        );
-    } else if (status === 'success') {
-        icon = (
-            <Tooltip title="Conectado">
-                <div>
-                    <IconCheck size={14} style={{ position: 'relative', top: 1, marginLeft: 2, color: '#00c853' }} />
-                </div>
-            </Tooltip>
-        );
-    }
+    // if (status === 'fail') {
+    //     icon = (
+    //         <Tooltip title="Desconectado">
+    //             <div>
+    //                 <IconBan size={12} style={{ position: 'relative', top: 0, marginLeft: 2, color: '#c62828' }} />
+    //             </div>
+    //         </Tooltip>
+    //     );
+    // } else if (status === 'success') {
+    //     icon = (
+    //         <Tooltip title="Conectado">
+    //             <div>
+    //                 <IconCheck size={14} style={{ position: 'relative', top: 1, marginLeft: 2, color: '#00c853' }} />
+    //             </div>
+    //         </Tooltip>
+    //     );
+    // }
 
     return (
         <>
@@ -47,7 +46,9 @@ const ProxyConnection = ({ type, ip, port, status }) => {
 
 ProxyConnection.propTypes = {
     type: PropTypes.string.isRequired,
-    port: PropTypes.number.isRequired
+    port: PropTypes.number.isRequired,
+    ip: PropTypes.string,
+    status: PropTypes.string
 };
 
 export default ProxyConnection;

@@ -1,9 +1,22 @@
-import { createStore } from 'redux';
-import reducer from './reducer';
+import { configureStore } from '@reduxjs/toolkit';
+import customizationReducer from './customizationReducer';
+import modemsDetailsReducer from './modemsDetailsReducer';
+import modemsReducer from './modemsReducer';
+import serverControlReducer from './serverControlReducer';
 
-// ==============================|| REDUX - MAIN STORE ||============================== //
-
-const store = createStore(reducer);
+const store = configureStore({
+    reducer: {
+        customization: customizationReducer,
+        modems: modemsReducer,
+        modemsDetails: modemsDetailsReducer,
+        serverControl: serverControlReducer
+    },
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+            immutableCheck: false,
+            serializableCheck: false
+        })
+});
 const persister = 'Free';
 
 export { store, persister };

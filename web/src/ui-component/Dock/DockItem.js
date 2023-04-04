@@ -1,67 +1,13 @@
-import { Grid, Box, Card, Typography } from '@mui/material';
-import Button from '@mui/material/Button';
-
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import TextField from '@mui/material/TextField';
-import Stack from '@mui/material/Stack';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import Switch from '@mui/material/Switch';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormGroup from '@mui/material/FormGroup';
-import InputAdornment from '@mui/material/InputAdornment';
-import FormHelperText from '@mui/material/FormHelperText';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import Divider from '@mui/material/Divider';
+import { Grid, Typography } from '@mui/material';
+import { useState, useEffect, createRef } from 'react';
+import PropTypes from 'prop-types';
+import DockItemState from './DockItemState';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { IconChevronUp, IconChevronDown } from '@tabler/icons';
-import styled from 'styled-components';
 
-import { useState, useEffect, useRef, createRef } from 'react';
-import PropTypes from 'prop-types';
-import { BootstrapDialogTitle } from 'ui-component/extended/BootstrapDialog';
-
-import Log from 'ui-component/ModemLog';
-
-export const Dockmodal = (props) => {
-    const { open, onClose, ...other } = props;
-
-    return (
-        <>
-            <Grid
-                container
-                justifyContent="flex-start"
-                alignItems="start"
-                direction="row"
-                sx={{ p: 0.2, px: 0.8, borderRadius: 1, minWidth: '160px' }}
-            >
-                <Grid item>test</Grid>
-            </Grid>
-        </>
-    );
-};
-
-Dockmodal.propTypes = {
-    // onClose: PropTypes.func.isRequired,
-    // onConfirm: PropTypes.func.isRequired
-};
-
-export const DockItemState = {
-    minimized: 'minimized',
-    maximized: 'maximized'
-};
-
-export const DockItem = (props) => {
-    const { title, children, open, onClose, onToggleMinimize, state, ...other } = props;
+const DockItem = (props) => {
+    const { title, children, onClose, onChangeState, state } = props;
 
     const minimizedWidth = 265;
 
@@ -77,8 +23,9 @@ export const DockItem = (props) => {
 
     const [_state, _setState] = useState(state);
 
-    const onChangeState = (state) => {
+    const _onChangeState = (state) => {
         _setWidth(getWidth(state));
+        onChangeState(state);
     };
 
     const handleToggleMinimize = () => {
@@ -95,16 +42,8 @@ export const DockItem = (props) => {
         onClose();
     };
 
-    // const scrollToBottom = () => {
-    //     dockContentEnd.current?.scrollIntoView({ behavior: 'smooth' });
-    // };
-
-    // useEffect(() => {
-    //     scrollToBottom();
-    // }, [children]);
-
     useEffect(() => {
-        onChangeState(_state);
+        _onChangeState(_state);
     }, [_state]);
 
     const styles = {
@@ -244,82 +183,8 @@ export const DockItem = (props) => {
 
 DockItem.propTypes = {
     title: PropTypes.string.isRequired,
-    onToggleMinimize: PropTypes.func.isRequired,
+    onChangeState: PropTypes.func.isRequired,
     onClose: PropTypes.func.isRequired
 };
 
-const DockWrapperW = styled.div`
-    padding: 0 25px;
-`;
-
-export const Dock = (props) => {
-    const { open, onClose, items, ...other } = props;
-
-    const styles = {
-        container: {
-            visibility: 'hidden',
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            width: '100%',
-            height: '100%',
-            overflow: 'hidden',
-            zIndex: 999
-        }
-    };
-
-    const [_window, _setWindow] = useState({ width: 0, height: 0 });
-
-    const _resize = () => {
-        const ih = window.innerHeight;
-        const iw = window.innerWidth;
-        _setWindow({ width: iw, height: ih });
-    };
-    useEffect(() => {
-        _resize();
-
-        window.addEventListener('resize', _resize);
-
-        return () => {
-            window.removeEventListener('resize', _resize);
-        };
-    }, []);
-
-    return (
-        <div style={styles.container}>
-            <div>
-                <DockWrapperW style={{ width: `${_window.width}px` }}>
-                    <div style={{ height: `${_window.height}px` }}>
-                        <div style={{ float: 'right' }}>
-                            <div style={styles.item}></div>
-                            {items
-                                ? items.map((item) => (
-                                      <DockItem
-                                          key={item.id}
-                                          title={item.title}
-                                          state={item.state}
-                                          onToggleMinimize={() => {
-                                              console.log('toggle event');
-                                          }}
-                                          onClose={() => {
-                                              onClose(item);
-                                          }}
-                                      >
-                                          {item.content}
-                                      </DockItem>
-                                  ))
-                                : null}
-                            <div style={styles.item}></div>
-                            <div style={styles.item}></div>
-                        </div>
-                    </div>
-                </DockWrapperW>
-            </div>
-        </div>
-    );
-};
-
-Dock.propTypes = {
-    onClose: PropTypes.func.isRequired
-    // onConfirm: PropTypes.func.isRequired
-};
+export default DockItem;

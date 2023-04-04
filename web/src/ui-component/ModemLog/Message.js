@@ -65,6 +65,8 @@ const Message = ({ message }) => {
     );
 };
 
-Message.propTypes = {};
+Message.propTypes = {
+    message: PropTypes.object
+};
 
 export default Message;

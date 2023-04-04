@@ -10,10 +10,19 @@ import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import LinearProgress from '@mui/material/LinearProgress';
 import moment from 'moment';
-import { scheduleAutoRotate } from 'services/api/modem';
 import { toMoment, fromNow } from 'utils/calendar';
+import styled from 'styled-components';
 
-const AutoRotateInfoDialog = (props) => {
+const AutoRotateInfoContent = styled.div`
+    white-space: pre-line;
+    padding: 16px;
+`;
+
+const AutoRotateInfoFooter = styled.div`
+    padding: 0 16px 16px 16px;
+`;
+
+const AutoRotateInfo = (props) => {
     const { modem, open, onClose, ...other } = props;
 
     const [autoRotateSchedule, setAutoRotateSchedule] = useState(null);
@@ -65,35 +74,31 @@ const AutoRotateInfoDialog = (props) => {
     }, [autoRotateSchedule]);
 
     return (
-        <Dialog
-            open={open}
-            onClose={onClose}
-            aria-labelledby="modem-auto-rotate-dialog-info-title"
-            aria-describedby="modem-auto-rotate-dialog-info-description"
-            fullWidth={true}
-        >
-            <BootstrapDialogTitle id="modem-auto-rotate-dialog-info-title" onClose={onClose}>
-                <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
-                    Rotacionamento automático
-                </Typography>
-            </BootstrapDialogTitle>
-            <DialogContent sx={{ whiteSpace: 'pre-line' }}>
-                <DialogContentText id="modem-auto-rotate-dialog-info-description">
-                    <FormattedMessage
-                        id="app.components.modem.rotate.automated.info.description"
-                        values={{ modemId: modem?.id, formattedDateTime: runAtFormattedDateTime }}
-                    />
-                </DialogContentText>
-                <Box sx={{ width: '100%', marginTop: '20px' }}>
-                    <LinearProgress variant="determinate" value={progress} />
-                </Box>
-            </DialogContent>
-        </Dialog>
+        <Box>
+            <Grid container>
+                <Grid item>
+                    <AutoRotateInfoContent>
+                        <FormattedMessage
+                            id="app.components.modem.rotate.automated.info.description"
+                            values={{ modemId: modem?.id, formattedDateTime: runAtFormattedDateTime }}
+                        />
+                        <br></br>
+                        <FormattedMessage
+                            id="app.components.modem.rotate.automated.schedule.task.next"
+                            values={{ modemId: modem?.id, formattedDateTime: runAtFormattedDateTime }}
+                        />
+                    </AutoRotateInfoContent>
+                    <AutoRotateInfoFooter>
+                        <LinearProgress variant="determinate" value={progress} />
+                    </AutoRotateInfoFooter>
+                </Grid>
+            </Grid>
+        </Box>
     );
 };
 
-AutoRotateInfoDialog.propTypes = {
+AutoRotateInfo.propTypes = {
     onClose: PropTypes.func.isRequired
 };
 
-export default AutoRotateInfoDialog;
+export default AutoRotateInfo;

@@ -90,7 +90,6 @@ const RotateDialog = (props) => {
                         if (response.items) {
                             setProxyUsers(response.items);
                         }
-                        console.log(response.items);
                     },
                     (err) => {
                         console.log('rotate error', err);
@@ -113,7 +112,14 @@ const RotateDialog = (props) => {
                             .then(
                                 (response) => {
                                     if (response && response.items) {
-                                        setIPv4Filter(response.items);
+                                        const filters = [];
+                                        response.items.forEach((item) => {
+                                            filters.push({
+                                                type: item.type,
+                                                value: item.value
+                                            });
+                                        });
+                                        setIPv4Filter(filters);
                                     }
                                 },
                                 (err) => {
@@ -168,11 +174,9 @@ const RotateDialog = (props) => {
                             value={proxyUser}
                             onChange={(event, newValue) => {
                                 setProxyUser(newValue);
-                                console.log(newValue);
                             }}
                             onInputChange={(event, newInputValue) => {
                                 setProxyUser(newInputValue);
-                                console.log(newInputValue);
                             }}
                             renderInput={(params) => (
                                 <TextField

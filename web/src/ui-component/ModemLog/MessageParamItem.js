@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { FormattedMessage } from 'react-intl';
 import IntlMessageFormat from 'intl-messageformat';
 import { locale, messages } from 'i18n';
@@ -48,6 +47,9 @@ const MessageParamItem = ({ pkey, pvalue }) => {
     );
 };
 
-MessageParamItem.propTypes = {};
+MessageParamItem.propTypes = {
+    pkey: PropTypes.string,
+    pvalue: PropTypes.any
+};
 
 export default MessageParamItem;

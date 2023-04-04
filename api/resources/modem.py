@@ -165,7 +165,7 @@ class Modem(Resource):
 
         app.modems_service.reload_modems()
         # app.socketio.emit('server_control', { 'action': 'reload_modems' }, broadcast=True)
-        app.socketio.emit('server_control', { 'action': 'reload_modem', 'id': modem_id }, broadcast=True)
+        app.socketio.emit('server_control', { 'action': 'reload_modem', 'data': { 'id': modem_id } }, broadcast=True)
 
         return {"message": "OK"}, 200
 

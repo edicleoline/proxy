@@ -1,16 +1,12 @@
-import * as React from 'react';
-
 import { Grid, Box, Card, Typography } from '@mui/material';
 import SubCard from 'ui-component/cards/SubCard';
 import MainCard from 'ui-component/cards/MainCard';
 import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
 
-import { useEffect, useState, useRef, useLayoutEffect, useMemo } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import { getServer } from 'services/api/server';
 import { stopRotate } from 'services/api/modem';
-
-// import { bytesToSize } from 'utils/format';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -24,36 +20,24 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import Badge from '@mui/material/Badge';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import cloneDeep from 'lodash/cloneDeep';
-
-import PropTypes from 'prop-types';
+import Popover from '@mui/material/Popover';
 import { FormattedMessage } from 'react-intl';
-
-import { IconDotsVertical, IconAccessPoint, IconAccessPointOff } from '@tabler/icons';
-import CloseIcon from '@mui/icons-material/Close';
-
+import { IconDotsVertical } from '@tabler/icons';
 import RotateDialog from 'ui-component/modem/Rotate';
-import AutoRotateInfoDialog from 'ui-component/modem/AutoRotateInfoDialog';
+import AutoRotateInfo from 'ui-component/modem/AutoRotateInfo';
 import RebootDialog from 'ui-component/modem/Reboot';
 import SettingsDialog from 'ui-component/modem/Settings';
 import DiagnoseDialog from 'ui-component/modem/Diagnose';
-import { Dock, DockItemState } from 'ui-component/Dockmodal';
+import DockItemState from 'ui-component/Dock/DockItemState';
+import { Dock } from 'ui-component/Dock';
 import ModemLog from 'ui-component/ModemLog';
-
-import { storeModemLog, modemLog } from 'storage/modem/log';
-import { useLiveQuery } from 'dexie-react-hooks';
-
+import cloneDeep from 'lodash/cloneDeep';
 import { testProxyIPv4HTTP } from 'utils/proxy';
-
-import io from 'socket.io-client';
-import objectHash from 'object-hash';
 
 import config from 'config';
 import styled from 'styled-components';
@@ -63,6 +47,8 @@ import ModemAutoRotateFlag from './ModemAutoRotateFlag';
 import ProxyConnection from './ProxyConnection';
 import DataUsage from './DataUsage';
 import SignalBar from './SignalBar';
+
+import { useSelector } from 'react-redux';
 
 const ModemIdWrapper = styled.div`
     position: relative;
@@ -100,9 +86,36 @@ const Modems = () => {
     }, []);
 
     const [modems, setModems] = useState([]);
-    const _modems = useRef(null);
-    const _modemsHash = useRef(null);
-    const _modemsDetailsHash = useRef(null);
+
+    const _modems = useSelector((state) => state.modems);
+    const _modemsDetails = useSelector((state) => state.modemsDetails);
+
+    useEffect(() => {
+        // console.log('UPDATED MODEMS ITEMS!', _modems);
+        setModems(_modems.items);
+    }, [_modems]);
+
+    useEffect(() => {
+        // console.log('UPDATED MODEMS___DETAILS ITEMS!', _modems);
+        _modems.items.map((modem) => {
+            _modemsDetails.items.forEach((modemDetail) => {
+                if (modem.modem.id === modemDetail.modem.id) {
+                    modem.device_network_type = modemDetail.device_network_type;
+                    modem.device_network_provider = modemDetail.device_network_provider;
+                    modem.device_network_signalbar = modemDetail.device_network_signalbar;
+                    modem.data = modemDetail.data;
+
+                    if (modem.external_ip !== modemDetail.external_ip_through_device) {
+                        testProxies(modem, modemDetail.external_ip_through_device);
+                    }
+
+                    modem.external_ip = modemDetail.external_ip_through_device;
+                }
+            });
+
+            return modem;
+        });
+    }, [_modemsDetails]);
 
     const testProxies = (modem, ip) => {
         testModemProxyIPv4HTTP(modem, ip);
@@ -120,8 +133,7 @@ const Modems = () => {
     };
     const testModemProxyIPv4HTTP = (modem, ip) => {
         // console.log('lets test modem-ipv4');
-
-        const remodems = _modems.current.map(function (item) {
+        /*const remodems = _modems.current.map(function (item) {
             if (item.modem.id == modem.id) {
                 if (item.modem.id == 5) {
                     item.proxy.ipv4.http.status = 'fail';
@@ -134,155 +146,8 @@ const Modems = () => {
         });
 
         _modems.current = remodems;
-        setModems(_modems.current);
+        setModems(_modems.current);*/
     };
-
-    const [socketConnected, setSocketConnected] = useState(false);
-
-    const _serverControl = useRef(null);
-
-    useEffect(() => {
-        const socket = io(config.socketio.baseURL);
-
-        socket.on('connect', () => {
-            setSocketConnected(true);
-            console.log('socket.io: connected');
-        });
-
-        socket.on('disconnect', () => {
-            setSocketConnected(false);
-            console.log('socket.io: disconnected');
-        });
-
-        socket.on('modem_log', (message) => {
-            // console.log('socket.io server: message', message);
-            handleStoreModemLog(message);
-        });
-
-        socket.on('server_control', (serverControl) => {
-            // console.log(serverControl);
-            _serverControl.current = serverControl;
-        });
-
-        socket.on('modems', (items) => {
-            // console.log('socket.io server: modems', items);
-            const itemsHash = objectHash.MD5(items);
-
-            if (!_modems.current || (_serverControl.current && _serverControl.current.action === 'reload_modems')) {
-                _modems.current = items;
-                _modemsHash.current = itemsHash;
-                setModems(_modems.current);
-                if (_serverControl.current && _serverControl.current.action === 'reload_modems') {
-                    _serverControl.current = null;
-                }
-            } else {
-                if (_modemsHash.current !== itemsHash) {
-                    let changed = false;
-                    const remodems = _modems.current.map(function (modem) {
-                        items.forEach((item) => {
-                            if (modem.id !== item.id) {
-                                return;
-                            }
-
-                            if (
-                                _serverControl.current &&
-                                _serverControl.current.action === 'reload_modem' &&
-                                _serverControl.current.id == item.id
-                            ) {
-                                _serverControl.current = null;
-                                modem = item;
-                                changed = true;
-                                return;
-                            }
-
-                            if (modem.is_connected !== item.is_connected) {
-                                changed = true;
-                                modem.is_connected = item.is_connected;
-
-                                if (!modem.is_connected) {
-                                    delete modem.external_ip;
-                                    delete modem.device_network_type;
-                                    delete modem.device_network_provider;
-                                    delete modem.device_network_signalbar;
-                                    delete modem.data;
-                                }
-                            }
-
-                            if (modem.lock !== item.lock) {
-                                changed = true;
-                                modem.lock = item.lock;
-                            }
-
-                            if (
-                                (!modem.schedule && item.schedule) ||
-                                (modem.schedule && !item.schedule) ||
-                                objectHash.MD5(modem.schedule) != objectHash.MD5(item.schedule)
-                            ) {
-                                if (item.schedule?.time_left_to_run <= 30 || item.schedule?.added_at != modem.schedule?.added_at) {
-                                    modem.schedule = item.schedule;
-                                    changed = true;
-                                }
-                            }
-                        });
-
-                        return modem;
-                    });
-
-                    _modemsHash.current = itemsHash;
-                    if (changed) {
-                        _modems.current = remodems;
-                        setModems(_modems.current);
-                    }
-                }
-            }
-        });
-
-        socket.on('modems_details', (items) => {
-            // console.log('socket.io server: modems_details', items);
-            const hash = objectHash.MD5(items);
-            if (_modems.current && (!_modemsDetailsHash.current || _modemsDetailsHash.current !== hash)) {
-                // console.log('new modems_details hash', hash);
-                _modemsDetailsHash.current = hash;
-
-                const _remodems = _modems.current.map(function (modem) {
-                    items.forEach((modemDetail) => {
-                        if (modem.modem.id === modemDetail.modem.id) {
-                            modem.is_connected = modemDetail.is_connected;
-                        }
-                    });
-                    return modem;
-                });
-                _modemsHash.current = objectHash.MD5(_remodems);
-
-                const remodems = _modems.current.map(function (modem) {
-                    items.forEach((modemDetail) => {
-                        if (modem.modem.id === modemDetail.modem.id) {
-                            // console.log('remodem', modemDetail);
-                            modem.device_network_type = modemDetail.device_network_type;
-                            modem.device_network_provider = modemDetail.device_network_provider;
-                            modem.device_network_signalbar = modemDetail.device_network_signalbar;
-                            modem.data = modemDetail.data;
-
-                            if (modem.external_ip !== modemDetail.external_ip_through_device) {
-                                testProxies(modem, modemDetail.external_ip_through_device);
-                            }
-
-                            modem.external_ip = modemDetail.external_ip_through_device;
-                        }
-                    });
-                    return modem;
-                });
-
-                _modems.current = remodems;
-                setModems(remodems);
-            }
-        });
-
-        return () => {
-            socket.off('connect');
-            socket.off('disconnect');
-        };
-    }, []);
 
     const [anchorModemMenuEl, setAnchorModemMenuEl] = useState(null);
     const [openModemMenuElem, setOpenModemMenuElem] = useState(null);
@@ -309,21 +174,21 @@ const Modems = () => {
         setModemRebootDialog({ ...modemRebootDialog, open: false });
     };
 
-    const [modemChangeIPDialog, setModemChangeIPDialog] = useState({
+    const [modemRotateDialog, setModemRotateDialog] = useState({
         open: false,
         modem: null
     });
-    const handleModemChangeIPClick = (modem) => {
-        setModemChangeIPDialog({
+    const handleModemRotateClick = (modem) => {
+        setModemRotateDialog({
             open: true,
             modem: modem
         });
     };
-    const handleModemChangeIPClose = () => {
-        setModemChangeIPDialog({ ...modemChangeIPDialog, open: false });
+    const handleModemRotateClose = () => {
+        setModemRotateDialog({ ...modemRotateDialog, open: false });
     };
 
-    const handleCancelModemChangeIPClick = (modem) => {
+    const handleCancelModemRotateClick = (modem) => {
         stopRotate(modem.id)
             .then(
                 (response) => {
@@ -380,8 +245,10 @@ const Modems = () => {
     const _dockLogItems = useRef([]);
 
     const addDockLog = (modem) => {
-        const index = _dockLogItems.current.map((item) => item.id).indexOf(modem.modem.id);
-        if (index > -1) {
+        const dockItemIndex = _dockLogItems.current.findIndex((item) => item.id == modem.modem.id);
+        if (dockItemIndex > -1) {
+            _dockLogItems.current[dockItemIndex].state = DockItemState.maximized;
+            setDockLogItems(_dockLogItems.current);
             return false;
         }
 
@@ -391,8 +258,8 @@ const Modems = () => {
             content: <ModemLog modem={modem} />,
             state: DockItemState.maximized
         });
-        setDockLogItems(_dockLogItems.current);
 
+        setDockLogItems(_dockLogItems.current);
         return true;
     };
 
@@ -406,37 +273,30 @@ const Modems = () => {
 
     const [dockLogItems, setDockLogItems] = useState(_dockLogItems.current);
 
-    const handleStoreModemLog = (log) => {
-        storeModemLog(log);
-    };
-
     const [taskStoppingHelpDialog, setTaskStoppingHelpDialog] = useState({
         open: false,
         title: '',
         description: ''
     });
 
+    const [autoRotateInfoAnchorEl, setAutoRotateInfoAnchorEl] = useState(null);
+
+    const autoRotateInfoHandleClose = () => {
+        setAutoRotateInfoAnchorEl(null);
+    };
+    const autoRotateInfoOpen = Boolean(autoRotateInfoAnchorEl);
+    const autoRotateInfoPopoverId = autoRotateInfoOpen ? 'simple-popover' : undefined;
+
     const [autoRotateInfoModem, setAutoRotateInfoModem] = useState(null);
-    const [autoRotateInfoOpen, setAutoRotateInfoOpen] = useState(false);
 
     const handleModemAutoRotateFlagClick = (modem) => (event) => {
         setAutoRotateInfoModem(modem);
-        setAutoRotateInfoOpen(true);
-    };
-
-    const handleAutoRotateInfoOnClose = () => {
-        setAutoRotateInfoOpen(false);
-        setAutoRotateInfoModem(null);
+        setAutoRotateInfoAnchorEl(event.currentTarget);
     };
 
     useEffect(() => {
         if (modems && autoRotateInfoModem) {
-            modems.forEach((modem) => {
-                if (modem.id === autoRotateInfoModem.id) {
-                    setAutoRotateInfoModem(cloneDeep(modem));
-                    return false;
-                }
-            });
+            setAutoRotateInfoModem(modems.find((modem) => modem.id == autoRotateInfoModem.id));
         }
     }, [modems]);
 
@@ -472,98 +332,100 @@ const Modems = () => {
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {modems.map((row) => (
+                                            {modems.map((modem) => (
                                                 <TableRow
                                                     hover
-                                                    key={row.modem.id}
+                                                    key={modem.modem.id}
                                                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                                 >
                                                     <TableCell component="th" scope="row" sx={{ minWidth: '100px', position: 'relative' }}>
                                                         <Grid container justifyContent="flex-start" alignItems="center" direction="row">
                                                             <Grid item>
                                                                 <IconButton
-                                                                    id={`modem-button-${row.modem.id}`}
+                                                                    id={`modem-button-${modem.modem.id}`}
                                                                     aria-label="Modem Options"
                                                                     size="small"
-                                                                    aria-controls={`modem-menu-${row.modem.id}`}
+                                                                    aria-controls={`modem-menu-${modem.modem.id}`}
                                                                     aria-haspopup="true"
-                                                                    onClick={handleModemOpenMenuClick(row.modem.id)}
+                                                                    onClick={handleModemOpenMenuClick(modem.modem.id)}
                                                                 >
                                                                     <IconDotsVertical />
                                                                 </IconButton>
                                                             </Grid>
                                                             <Grid item>
                                                                 <ModemIdWrapper>
-                                                                    {row.auto_rotate == true ? (
+                                                                    {modem.auto_rotate == true ? (
                                                                         <ModemAutoRotateFlag
-                                                                            modem={row}
+                                                                            modem={modem}
                                                                             onAutoRotateIconClick={handleModemAutoRotateFlagClick}
                                                                         />
                                                                     ) : null}
-                                                                    &nbsp;&nbsp;{row.modem.id}
+                                                                    &nbsp;&nbsp;{modem.modem.id}
                                                                 </ModemIdWrapper>
                                                             </Grid>
                                                         </Grid>
                                                         <Menu
-                                                            id={`modem-menu-${row.modem.id}`}
+                                                            id={`modem-menu-${modem.modem.id}`}
                                                             anchorEl={anchorModemMenuEl}
-                                                            open={openModemMenuElem === row.modem.id}
+                                                            open={openModemMenuElem === modem.modem.id}
                                                             onClose={handleModemCloseMenu}
                                                             MenuListProps={{
-                                                                'aria-labelledby': `modem-button-${row.modem.id}`
+                                                                'aria-labelledby': `modem-button-${modem.modem.id}`
                                                             }}
                                                         >
-                                                            {row.lock != null && row.lock.task && row.lock.task.name == 'ROTATE' ? (
+                                                            {modem.lock != null && modem.lock.task && modem.lock.task.name == 'ROTATE' ? (
                                                                 <MenuItem
                                                                     onClick={() => {
-                                                                        handleCancelModemChangeIPClick(row);
+                                                                        handleCancelModemRotateClick(modem);
                                                                         handleModemCloseMenu();
                                                                     }}
-                                                                    disabled={row.lock && row.lock.task && row.lock.task.stopping == true}
+                                                                    disabled={
+                                                                        modem.lock && modem.lock.task && modem.lock.task.stopping == true
+                                                                    }
                                                                 >
                                                                     Cancelar rotacionamento
                                                                 </MenuItem>
                                                             ) : (
                                                                 <MenuItem
                                                                     onClick={() => {
-                                                                        handleModemChangeIPClick(row);
+                                                                        handleModemRotateClick(modem);
                                                                         handleModemCloseMenu();
                                                                     }}
-                                                                    disabled={!row.is_connected || row.lock != null}
+                                                                    disabled={!modem.is_connected || modem.lock != null}
                                                                 >
                                                                     Rotacionar IP
                                                                 </MenuItem>
                                                             )}
                                                             <MenuItem
                                                                 onClick={() => {
-                                                                    handleModemRebootClick(row);
+                                                                    handleModemRebootClick(modem);
                                                                     handleModemCloseMenu();
                                                                 }}
-                                                                disabled={row.lock != null}
+                                                                disabled={modem.lock != null}
                                                             >
                                                                 Reiniciar
                                                             </MenuItem>
                                                             <Divider />
                                                             <MenuItem
                                                                 onClick={() => {
-                                                                    handleModemDiagnoseClick(row);
+                                                                    handleModemDiagnoseClick(modem);
                                                                     handleModemCloseMenu();
                                                                 }}
-                                                                disabled={row.lock != null}
+                                                                disabled={modem.lock != null}
                                                             >
                                                                 Executar diagnóstico
                                                             </MenuItem>
                                                             <MenuItem
                                                                 onClick={() => {
                                                                     handleModemCloseMenu();
-                                                                    addDockLog(row);
+                                                                    addDockLog(modem);
                                                                 }}
                                                             >
                                                                 Log
                                                             </MenuItem>
                                                             <MenuItem
                                                                 onClick={() => {
-                                                                    handleModemSettingsClick(row);
+                                                                    handleModemSettingsClick(modem);
                                                                     handleModemCloseMenu();
                                                                 }}
                                                             >
@@ -580,12 +442,12 @@ const Modems = () => {
                                                             </MenuItem>
                                                         </Menu>
                                                     </TableCell>
-                                                    <TableCell align="left">{row.modem.device.model}</TableCell>
-                                                    <TableCell align="left">{row.usb.port}</TableCell>
+                                                    <TableCell align="left">{modem.modem.device.model}</TableCell>
+                                                    <TableCell align="left">{modem.usb.port}</TableCell>
                                                     <TableCell align="left" sx={{ position: 'relative' }}>
                                                         <ModemStatus
-                                                            lock={row.lock}
-                                                            connected={row.is_connected}
+                                                            lock={modem.lock}
+                                                            connected={modem.is_connected}
                                                             onStoppingTaskClick={() => {
                                                                 setTaskStoppingHelpDialog({
                                                                     ...taskStoppingHelpDialog,
@@ -600,22 +462,22 @@ const Modems = () => {
                                                             }}
                                                         />
                                                     </TableCell>
-                                                    <TableCell align="left">{row.external_ip ? row.external_ip : '-'}</TableCell>
+                                                    <TableCell align="left">{modem.external_ip ? modem.external_ip : '-'}</TableCell>
                                                     <TableCell align="right">
-                                                        {row.device_network_provider ? row.device_network_provider : '-'}
+                                                        {modem.device_network_provider ? modem.device_network_provider : '-'}
                                                     </TableCell>
                                                     <TableCell align="right">
-                                                        {row.device_network_type ? row.device_network_type : '-'}
+                                                        {modem.device_network_type ? modem.device_network_type : '-'}
                                                     </TableCell>
                                                     <TableCell align="center">
-                                                        {row.device_network_signalbar ? (
-                                                            <SignalBar signal={row.device_network_signalbar} />
+                                                        {modem.device_network_signalbar ? (
+                                                            <SignalBar signal={modem.device_network_signalbar} />
                                                         ) : (
                                                             <SignalBar signal={0} />
                                                         )}
                                                     </TableCell>
                                                     <TableCell align="left">
-                                                        {row.external_ip && row.proxy ? (
+                                                        {modem.external_ip && modem.proxy ? (
                                                             <Grid
                                                                 container
                                                                 justifyContent="flex-start"
@@ -627,8 +489,8 @@ const Modems = () => {
                                                                         <ProxyConnection
                                                                             type={'http'}
                                                                             ip={server.external_ip}
-                                                                            port={row.proxy.ipv4.http.port}
-                                                                            status={row.proxy.ipv4.http.status}
+                                                                            port={modem.proxy.ipv4.http.port}
+                                                                            status={modem.proxy.ipv4.http.status}
                                                                         />
                                                                     ) : (
                                                                         <span>-</span>
@@ -639,8 +501,8 @@ const Modems = () => {
                                                                         <ProxyConnection
                                                                             type={'socks'}
                                                                             ip={server.external_ip}
-                                                                            port={row.proxy.ipv4.socks.port}
-                                                                            status={row.proxy.ipv4.socks.status}
+                                                                            port={modem.proxy.ipv4.socks.port}
+                                                                            status={modem.proxy.ipv4.socks.status}
                                                                         />
                                                                     ) : (
                                                                         <span>-</span>
@@ -652,7 +514,7 @@ const Modems = () => {
                                                         )}
                                                     </TableCell>
                                                     <TableCell align="left">
-                                                        {row.external_ip && row.proxy ? (
+                                                        {modem.external_ip && modem.proxy ? (
                                                             <Grid
                                                                 container
                                                                 justifyContent="flex-start"
@@ -664,8 +526,8 @@ const Modems = () => {
                                                                         <ProxyConnection
                                                                             type={'http'}
                                                                             ip={server.external_ip}
-                                                                            port={row.proxy.ipv6.http.port}
-                                                                            status={row.proxy.ipv6.http.status}
+                                                                            port={modem.proxy.ipv6.http.port}
+                                                                            status={modem.proxy.ipv6.http.status}
                                                                         />
                                                                     ) : (
                                                                         <span>-</span>
@@ -676,8 +538,8 @@ const Modems = () => {
                                                                         <ProxyConnection
                                                                             type={'socks'}
                                                                             ip={server.external_ip}
-                                                                            port={row.proxy.ipv6.socks.port}
-                                                                            status={row.proxy.ipv6.socks.status}
+                                                                            port={modem.proxy.ipv6.socks.port}
+                                                                            status={modem.proxy.ipv6.socks.status}
                                                                         />
                                                                     ) : (
                                                                         <span>-</span>
@@ -689,10 +551,10 @@ const Modems = () => {
                                                         )}
                                                     </TableCell>
                                                     <TableCell align="right">
-                                                        {row.data && row.data.receive ? (
+                                                        {modem.data && modem.data.receive ? (
                                                             <DataUsage
-                                                                download={row.data.receive.formatted}
-                                                                upload={row.data.transmit.formatted}
+                                                                download={modem.data.receive.formatted}
+                                                                upload={modem.data.transmit.formatted}
                                                             />
                                                         ) : (
                                                             <span>-</span>
@@ -715,10 +577,10 @@ const Modems = () => {
                 onConfirm={handleModemSettingsClose}
             />
             <RotateDialog
-                open={modemChangeIPDialog.open}
-                modem={modemChangeIPDialog.modem}
-                onClose={handleModemChangeIPClose}
-                onConfirm={handleModemChangeIPClose}
+                open={modemRotateDialog.open}
+                modem={modemRotateDialog.modem}
+                onClose={handleModemRotateClose}
+                onConfirm={handleModemRotateClose}
             />
             <RebootDialog
                 open={modemRebootDialog.open}
@@ -769,7 +631,18 @@ const Modems = () => {
             </Dialog>
             <Dock items={dockLogItems} onClose={handleCloseDock} />
             {/* {dockLog} */}
-            <AutoRotateInfoDialog modem={autoRotateInfoModem} open={autoRotateInfoOpen} onClose={handleAutoRotateInfoOnClose} />
+            <Popover
+                id={autoRotateInfoPopoverId}
+                open={autoRotateInfoOpen}
+                anchorEl={autoRotateInfoAnchorEl}
+                onClose={autoRotateInfoHandleClose}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                }}
+            >
+                <AutoRotateInfo modem={autoRotateInfoModem} open={autoRotateInfoOpen} onClose={autoRotateInfoHandleClose} />
+            </Popover>
         </MainCard>
     );
 };
