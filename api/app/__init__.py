@@ -1,5 +1,6 @@
 import sys
 from api.service.modems import ModemsService, ModemsAutoRotateService
+from api.service.servercontrol import ServerControl
 from framework.manager.modem import ModemManager
 from framework.models.server import ServerModel
 
@@ -24,3 +25,7 @@ app.modems_auto_rotate_service = ModemsAutoRotateService(
 )
 
 app.modems_service.auto_rotate_service = app.modems_auto_rotate_service
+
+app.server_control = ServerControl(
+    socketio = lambda: app.socketio
+)

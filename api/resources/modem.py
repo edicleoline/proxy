@@ -2,6 +2,7 @@ from flask_restful import Resource, reqparse, request
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
 import requests
 from api.service.modems import ModemsAutoRotateAgendaItem
+from api.service.servercontrol import ServerControlAction, ServerControlEvent
 from framework.helper.database.pagination import PaginateDirection, PaginateOrder
 from framework.models.modem import ModemModel
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
@@ -164,8 +165,11 @@ class Modem(Resource):
         server_modem.save_to_db()
 
         app.modems_service.reload_modems()
-        # app.socketio.emit('server_control', { 'action': 'reload_modems' }, broadcast=True)
-        app.socketio.emit('server_control', { 'action': 'reload_modem', 'data': { 'id': modem_id } }, broadcast=True)
+        
+        app.server_control.emit(ServerControlEvent(
+            action = ServerControlAction.RELOAD_MODEM,
+            data = { 'modem': { 'id': modem_id } }
+        ))
 
         return {"message": "OK"}, 200
 

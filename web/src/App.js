@@ -18,7 +18,7 @@ import { storeModemLog } from 'storage/modem/log';
 socket.on('modems', (modems) => {
     const pendingReloads = pendingReloadModemsInQueue();
     const replaceItems = pendingReloads.map((replaceItem) => {
-        return { id: replaceItem.data.id };
+        return { modem: { id: replaceItem.data.modem.id } };
     });
     if (replaceItems && replaceItems.length > 0) {
         removeCommandsFromQueue(pendingReloads);

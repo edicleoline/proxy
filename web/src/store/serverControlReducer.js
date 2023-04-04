@@ -18,6 +18,7 @@ const serverControlReducer = (state = initialState, action) => {
                 commands: [
                     ...state.commands,
                     {
+                        id: action.command.id,
                         action: action.command.action,
                         data: action.command.data,
                         status: commandStatus.pending

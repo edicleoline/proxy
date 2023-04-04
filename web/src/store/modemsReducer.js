@@ -39,7 +39,7 @@ const merge = (oldState, newItems = [], replaceItems = []) => {
             }
 
             if (replaceItems) {
-                const found = replaceItems.find((x) => x.id === newItem.modem.id);
+                const found = replaceItems.find((x) => x.modem.id === newItem.modem.id);
                 if (found) {
                     updated = true;
                     const oldItemCloned = cloneDeep(oldItem);
