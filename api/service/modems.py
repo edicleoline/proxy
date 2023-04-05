@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import json
-from api.service.serverevent import Event, EventType
+from api.service.serverevent import Event, EventType, ServerEvent
+from framework.manager.modem import ModemManager
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 from framework.models.schedule import ModemsAutoRotateAgendaItem
 from framework.models.server import ServerModel
@@ -10,6 +11,7 @@ from dataclasses_json import dataclass_json, config
 from marshmallow import fields
 import json
 import copy
+from framework.proxy.factory import ProxyService
 
 from framework.util.format import HumanBytes
 
@@ -62,17 +64,17 @@ class ModemsEventObserver():
         self.server_event.emit(Event(type = type, data = data))
 
 class ModemsService():
-    def __init__(self, server_model: ServerModel, modems_manager, server_event):        
-        self.server_model = server_model        
+    def __init__(self, server: ServerModel, modems_manager: ModemManager, server_event: ServerEvent):        
+        self.server = server        
         self.modems_manager = modems_manager
         self.server_event = server_event
         self.modems_event_observer = ModemsEventObserver(self.server_event)        
-        self.auto_rotate_service = None        
         self.reload_modems()
 
     def reload_modems(self):
-        self.server_modems = self.server_model.modems()
+        self.server_modems = self.server.modems()
         self.modems_event_observer.subscribe([item.json() for item in self.server_modems])
+        self.modems_manager.proxy_service.update_modems(self.server_modems)
 
     def server_modem_model_index_by_id(self, server_modem_model_id):
         if not self.server_modems:
@@ -248,7 +250,7 @@ class ModemsAutoRotateSchedule():
 
 
 class ModemsAutoRotateService():
-    def __init__(self, modems_service: ModemsService, modems_manager, server_event):
+    def __init__(self, modems_service: ModemsService, modems_manager: ModemManager, server_event: ServerEvent):
         self.modems_service = modems_service        
         self.modems_manager = modems_manager
         self.server_event = server_event
@@ -284,12 +286,13 @@ class ModemsAutoRotateService():
         modem_log_model.save_to_db()
 
         callback = None
-        # socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
+        
         self.server_event.emit(Event(
-            action = EventType.MODEM_LOG,
+            type = EventType.MODEM_LOG,
             data = modem_log_model
         ))
-            # callback = lambda modem_log_model: socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
+
+        callback = lambda modem_log_model: self.server_event.emit(Event(type = EventType.MODEM_LOG, data = modem_log_model))
                 
         infra_modem.callback = callback
         

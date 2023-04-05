@@ -11,13 +11,14 @@ from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 from framework.infra.netiface import NetIface
 from framework.infra.usb import USB
 from framework.infra.route import Route
-from framework.infra.proxyservice import ProxyService
 
 from framework.device.zte.mf79s import MF79S
 from framework.device.zte.error.exception import ConnectException
 
 from datetime import datetime
 from enum import Enum
+
+from framework.proxy.factory import ProxyService
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
@@ -42,8 +43,15 @@ class Owner(Enum):
     USER    = 2
 
 class Modem:
-    def __init__(self, server_modem_model: ServerModemModel, event_stop: Event = None, callback = None):
-        self.server_modem_model = server_modem_model        
+    def __init__(
+            self, 
+            server_modem_model: ServerModemModel, 
+            proxy_service: ProxyService = None, 
+            event_stop: Event = None, 
+            callback = None
+    ):
+        self.server_modem_model = server_modem_model   
+        self.proxy_service = proxy_service     
         self.event_stop = event_stop
         self.callback = callback
         self._modem = None
@@ -127,6 +135,21 @@ class Modem:
 
     def log(self, log: ModemLogModel):
         if self.callback: self.callback(log)
+
+    def resolve_proxy(self):
+        if self.proxy_service:
+            self.proxy_service.resolve(self.server_modem_model)
+
+    def resolve_route(self):
+        inframodem_iface = self.iface()
+        modem_ifaddress = inframodem_iface.ifaddresses[0]
+        modem_gateway = NetIface.get_gateway_from_ipv4(ipv4 = modem_ifaddress['addr'])        
+        route = Route(gateway=modem_gateway, interface=inframodem_iface.interface, ip=modem_ifaddress['addr'], table=self.modem().id)
+        route.resolve_route()
+
+    def resolve_connectivity(self):
+        self.resolve_proxy()
+        self.resolve_route()
 
     def reboot(self, hard_reset = False, write_params = True):
         rebooted = self.reboot_and_wait(hard_reset=hard_reset, write_params=write_params)
@@ -220,8 +243,8 @@ class Modem:
             proxy_username = None,
             hard_reset = False, 
             not_changed_try_count = 3, 
-            not_ip_try_count = 3):
-
+            not_ip_try_count = 3
+    ):
         modem_log_model = ModemLogModel(
             modem_id=self.modem().id, 
             owner=ModemLogOwner.SYSTEM, 
@@ -388,11 +411,7 @@ class Modem:
                         proxy_user_ip_history_model = ProxyUserIPHistoryModel(proxy_user_id = proxy_user_id, modem_ip_history_id = modem_ip_history.id)
                         proxy_user_ip_history_model.save_to_db()
 
-                    proxyService = ProxyService(ip=modem_ifaddress['addr'], proxy_ipv4_http_port=self.server_modem_model.proxy_ipv4_http_port)
-                    proxyService.resolve_proxy()
-
-                    route = Route(gateway=modem_gateway, interface=inframodem_iface.interface, ip=modem_ifaddress['addr'], table=self.modem().id)
-                    route.resolve_route()
+                    self.resolve_connectivity()
                     
                     modem_log_model = ModemLogModel(
                         modem_id=self.modem().id, 

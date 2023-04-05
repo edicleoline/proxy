@@ -4,9 +4,11 @@ from threading import Thread
 from threading import Event
 from enum import Enum
 from framework.manager.error.exception import ModemLockedByOtherThreadException, ModemRebootException, NoTaskRunningException
+from framework.proxy.factory import ProxyService
 
 class ModemManager():
-    def __init__(self):
+    def __init__(self, proxy_service: ProxyService):
+        self.proxy_service = proxy_service
         self.threads = []
 
     def reboot(self, infra_modem: IModem, hard_reset = False):
@@ -17,6 +19,7 @@ class ModemManager():
         
         event_stop = Event()
         infra_modem.event_stop = event_stop
+        infra_modem.proxy_service = self.proxy_service
 
         process_thread = Thread(
             target=infra_modem.reboot,
@@ -47,6 +50,7 @@ class ModemManager():
 
         event_stop = Event()
         infra_modem.event_stop = event_stop
+        infra_modem.proxy_service = self.proxy_service
 
         process_thread = Thread(
             target=infra_modem.rotate, 

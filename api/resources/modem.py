@@ -18,7 +18,6 @@ from datetime import datetime
 from framework.manager.error.exception import ModemLockedByOtherThreadException, NoTaskRunningException
 from framework.models.proxyuser import ProxyUserModel
 from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
-from app import app
 
 def filters_type(value, name):
     full_json_data = request.get_json()
