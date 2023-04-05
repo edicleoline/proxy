@@ -7,12 +7,12 @@ const config = {
     fontFamily: `'Roboto', sans-serif`,
     borderRadius: 6,
     api: {
-        baseURL: 'http://192.168.15.20:5000'
-        // baseURL: 'http://192.168.15.10:5000'
+        //baseURL: 'http://192.168.15.20:5000'
+        baseURL: 'http://192.168.15.10:5000'
     },
     socketio: {
-        baseURL: 'http://192.168.15.20:5000'
-        // baseURL: 'http://192.168.15.10:5000'
+        //baseURL: 'http://192.168.15.20:5000'
+        baseURL: 'http://192.168.15.10:5000'
     },
     options: {
         autoRotateNotifyIn: 30 //notificar auto-rotate quando faltar 30 segundos

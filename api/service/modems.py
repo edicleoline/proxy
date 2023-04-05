@@ -50,20 +50,16 @@ class ModemsEventObserver():
             if observer['lock'] == None:
                 if self._observers_connected[observer_index]['is_connected'] == True and observer['is_connected'] == False:
                     self._observers_connected[observer_index]['is_connected'] = observer['is_connected']
-                    print('disconnected! {0}'.format(observer['id']))
-                    self.server_event.emit(Event(type = EventType.UNEXPECTED_MODEM_DISCONNECT, data = observer))
+                    self.notify(EventType.UNEXPECTED_MODEM_DISCONNECT, observer)
                     continue
 
                 if self._observers_connected[observer_index]['is_connected'] == False and observer['is_connected'] == True:
                     self._observers_connected[observer_index]['is_connected'] = observer['is_connected']
-                    print('connected! {0}'.format(observer['id']))
-                    self.server_event.emit(Event(type = EventType.MODEM_CONNECT, data = observer))
+                    self.notify(EventType.MODEM_CONNECT, observer)
                     continue
 
-        #print(self._observers_connected)
-
-    def notify(self):
-        pass
+    def notify(self, type: EventType, data):
+        self.server_event.emit(Event(type = type, data = data))
 
 class ModemsService():
     def __init__(self, server_model: ServerModel, modems_manager, server_event):        
