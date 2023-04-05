@@ -6,7 +6,7 @@ from time import sleep
 
 class RouteServiceObserverThread(Thread):
     def __init__(self, modems: List[ServerModemModel] = [], stop_event: Event = None):
-        self.delay = 1
+        self.delay = 3
         self.modems = modems
         self.stop_event = stop_event
         super(RouteServiceObserverThread, self).__init__()

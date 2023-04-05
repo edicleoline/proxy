@@ -1,5 +1,6 @@
 import sys
 import subprocess
+import time
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
@@ -17,47 +18,52 @@ class Route:
         self.ip = ip
         self.table = table
 
-    def ip_route_list(self):
-        proc = subprocess.Popen(['ip', 'route'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def ip_route_table(self):
+        #ip route show table all
+        #default via 10.56.72.157 dev eth1 table 31 src 10.56.72.157
+        proc = subprocess.Popen(['ip', 'route', 'show', 'table', 'all'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         o, e = proc.communicate()
         lines = o.decode().splitlines()
-        return lines
+
+        search = 'default via {0} dev {1} table'.format(self.ip, self.interface)
+        print('search table {0}'.format(search))
+        for line in lines:
+            if 'default via {0} dev {1} table'.format(self.ip, self.interface) in line:
+                return line.split('table', 1)[1].split('src')[0].strip()
+            
+            if 'default via {0} dev {1} table'.format(self.gateway, self.interface) in line:
+                return line.split('table', 1)[1].split('src')[0].strip()
+        
+        return None
 
 
     def resolve_route(self):
-        #check routes > ip route list
-
-        # sys.stdout.write('{0}[+] Setting up the route...{1}\n'.format(CBLUE, CEND)) 
-        # sys.stdout.flush()
-
-        ip_route_list = self.ip_route_list()
-
-        routed = False
-        for ip_route_item in ip_route_list:
-            if 'link src {0}'.format(self.ip) in ip_route_item:
-                routed = True
-                break
-
-        print('routed {0} = {1}'.format(self.ip, routed))
-        return
-        
+        print('RESOLVING ROUTE!')
         table = int(self.table)
         while True:
-            expr = 'ip route add default via {0} dev {1} src {2} table {3}'.format(self.gateway, self.interface, self.ip, str(table))
+            routed_table = self.ip_route_table()
+            print('table_found {0}'.format(routed_table))
+            if routed_table == None:
+                proc = subprocess.Popen(['sudo', 'ip', 'route', 'add', 'default', 'via', self.gateway, 'dev', self.interface, 'src', self.ip, 'table', str(table)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                o, e = proc.communicate()
 
-            sys.stdout.write('{0}[+] Executing "{1}"...{2}\n'.format(CBLUE, expr, CEND))
-            sys.stdout.flush()
+                if proc.returncode != 0:
+                    sys.stdout.write('{0}[!] Error: {1}{2}\n'.format(CRED, e.decode('ascii').rstrip(), CEND))
+                    sys.stdout.flush()
 
-            proc = subprocess.Popen(['sudo', 'ip', 'route', 'add', 'default', 'via', self.gateway, 'dev', self.interface, 'src', self.ip, 'table', str(table)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            o, e = proc.communicate()
+                time.sleep(2)
 
-            if proc.returncode != 0:
-                sys.stdout.write('{0}[!] Error: {1}{2}\n'.format(CRED, e.decode('ascii').rstrip(), CEND))
-                sys.stdout.flush()
-                table = table + 1
-                continue        
+                proc = subprocess.Popen(['sudo', 'ip', 'rule', 'add', 'from', self.ip, 'table', str(table)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                o, e = proc.communicate()
 
-            proc = subprocess.Popen(['sudo', 'ip', 'rule', 'add', 'from', self.ip, 'table', str(table)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            o, e = proc.communicate()
+                time.sleep(1)
+
+                routed_table = self.ip_route_table()
+                if routed_table != None:
+                    break
+            else:
+                print('RESOLVED ROUTE\n')
+
+            table = table + 1            
             break
 
