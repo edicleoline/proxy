@@ -25,8 +25,6 @@ class Route:
         o, e = proc.communicate()
         lines = o.decode().splitlines()
 
-        search = 'default via {0} dev {1} table'.format(self.ip, self.interface)
-        print('search table {0}'.format(search))
         for line in lines:
             if 'default via {0} dev {1} table'.format(self.ip, self.interface) in line:
                 return line.split('table', 1)[1].split('src')[0].strip()
@@ -38,12 +36,13 @@ class Route:
 
 
     def resolve_route(self):
-        print('RESOLVING ROUTE!')
         table = int(self.table)
         while True:
             routed_table = self.ip_route_table()
-            print('table_found {0}'.format(routed_table))
+            
             if routed_table == None:
+                print('table not found. lets try resolve route {0}'.format(self.ip))
+
                 proc = subprocess.Popen(['sudo', 'ip', 'route', 'add', 'default', 'via', self.gateway, 'dev', self.interface, 'src', self.ip, 'table', str(table)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 o, e = proc.communicate()
 
@@ -61,8 +60,6 @@ class Route:
                 routed_table = self.ip_route_table()
                 if routed_table != None:
                     break
-            else:
-                print('RESOLVED ROUTE\n')
 
             table = table + 1            
             break
