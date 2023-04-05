@@ -20,8 +20,6 @@ from enum import Enum
 
 from framework.proxy.factory import ProxyService
 
-from pyroute2 import IPRoute
-
 CRED = '\033[91m'
 CGREEN = '\033[92m'
 CYELLOW = '\033[93m'
@@ -144,13 +142,11 @@ class Modem:
 
     def resolve_route(self):
         inframodem_iface = self.iface()
-        # modem_ifaddress = inframodem_iface.ifaddresses[0]
-        # modem_gateway = NetIface.get_gateway_from_ipv4(ipv4 = modem_ifaddress['addr'])        
-        # route = Route(gateway=modem_gateway, interface=inframodem_iface.interface, ip=modem_ifaddress['addr'], table=self.modem().id)
-        # route.resolve_route()
-        with IPRoute() as ipr:
-            eth0 = ipr.link_lookup(ifname=inframodem_iface.interface)
-            print(eth0)
+        modem_ifaddress = inframodem_iface.ifaddresses[0]
+        modem_gateway = NetIface.get_gateway_from_ipv4(ipv4 = modem_ifaddress['addr'])        
+        route = Route(gateway=modem_gateway, interface=inframodem_iface.interface, ip=modem_ifaddress['addr'], table=self.modem().id)
+        route.resolve_route()
+        
 
     def resolve_connectivity(self):
         self.resolve_proxy()

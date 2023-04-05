@@ -17,11 +17,29 @@ class Route:
         self.ip = ip
         self.table = table
 
+    def ip_route_list(self):
+        proc = subprocess.Popen(['ip', 'route'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        o, e = proc.communicate()
+        lines = o.decode().splitlines()
+        return lines
+
+
     def resolve_route(self):
         #check routes > ip route list
 
-        sys.stdout.write('{0}[+] Setting up the route...{1}\n'.format(CBLUE, CEND)) 
-        sys.stdout.flush()
+        # sys.stdout.write('{0}[+] Setting up the route...{1}\n'.format(CBLUE, CEND)) 
+        # sys.stdout.flush()
+
+        ip_route_list = self.ip_route_list()
+
+        routed = False
+        for ip_route_item in ip_route_list:
+            if 'link src {0}'.format(self.ip) in ip_route_item:
+                routed = True
+                break
+
+        print('routed {0} = {1}'.format(self.ip, routed))
+        return
         
         table = int(self.table)
         while True:
