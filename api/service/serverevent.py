@@ -5,33 +5,36 @@ from marshmallow import fields
 import json
 import uuid
 
-class ServerControlActionField(fields.Field):
+class EventTypeField(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
         return value.name
 
     def _deserialize(self, value, attr, data, **kwargs):
-        return ServerControlActionField[value]
+        return EventTypeField[value]
 
 server_control_action_field = {
     "dataclasses_json": {
         "encoder": lambda type: type.name,
-        "decoder": lambda name: ServerControlAction(name),
-        "mm_field": ServerControlActionField(),
+        "decoder": lambda name: EventType(name),
+        "mm_field": EventTypeField(),
     }
 }
 
-class ServerControlAction(Enum):
-    MODEM_RELOAD    = 'MODEM_RELOAD'
+class EventType(Enum):
+    MODEM_LOG    = 'MODEM_LOG'
+    UNEXPECTED_MODEM_DISCONNECT = 'UNEXPECTED_MODEM_DISCONNECT'
+    MODEM_CONNECT = 'MODEM_CONNECT'
+
 
 @dataclass_json
 @dataclass
-class ServerControlEvent():
+class Event():
     id: str
-    action: ServerControlAction = field(metadata=server_control_action_field)
+    type: EventType = field(metadata=server_control_action_field)
     data: any
 
-    def __init__(self, action: ServerControlAction, data: any):
-        self.action = action
+    def __init__(self, type: EventType, data: any):
+        self.type = type
         self.data = data
         self.id = self.generate_id()
 
@@ -39,15 +42,15 @@ class ServerControlEvent():
         return uuid.uuid4()
 
 
-class ServerControl():
+class ServerEvent():
     def __init__(self, socketio):
         self.socketio = socketio
     
-    def emit(self, event: ServerControlEvent):
+    def emit(self, event: Event):
         socketio = self.socketio()
         if not socketio:
             return False
         
-        socketio.emit('server_control', json.loads(event.to_json()), broadcast = True)
+        socketio.emit('event', json.loads(event.to_json()), broadcast = True)
 
         return True

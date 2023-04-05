@@ -14,6 +14,7 @@ import setModemsItems from 'store/actions/setModemsItems';
 import { pendingReloadModemsInQueue, addCommandInQueue, removeCommandsFromQueue } from 'services/server-control';
 import setModemsDetailsItems from 'store/actions/setModemsDetailsItems';
 import { storeModemLog } from 'storage/modem/log';
+import { serverEventType } from 'store/constant';
 
 socket.on('modems', (modems) => {
     const pendingReloads = pendingReloadModemsInQueue();
@@ -33,18 +34,25 @@ socket.on('modems_details', (modems) => {
 
 socket.on('server_control', (serverControl) => {
     addCommandInQueue(serverControl);
+    console.log(serverControl);
 });
 
-socket.on('modem_log', (message) => {
-    storeModemLog(message);
+socket.on('event', (event) => {
+    console.log(event);
+    if (event.type === serverEventType.modem.log) {
+        storeModemLog(event.data);
+        return;
+    }
+
+    return;
 });
 
 socket.on('connect', () => {
-    console.log('socket.io: connected');
+    console.log('socketio: connected');
 });
 
 socket.on('disconnect', () => {
-    console.log('socket.io: disconnected');
+    console.log('socketio: disconnected');
 });
 
 const App = () => {

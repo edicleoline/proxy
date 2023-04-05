@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import json
+from api.service.serverevent import Event, EventType
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 from framework.models.schedule import ModemsAutoRotateAgendaItem
 from framework.models.server import ServerModel
@@ -8,18 +9,74 @@ from dataclasses import dataclass, field
 from dataclasses_json import dataclass_json, config
 from marshmallow import fields
 import json
+import copy
 
 from framework.util.format import HumanBytes
 
+class ModemsEventObserver():
+    def __init__(self, server_event):
+        self._observers = []
+        self.server_event = server_event
+
+    def subscribe(self, observers):
+        self._observers = observers   
+        self.subscribe_connected()     
+    
+    def subscribe_connected(self):
+        self._observers_connected = []
+        for observer in self._observers:
+            copied = copy.copy(observer)
+            copied['is_connected'] = None
+            copied['lock'] = None
+            self._observers_connected.append(copied)
+
+    def _index_by_id(self, array, id):
+        for index, item in enumerate(array):
+            if item['id'] == id:
+                return index
+        return -1
+    
+    def update(self, observers):
+        self._observe_connected(observers)
+
+    def _observe_connected(self, observers):        
+        for observer in observers:            
+            observer_index = self._index_by_id(self._observers_connected, observer['id'])
+
+            if self._observers_connected[observer_index]['is_connected'] == None:
+                self._observers_connected[observer_index]['is_connected'] = observer['is_connected']
+                continue
+
+            if observer['lock'] == None:
+                if self._observers_connected[observer_index]['is_connected'] == True and observer['is_connected'] == False:
+                    self._observers_connected[observer_index]['is_connected'] = observer['is_connected']
+                    print('disconnected! {0}'.format(observer['id']))
+                    self.server_event.emit(Event(type = EventType.UNEXPECTED_MODEM_DISCONNECT, data = observer))
+                    continue
+
+                if self._observers_connected[observer_index]['is_connected'] == False and observer['is_connected'] == True:
+                    self._observers_connected[observer_index]['is_connected'] = observer['is_connected']
+                    print('connected! {0}'.format(observer['id']))
+                    self.server_event.emit(Event(type = EventType.MODEM_CONNECT, data = observer))
+                    continue
+
+        #print(self._observers_connected)
+
+    def notify(self):
+        pass
+
 class ModemsService():
-    def __init__(self, server_model: ServerModel, modems_manager):
+    def __init__(self, server_model: ServerModel, modems_manager, server_event):        
         self.server_model = server_model        
         self.modems_manager = modems_manager
+        self.server_event = server_event
+        self.modems_event_observer = ModemsEventObserver(self.server_event)        
+        self.auto_rotate_service = None        
         self.reload_modems()
-        self.auto_rotate_service = None
 
     def reload_modems(self):
         self.server_modems = self.server_model.modems()
+        self.modems_event_observer.subscribe([item.json() for item in self.server_modems])
 
     def server_modem_model_index_by_id(self, server_modem_model_id):
         if not self.server_modems:
@@ -51,15 +108,12 @@ class ModemsService():
                     }
                 }
 
+        self.modems_event_observer.update(items)
         return items
 
     def modems_details(self):
         items = [item.json() for item in self.server_modems]
         result = []
-
-        # if self.auto_rotate_service:
-        #     print('auto_rotate_service')
-        #TODO add future auto rotate alert
 
         for x, item in enumerate(items):
             imodem = IModem(self.server_modems[x])
@@ -198,10 +252,10 @@ class ModemsAutoRotateSchedule():
 
 
 class ModemsAutoRotateService():
-    def __init__(self, modems_service: ModemsService, modems_manager, socketio):
+    def __init__(self, modems_service: ModemsService, modems_manager, server_event):
         self.modems_service = modems_service        
         self.modems_manager = modems_manager
-        self.socketio = socketio
+        self.server_event = server_event
         self.schedule = ModemsAutoRotateSchedule(modems_service=modems_service, modems_manager=modems_manager)
 
     def check_and_rotate(self):
@@ -233,12 +287,13 @@ class ModemsAutoRotateService():
         )
         modem_log_model.save_to_db()
 
-        socketio = self.socketio()
-
         callback = None
-        if socketio:
-            socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
-            callback = lambda modem_log_model: socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
+        # socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
+        self.server_event.emit(Event(
+            action = EventType.MODEM_LOG,
+            data = modem_log_model
+        ))
+            # callback = lambda modem_log_model: socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
                 
         infra_modem.callback = callback
         

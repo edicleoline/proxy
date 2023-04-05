@@ -3,6 +3,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
 import requests
 from api.service.modems import ModemsAutoRotateAgendaItem
 from api.service.servercontrol import ServerControlAction, ServerControlEvent
+from api.service.serverevent import Event, EventType
 from framework.helper.database.pagination import PaginateDirection, PaginateOrder
 from framework.models.modem import ModemModel
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
@@ -166,10 +167,7 @@ class Modem(Resource):
 
         app.modems_service.reload_modems()
         
-        app.server_control.emit(ServerControlEvent(
-            action = ServerControlAction.RELOAD_MODEM,
-            data = { 'modem': { 'id': modem_id } }
-        ))
+        app.server_control.emit(ServerControlEvent(action = ServerControlAction.MODEM_RELOAD, data = {'modem': {'id': modem_id}}))
 
         return {"message": "OK"}, 200
 
@@ -191,9 +189,10 @@ class ModemReboot(Resource):
             logged_at = datetime.now()
         )
         modem_log_model.save_to_db()
-        app.socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
 
-        callback = lambda modem_log_model: app.socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
+        app.server_event.emit(Event(type = EventType.MODEM_LOG, data = modem_log_model))
+
+        callback = lambda modem_log_model: app.server_event.emit(Event(type = EventType.MODEM_LOG, data = modem_log_model))
         imodem = IModem(server_modem_model=server_modem_model, callback=callback)
 
         data = _server_modem_reboot_parser.parse_args()
@@ -246,7 +245,8 @@ class ModemRotate(Resource):
                 logged_at = datetime.now()
             )
             modem_log_model.save_to_db()
-            app.socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
+
+            app.server_event.emit(Event(type = EventType.MODEM_LOG, data = modem_log_model))
         except NoTaskRunningException as err:
             return {
                 "error": {
@@ -269,9 +269,10 @@ class ModemRotate(Resource):
             logged_at = datetime.now()
         )
         modem_log_model.save_to_db()
-        app.socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
+        
+        app.server_event.emit(Event(type = EventType.MODEM_LOG, data = modem_log_model))
 
-        callback = lambda modem_log_model: app.socketio.emit('modem_log', json.loads(modem_log_model.to_json()), broadcast=True)
+        callback = lambda modem_log_model: app.server_event.emit(Event(type = EventType.MODEM_LOG, data = modem_log_model))
         imodem = IModem(server_modem_model=server_modem_model, callback=callback)   
 
         data = _server_modem_rotate_parser.parse_args() 

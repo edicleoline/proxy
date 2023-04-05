@@ -3,7 +3,7 @@ import { commandStatus } from 'store/serverControlReducer';
 import addCommandServerControl from 'store/actions/addCommandServerControl';
 import setCommandsServerControl from 'store/actions/setCommandsServerControl';
 import objectHash from 'object-hash';
-import { serverControlActionReloadModem } from 'store/constant';
+import { serverControlAction } from 'store/constant';
 
 export const commandsInQueue = () => {
     return store.getState().serverControl.commands;
@@ -11,7 +11,7 @@ export const commandsInQueue = () => {
 
 export const pendingReloadModemsInQueue = () => {
     const commands = commandsInQueue();
-    return commands ? commands.filter((x) => x.status === commandStatus.pending && x.action === serverControlActionReloadModem) : [];
+    return commands ? commands.filter((x) => x.status === commandStatus.pending && x.action === serverControlAction.modem.reload) : [];
 };
 
 export const addCommandInQueue = (command) => {
