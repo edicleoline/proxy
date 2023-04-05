@@ -15,7 +15,7 @@
     "app.components.modem.Rotate.error": "{error}",
     "app.components.modem.Rotate.warning.inUse": "Antes de continuar, considere pausar quaiquer serviços que estiverem usando o modem {modemId} como proxy, ele poderá ficar indisponível durante o processo.",
     "app.components.modem.Task.help.stopping.title": "Cancelando tarefa",
-    "app.components.modem.Task.help.stopping.description": "Algumas tarefas podem demorar para serem canceladas.\nIsso porque elas são executadas de forma independente. Além disso, para ter melhor performance, nós subdividimos essas tarefas em tarefas menores, e essas por sua vez não podem ser interrompidas a qualquer momento.\nAssim, se uma subtarefa estiver pendente, precisamos aguardá-la finalizar para interromper todo o processo.",
+    "app.components.modem.Task.help.stopping.description": "Algumas tarefas podem demorar para serem canceladas.\nIsso porque elas são executadas de forma independente. Além disso, para ter melhor performance, nós subdividimos essas tarefas em tarefas menores, e essas por sua vez não podem ser interrompidas a qualquer momento.\nAssim, se uma subtarefa estiver pendente, precisamos aguardá-la finalizar para interromper todo o processo.",    
 
     "app.log.modem.rotate.start": "Rotacionar IP",
     "app.log.modem.rotate.starting": "Iniciando rotacionamento",
@@ -41,7 +41,7 @@
     "app.log.modem.params.usb_port": "Porta",
     "app.log.modem.params.error": "Erro",
     "app.log.modem.middleware.starting": "Iniciando middleware",
-    "app.log.modem.rotate.stop.error.middleware_not_found": "Interrompemos a tarefa porque não conseguimos ininiciar middleware",
+    "app.log.modem.rotate.stop.error.middleware_not_found": "Interrompemos a tarefa porque não conseguimos iniciar middleware",
     "app.log.modem.usb.rebooted_wait_modem": "Porta USB reiniciada. Aguardando modem",
     "app.log.modem.rebooted_wait_provider": "Modem reiniciado. Aguardando conexão com a operadora",
     "app.log.modem.middleware.rebooting": "Reiniciando conexão com a operadora usando middleware",
@@ -55,6 +55,9 @@
     "app.log.modem.reboot.stop.error.hard_reboot": "Interrompemos a tarefa porque não conseguimos reiniciar a porta USB. Considere utilizar a opção hard-reset desativada",
     "app.log.modem.reboot.stop.error.middleware_reboot": "Interrompemos a tarefa porque não conseguimos reiniciar conexão com a operadora usando middleware",
     "app.log.modem.reboot.stop.error.middleware_not_found": "Interrompemos a tarefa porque não conseguimos ininiciar middleware",
-    "app.log.modem.rotate.automated": "Automatizado de acordo com suas configurações"
+    "app.log.modem.rotate.automated": "Automatizado de acordo com suas configurações",
+
+    "app.notification.modem.unexpectedDisconnect": "O modem {modemId} foi desconectado de forma inesperada.",
+    "app.notification.modem.connect": "O modem {modemId} foi conectado."
 
 }

@@ -10,3 +10,6 @@ export const SET_MODEMS_DETAILS_ITEMS = '@modems/SET_MODEMS_DETAILS_ITEMS';
 
 export const ADD_COMMAND_CONTROL = '@server_control/ADD_COMMAND_CONTROL';
 export const SET_COMMANDS_CONTROL = '@server_control/SET_COMMANDS_CONTROL';
+
+export const ADD_NOTIFICATION = '@notification/ADD_NOTIFICATION';
+export const REMOVE_NOTIFICATION = '@notification/REMOVE_NOTIFICATION';

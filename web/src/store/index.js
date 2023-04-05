@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import customizationReducer from './customizationReducer';
 import modemsDetailsReducer from './modemsDetailsReducer';
 import modemsReducer from './modemsReducer';
+import notificationsReducer from './notificationsReducer';
 import serverControlReducer from './serverControlReducer';
 
 const store = configureStore({
@@ -9,7 +10,8 @@ const store = configureStore({
         customization: customizationReducer,
         modems: modemsReducer,
         modemsDetails: modemsDetailsReducer,
-        serverControl: serverControlReducer
+        serverControl: serverControlReducer,
+        notifications: notificationsReducer
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

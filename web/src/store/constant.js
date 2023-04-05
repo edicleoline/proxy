@@ -9,8 +9,10 @@ export const serverControlAction = {
     }
 };
 
-export const serverEventType = {
-    modem: {
-        log: 'MODEM_LOG'
+export const SERVER_EVENT_TYPE = {
+    MODEM: {
+        LOG: 'MODEM_LOG',
+        UNEXPECTED_DISCONNECT: 'UNEXPECTED_MODEM_DISCONNECT',
+        CONNECT: 'MODEM_CONNECT'
     }
 };

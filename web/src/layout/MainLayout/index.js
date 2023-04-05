@@ -1,4 +1,7 @@
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { store } from 'store';
 import { Outlet } from 'react-router-dom';
 
 // material-ui
@@ -12,10 +15,15 @@ import Sidebar from './Sidebar';
 import Customization from '../Customization';
 import navigation from 'menu-items';
 import { drawerWidth } from 'store/constant';
-import { SET_MENU } from 'store/actions/types';
+import { SET_MENU, REMOVE_NOTIFICATION } from 'store/actions/types';
 
 // assets
 import { IconChevronRight } from '@tabler/icons';
+
+import Snackbar from '@mui/material/Snackbar';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import MuiAlert from '@mui/material/Alert';
 
 // styles
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
@@ -62,6 +70,9 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({
 }));
 
 // ==============================|| MAIN LAYOUT ||============================== //
+const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const MainLayout = () => {
     const theme = useTheme();
@@ -71,6 +82,17 @@ const MainLayout = () => {
     const dispatch = useDispatch();
     const handleLeftDrawerToggle = () => {
         dispatch({ type: SET_MENU, opened: !leftDrawerOpened });
+    };
+
+    const [notifications, setNotifications] = useState([]);
+    const _notifications = useSelector((state) => state.notifications);
+    useEffect(() => {
+        console.log(_notifications);
+        setNotifications(_notifications.items);
+    }, [_notifications]);
+    const handleCloseNotification = (notification) => {
+        console.log(notification);
+        dispatch({ type: REMOVE_NOTIFICATION, notification: notification });
     };
 
     return (
@@ -101,6 +123,31 @@ const MainLayout = () => {
                 <Breadcrumbs separator={IconChevronRight} navigation={navigation} icon title rightAlign />
                 <Outlet />
             </Main>
+            {notifications.map((notification) => (
+                <Snackbar
+                    key={notification.id}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                    open={notification.props.open}
+                    autoHideDuration={notification.props.autoHideDuration}
+                    onClose={() => {
+                        handleCloseNotification(notification);
+                    }}
+                    message={notification.message}
+                    // action={
+                    //     <React.Fragment>
+                    //         <IconButton aria-label="close" color="inherit" sx={{ p: 0.5 }} onClick={handleCloseNotification}>
+                    //             <CloseIcon />
+                    //         </IconButton>
+                    //     </React.Fragment>
+                    // }
+                >
+                    {notification.props.alert === true ? (
+                        <Alert onClose={handleCloseNotification} severity={notification.props.severity} sx={{ width: '100%' }}>
+                            {notification.message}
+                        </Alert>
+                    ) : null}
+                </Snackbar>
+            ))}
         </Box>
     );
 };

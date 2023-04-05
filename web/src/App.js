@@ -14,7 +14,9 @@ import setModemsItems from 'store/actions/setModemsItems';
 import { pendingReloadModemsInQueue, addCommandInQueue, removeCommandsFromQueue } from 'services/server-control';
 import setModemsDetailsItems from 'store/actions/setModemsDetailsItems';
 import { storeModemLog } from 'storage/modem/log';
-import { serverEventType } from 'store/constant';
+import { SERVER_EVENT_TYPE } from 'store/constant';
+import addNotification from 'store/actions/addNotification';
+import { FormattedMessage } from 'react-intl';
 
 socket.on('modems', (modems) => {
     const pendingReloads = pendingReloadModemsInQueue();
@@ -39,12 +41,42 @@ socket.on('server_control', (serverControl) => {
 
 socket.on('event', (event) => {
     console.log(event);
-    if (event.type === serverEventType.modem.log) {
+    if (event.type === SERVER_EVENT_TYPE.MODEM.LOG) {
         storeModemLog(event.data);
         return;
     }
 
-    return;
+    if (event.type === SERVER_EVENT_TYPE.MODEM.UNEXPECTED_DISCONNECT) {
+        store.dispatch(
+            addNotification({
+                id: event.id,
+                message: <FormattedMessage id={'app.notification.modem.unexpectedDisconnect'} values={{ modemId: event.data.modem.id }} />,
+                props: {
+                    open: true,
+                    autoHideDuration: 15000,
+                    alert: false
+                },
+                ref: event
+            })
+        );
+        return;
+    }
+
+    if (event.type === SERVER_EVENT_TYPE.MODEM.CONNECT) {
+        store.dispatch(
+            addNotification({
+                id: event.id,
+                message: <FormattedMessage id={'app.notification.modem.connect'} values={{ modemId: event.data.modem.id }} />,
+                props: {
+                    open: true,
+                    autoHideDuration: 15000,
+                    alert: false
+                },
+                ref: event
+            })
+        );
+        return;
+    }
 });
 
 socket.on('connect', () => {
