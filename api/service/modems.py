@@ -12,6 +12,7 @@ from marshmallow import fields
 import json
 import copy
 from framework.proxy.factory import ProxyService
+from framework.service.route.routeservice import RouteService
 
 from framework.util.format import HumanBytes
 
@@ -64,10 +65,11 @@ class ModemsEventObserver():
         self.server_event.emit(Event(type = type, data = data))
 
 class ModemsService():
-    def __init__(self, server: ServerModel, modems_manager: ModemManager, server_event: ServerEvent):        
+    def __init__(self, server: ServerModel, modems_manager: ModemManager, server_event: ServerEvent, route_service: RouteService):        
         self.server = server        
         self.modems_manager = modems_manager
         self.server_event = server_event
+        self.route_service = route_service
         self.modems_event_observer = ModemsEventObserver(self.server_event)        
         self.reload_modems()
 
@@ -75,6 +77,7 @@ class ModemsService():
         self.server_modems = self.server.modems()
         self.modems_event_observer.subscribe([item.json() for item in self.server_modems])
         self.modems_manager.proxy_service.update_modems(self.server_modems)
+        self.route_service.update_modems(self.server_modems)
 
     def server_modem_model_index_by_id(self, server_modem_model_id):
         if not self.server_modems:
