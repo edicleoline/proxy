@@ -50,8 +50,6 @@ class Route:
                     sys.stdout.write('{0}[!] Error: {1}{2}\n'.format(CRED, e.decode('ascii').rstrip(), CEND))
                     sys.stdout.flush()
 
-                time.sleep(2)
-
                 proc = subprocess.Popen(['sudo', 'ip', 'rule', 'add', 'from', self.ip, 'table', str(table)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 o, e = proc.communicate()
 

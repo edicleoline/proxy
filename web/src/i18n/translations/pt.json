@@ -56,6 +56,8 @@
     "app.log.modem.reboot.stop.error.middleware_reboot": "Interrompemos a tarefa porque não conseguimos reiniciar conexão com a operadora usando middleware",
     "app.log.modem.reboot.stop.error.middleware_not_found": "Interrompemos a tarefa porque não conseguimos ininiciar middleware",
     "app.log.modem.rotate.automated": "Automatizado de acordo com suas configurações",
+    "app.log.modem.unexpectedDisconnect": "O modem foi desconectado de forma inesperada",
+    "app.log.modem.connect": "O modem foi conectado",
 
     "app.notification.modem.unexpectedDisconnect": "O modem {modemId} foi desconectado de forma inesperada.",
     "app.notification.modem.connect": "O modem {modemId} foi conectado."

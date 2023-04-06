@@ -64,6 +64,28 @@ class ModemsEventObserver():
     def notify(self, type: EventType, data):
         self.server_event.emit(Event(type = type, data = data))
 
+        if type == EventType.UNEXPECTED_MODEM_DISCONNECT:
+            modem_log_model = ModemLogModel(
+                modem_id=data['modem']['id'],
+                owner=ModemLogOwner.SYSTEM, 
+                type=ModemLogType.WARNING, 
+                message='app.log.modem.unexpectedDisconnect',
+                logged_at = datetime.now()
+            )
+            modem_log_model.save_to_db()
+            self.server_event.emit(Event(type = EventType.MODEM_LOG, data = modem_log_model))
+
+        elif type == EventType.MODEM_CONNECT:
+            modem_log_model = ModemLogModel(
+                modem_id=data['modem']['id'],
+                owner=ModemLogOwner.SYSTEM, 
+                type=ModemLogType.SUCCESS, 
+                message='app.log.modem.connect',
+                logged_at = datetime.now()
+            )
+            modem_log_model.save_to_db()
+            self.server_event.emit(Event(type = EventType.MODEM_LOG, data = modem_log_model))
+
 class ModemsService():
     def __init__(self, server: ServerModel, modems_manager: ModemManager, server_event: ServerEvent, route_service: RouteService):        
         self.server = server        
