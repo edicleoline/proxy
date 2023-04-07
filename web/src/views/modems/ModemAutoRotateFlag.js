@@ -69,15 +69,15 @@ const ModemAutoRotateFlag = ({ modem, onAutoRotateIconClick }) => {
         <AutomatedFlagContainer>
             <AutomatedFlagIconWrapper>
                 <Tooltip title={title.format()}>
-                    <IconButton color="secondary" onClick={onAutoRotateIconClick(modem)}>
+                    <IconButton color="secondary" onClick={onAutoRotateIconClick(modem.modem)}>
                         <IconRotateClockwise2 size="18" />
                     </IconButton>
                 </Tooltip>
             </AutomatedFlagIconWrapper>
             {!modem.lock &&
-            modem.schedule?.time_left_to_run <= config.options.autoRotateNotifyIn &&
-            modem.schedule?.time_left_to_run > 0 ? (
-                <AutomatedFlagBadgeWrapper>{modem.schedule?.time_left_to_run}</AutomatedFlagBadgeWrapper>
+            modem.modem.schedule?.time_left_to_run <= config.options.autoRotateNotifyIn &&
+            modem.modem.schedule?.time_left_to_run > 0 ? (
+                <AutomatedFlagBadgeWrapper>{modem.modem.schedule?.time_left_to_run}</AutomatedFlagBadgeWrapper>
             ) : null}
         </AutomatedFlagContainer>
     );

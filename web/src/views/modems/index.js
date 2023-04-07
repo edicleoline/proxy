@@ -356,7 +356,7 @@ const Modems = () => {
                                                                 <ModemIdWrapper>
                                                                     {item.modem.auto_rotate == true ? (
                                                                         <ModemAutoRotateFlag
-                                                                            modem={item.modem}
+                                                                            modem={item}
                                                                             onAutoRotateIconClick={handleModemAutoRotateFlagClick}
                                                                         />
                                                                     ) : null}
