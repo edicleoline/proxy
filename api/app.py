@@ -149,32 +149,31 @@ class ModemsDetailsThread(Thread):
         self.run_forever()
 
 
-# modems_auto_rotate_thread_lock = Lock()
-# modems_auto_rotate_thread = Thread()
-# modems_auto_rotate_thread_stop_event = Event()
-# class ModemsAutoRotateThread(Thread):
-#     def __init__(self):
-#         self.delay = 1
-#         super(ModemsAutoRotateThread, self).__init__()
+modems_auto_rotate_thread_lock = Lock()
+modems_auto_rotate_thread = Thread()
+modems_auto_rotate_thread_stop_event = Event()
+class ModemsAutoRotateThread(Thread):
+    def __init__(self):
+        self.delay = 1
+        super(ModemsAutoRotateThread, self).__init__()
 
-#     def run_forever(self):
-#         try:
-#             while True:
-#                 app.modems_auto_rotate_service.check_and_rotate()
-#                 sleep(self.delay)
+    def run_forever(self):
+        try:
+            while True:
+                app.modems_auto_rotate_service.check_and_rotate()
+                sleep(self.delay)
 
-#         except KeyboardInterrupt:
-#             # kill()
-#             pass
+        except KeyboardInterrupt:
+            # kill()
+            pass
 
-#     def run(self):
-#         self.run_forever()
+    def run(self):
+        self.run_forever()
 
 
 @app.socketio.event
 def connect():
     print('socketio: client connected')
-    # app.socketio.emit('modems', [], broadcast=True)
 
     global modems_status_thread
     with modems_status_thread_lock:
@@ -187,11 +186,11 @@ def connect():
             modems_details_thread = ModemsDetailsThread()
             modems_details_thread.start()
 
-    # global modems_auto_rotate_thread
-    # with modems_auto_rotate_thread_lock:
-    #     if not modems_auto_rotate_thread.is_alive():
-    #         modems_auto_rotate_thread = ModemsAutoRotateThread()
-    #         modems_auto_rotate_thread.start()
+    global modems_auto_rotate_thread
+    with modems_auto_rotate_thread_lock:
+        if not modems_auto_rotate_thread.is_alive():
+            modems_auto_rotate_thread = ModemsAutoRotateThread()
+            modems_auto_rotate_thread.start()
 
 @app.socketio.on_error_default
 def default_error_handler(e):

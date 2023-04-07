@@ -527,6 +527,9 @@ class ModemsAutoRotateService():
         self._modems_auto_rotate_observe_stop_event = Event()
         self._modems_auto_rotate_observe_thread = None
 
+    def check_and_rotate(self):
+        self.modems_auto_rotate_observer.check_and_rotate()
+
     def observe(self):
         with self._modems_auto_rotate_observe_lock:
             if not self._modems_auto_rotate_observe_thread or not self._modems_auto_rotate_observe_thread.is_alive():
