@@ -44,7 +44,7 @@ app.modems_service = ModemsService(
 #app.modems_service.subscribe_connectivity(lambda modems_states: set_modems_states(modems_states))
 
 app.modems_event_observer = ModemsEventObserver(server_event = app.server_event)
-#app.modems_service.subscribe_status(lambda modems_states: app.modems_event_observer.observe(modems_states))
+app.modems_service.subscribe_status(lambda modems_states: app.modems_event_observer.observe(modems_states))
 
 # app.modems_service.subscribe_status(lambda modems_states: app.route_service.update_modems(modems_states))
 

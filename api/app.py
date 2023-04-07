@@ -136,9 +136,9 @@ class ModemsDetailsThread(Thread):
 
     def run_forever(self):
         try:
-            while not modems_details_thread_stop_event.isSet():
+            while not modems_details_thread_stop_event.is_set():
                 modems = app.modems_service.modems_observer.observe_connectivity()
-                # app.socketio.emit('modems', ModemState.schema().dump(modems, many=True), broadcast=True)
+                #app.socketio.emit('modems', ModemState.schema().dump(modems, many=True), broadcast=True)
                 app.socketio.sleep(1)
 
         except KeyboardInterrupt:
