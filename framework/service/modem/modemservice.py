@@ -252,18 +252,20 @@ class ModemsObserver():
 
             modem_ifaddresses = imodem_iface.ifaddresses
 
-            modem_state.connectivity = ModemConnectivity(
-                interface = imodem_iface.interface,
-                internal_ip = modem_ifaddresses[0]['addr'] if modem_ifaddresses else None,
-                network_type = network_type,
-                network_provider = network_provider,
-                network_signalbar = network_signalbar,
-                external_ip = modem_state.infra_modem.external_ip_through_device(silence_mode=True, retries=1),
-                data_traffic = ModemConnectivityTraffic(
-                    receive = ModemConnectivityData(bytes = None, formatted = HumanBytes.format(imodem_iface.rx_bytes, True, 1)),
-                    transmit = ModemConnectivityData(bytes = None, formatted = HumanBytes.format(imodem_iface.tx_bytes, True, 1))
-                )
-            )  
+            external_ip = modem_state.infra_modem.external_ip_through_device(silence_mode=True, retries=1)
+            if modem_state.is_connected == True:
+                modem_state.connectivity = ModemConnectivity(
+                    interface = imodem_iface.interface,
+                    internal_ip = modem_ifaddresses[0]['addr'] if modem_ifaddresses else None,
+                    network_type = network_type,
+                    network_provider = network_provider,
+                    network_signalbar = network_signalbar,
+                    external_ip = external_ip,
+                    data_traffic = ModemConnectivityTraffic(
+                        receive = ModemConnectivityData(bytes = None, formatted = HumanBytes.format(imodem_iface.rx_bytes, True, 1)),
+                        transmit = ModemConnectivityData(bytes = None, formatted = HumanBytes.format(imodem_iface.tx_bytes, True, 1))
+                    )
+                )  
 
         self.notify_modems_states_subscribers()
     
@@ -332,23 +334,23 @@ class ModemsService():
         self._modems_observe_connectivity_thread = None
 
     def observe(self):
-        # with self._modems_observe_status_lock:
-        if not self._modems_observe_status_thread or not self._modems_observe_status_thread.is_alive():
-            self._modems_observe_status_thread = ModemsObserveStatusThread(
-                modems_observer = self.modems_observer, 
-                stop_event = self._modems_observe_status_stop_event
-            )
-            self._modems_observe_status_thread.start()
+        with self._modems_observe_status_lock:
+            if not self._modems_observe_status_thread or not self._modems_observe_status_thread.is_alive():
+                self._modems_observe_status_thread = ModemsObserveStatusThread(
+                    modems_observer = self.modems_observer, 
+                    stop_event = self._modems_observe_status_stop_event
+                )
+                self._modems_observe_status_thread.start()
 
         sleep(0.5)
 
-        # with self._modems_observe_connectivity_lock:
-        if not self._modems_observe_connectivity_thread or not self._modems_observe_connectivity_thread.is_alive():
-            self._modems_observe_connectivity_thread = ModemsObserveConnectivityThread(
-                modems_observer = self.modems_observer, 
-                stop_event = self._modems_observe_connectivity_stop_event
-            )
-            self._modems_observe_connectivity_thread.start()
+        with self._modems_observe_connectivity_lock:
+            if not self._modems_observe_connectivity_thread or not self._modems_observe_connectivity_thread.is_alive():
+                self._modems_observe_connectivity_thread = ModemsObserveConnectivityThread(
+                    modems_observer = self.modems_observer, 
+                    stop_event = self._modems_observe_connectivity_stop_event
+                )
+                self._modems_observe_connectivity_thread.start()
 
     def stop_observe(self):
         self._modems_observe_status_stop_event.set()
