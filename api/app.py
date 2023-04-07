@@ -116,37 +116,37 @@ api.add_resource(ProxyUserModemFilters, "/proxy-user/<int:proxy_user_id>/modem/<
 modems_status_thread = None
 modems_status_thread_lock = Lock()
 def background_thread_modems_status():
+    #while True:
+    #    app.socketio.emit('modems', ModemState.schema().dump(app.modems_states, many=True), broadcast=True)
+    #    app.socketio.sleep(1)
+
     while True:
-        app.socketio.emit('modems', ModemState.schema().dump(app.modems_states, many=True), broadcast=True)
+        modems = app.modems_service.modems_observer.observe_status()
+        app.socketio.emit('modems', ModemState.schema().dump(modems, many=True), broadcast=True)
         app.socketio.sleep(1)
 
-    # while True:
-    #     modems = app.modems_service.modems_observer.observe_status()
-    #     app.socketio.emit('modems', ModemState.schema().dump(modems, many=True), broadcast=True)
-    #     app.socketio.sleep(1)
 
+modems_details_thread_lock = Lock()
+modems_details_thread = Thread()
+modems_details_thread_stop_event = Event()
+class ModemsDetailsThread(Thread):
+    def __init__(self):
+        self.delay = 1
+        super(ModemsDetailsThread, self).__init__()
 
-# modems_details_thread_lock = Lock()
-# modems_details_thread = Thread()
-# modems_details_thread_stop_event = Event()
-# class ModemsDetailsThread(Thread):
-#     def __init__(self):
-#         self.delay = 1
-#         super(ModemsDetailsThread, self).__init__()
+    def run_forever(self):
+        try:
+            while not modems_details_thread_stop_event.isSet():
+                modems = app.modems_service.modems_observer.observe_connectivity()
+                # app.socketio.emit('modems', ModemState.schema().dump(modems, many=True), broadcast=True)
+                app.socketio.sleep(1)
 
-#     def run_forever(self):
-#         try:
-#             while not modems_details_thread_stop_event.isSet():
-#                 modems = app.modems_service.modems_observer.observe_connectivity()
-#                 # app.socketio.emit('modems', ModemState.schema().dump(modems, many=True), broadcast=True)
-#                 app.socketio.sleep(1)
+        except KeyboardInterrupt:
+            # kill()
+            pass
 
-#         except KeyboardInterrupt:
-#             # kill()
-#             pass
-
-#     def run(self):
-#         self.run_forever()
+    def run(self):
+        self.run_forever()
 
 
 # modems_auto_rotate_thread_lock = Lock()
@@ -181,11 +181,11 @@ def connect():
         if modems_status_thread is None:
             modems_status_thread = app.socketio.start_background_task(background_thread_modems_status)
 
-    # global modems_details_thread
-    # with modems_details_thread_lock:
-    #     if not modems_details_thread.is_alive():
-    #         modems_details_thread = ModemsDetailsThread()
-    #         modems_details_thread.start()
+    global modems_details_thread
+    with modems_details_thread_lock:
+        if not modems_details_thread.is_alive():
+            modems_details_thread = ModemsDetailsThread()
+            modems_details_thread.start()
 
     # global modems_auto_rotate_thread
     # with modems_auto_rotate_thread_lock:

@@ -285,7 +285,7 @@ class ModemsObserveStatusThread(Thread):
 
     def run_forever(self):
         try:
-            while not self.stop_event.isSet():
+            while not self.stop_event.is_set():
                 self.modems_observer.observe_status()             
                 sleep(self.delay)
         except KeyboardInterrupt:
@@ -305,7 +305,7 @@ class ModemsObserveConnectivityThread(Thread):
 
     def run_forever(self):
         try:
-            while not self.stop_event.isSet():
+            while not self.stop_event.is_set():
                 self.modems_observer.observe_connectivity()       
                 sleep(self.delay)
         except KeyboardInterrupt:
@@ -332,21 +332,23 @@ class ModemsService():
         self._modems_observe_connectivity_thread = None
 
     def observe(self):
-        with self._modems_observe_status_lock:
-            if not self._modems_observe_status_thread or not self._modems_observe_status_thread.is_alive():
-                self._modems_observe_status_thread = ModemsObserveStatusThread(
-                    modems_observer = self.modems_observer, 
-                    stop_event = self._modems_observe_status_stop_event
-                )
-                self._modems_observe_status_thread.start()
+        # with self._modems_observe_status_lock:
+        if not self._modems_observe_status_thread or not self._modems_observe_status_thread.is_alive():
+            self._modems_observe_status_thread = ModemsObserveStatusThread(
+                modems_observer = self.modems_observer, 
+                stop_event = self._modems_observe_status_stop_event
+            )
+            self._modems_observe_status_thread.start()
 
-        with self._modems_observe_connectivity_lock:
-            if not self._modems_observe_connectivity_thread or not self._modems_observe_connectivity_thread.is_alive():
-                self._modems_observe_connectivity_thread = ModemsObserveConnectivityThread(
-                    modems_observer = self.modems_observer, 
-                    stop_event = self._modems_observe_connectivity_stop_event
-                )
-                self._modems_observe_connectivity_thread.start()
+        sleep(0.5)
+
+        # with self._modems_observe_connectivity_lock:
+        if not self._modems_observe_connectivity_thread or not self._modems_observe_connectivity_thread.is_alive():
+            self._modems_observe_connectivity_thread = ModemsObserveConnectivityThread(
+                modems_observer = self.modems_observer, 
+                stop_event = self._modems_observe_connectivity_stop_event
+            )
+            self._modems_observe_connectivity_thread.start()
 
     def stop_observe(self):
         self._modems_observe_status_stop_event.set()
@@ -501,7 +503,7 @@ class ModemsAutoRotateObserveThread(Thread):
 
     def run_forever(self):
         try:
-            while not self.stop_event.isSet():
+            while not self.stop_event.is_set():
                 self.modems_auto_rotate_observer.check_and_rotate()
                 sleep(self.delay)
         except KeyboardInterrupt:

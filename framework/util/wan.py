@@ -53,8 +53,8 @@ class Wan:
             retry_ip = retry_ip + 1
             ip = self.get_current_ip(silence_mode=silence_mode)    
             
-            if ip != None or retry_ip >= retries or event_stop.is_set():
-                break
+            if event_stop and event_stop.is_set(): break
+            if ip != None or retry_ip >= retries: break
 
             time.sleep(1)
 
