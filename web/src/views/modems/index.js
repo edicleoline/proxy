@@ -398,7 +398,7 @@ const Modems = () => {
                                                             )}
                                                             <MenuItem
                                                                 onClick={() => {
-                                                                    handleModemRebootClick(item.modem);
+                                                                    handleModemRebootClick(item);
                                                                     handleModemCloseMenu();
                                                                 }}
                                                                 disabled={item.lock != null}

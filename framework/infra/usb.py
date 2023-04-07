@@ -26,7 +26,7 @@ class USB:
     def preserve_others_ports_status(self):
         usb_ports = self.server.usb_ports()
         for usb_port in usb_ports:
-            if usb_port.get_status() == USBPortStatus.ON:
+            if usb_port.status == USBPortStatus.ON:
                 self.hard_turn_on(usb_port)
             else:
                 self.hard_turn_off(usb_port)

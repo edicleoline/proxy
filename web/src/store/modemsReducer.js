@@ -33,7 +33,6 @@ const merge = (oldState, newItems = [], replaceItems = []) => {
     let updated = false;
 
     const items = oldItems.map(function (oldItem) {
-        console.log(oldItem);
         for (let newItem of newItems) {
             if (oldItem.modem.id !== newItem.modem.id) {
                 continue;

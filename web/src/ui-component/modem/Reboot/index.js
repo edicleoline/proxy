@@ -40,7 +40,7 @@ const RebootDialog = (props) => {
 
         let _hardReset = !modem.is_connected ? true : hardReset;
 
-        reboot(modem.id, _hardReset)
+        reboot(modem.modem.id, _hardReset)
             .then(
                 (response) => {
                     console.log(response);
@@ -103,7 +103,7 @@ const RebootDialog = (props) => {
                     <DialogContentText id="modem-reboot-dialog-description">
                         <FormattedMessage
                             id="app.components.modem.Reboot.modal.body.question"
-                            values={{ modemId: modem ? ' ' + modem.id : '' }}
+                            values={{ modemId: modem ? ' ' + modem.modem.id : '' }}
                         />
                         <br />
                         {modem && modem.is_connected === true ? (

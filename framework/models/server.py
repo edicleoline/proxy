@@ -144,6 +144,9 @@ class USBPortModel():
 
     def get_real_port(self):
         return self.port - 1
+    
+    def set_status(self, status: USBPortStatus):
+        self.status = status
 
     def save_to_db(self):
         conn = connection()
