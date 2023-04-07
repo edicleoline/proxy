@@ -113,17 +113,40 @@ api.add_resource(ProxyUserModemFilters, "/proxy-user/<int:proxy_user_id>/modem/<
 
 #https://github.com/ajaichemmanam/react-flask-socketio/blob/7cdfe2c76a8ad4eb36e097dd30e2b273882a08fb/server.py
 
-modems_status_thread = None
-modems_status_thread_lock = Lock()
-def background_thread_modems_status():
-    #while True:
-    #    app.socketio.emit('modems', ModemState.schema().dump(app.modems_states, many=True), broadcast=True)
-    #    app.socketio.sleep(1)
+# modems_status_thread = None
+# modems_status_thread_lock = Lock()
+# def background_thread_modems_status():
+#     #while True:
+#     #    app.socketio.emit('modems', ModemState.schema().dump(app.modems_states, many=True), broadcast=True)
+#     #    app.socketio.sleep(1)
 
-    while True:
-        modems = app.modems_service.modems_observer.observe_status()
-        app.socketio.emit('modems', ModemState.schema().dump(modems, many=True), broadcast=True)
-        app.socketio.sleep(1)
+#     while True:
+#         modems = app.modems_service.modems_observer.observe_status()
+#         app.socketio.emit('modems', ModemState.schema().dump(modems, many=True), broadcast=True)
+#         app.socketio.sleep(1)
+
+modems_states_thread_lock = Lock()
+modems_states_thread = Thread()
+modems_states_thread_stop_event = Event()
+class ModemsStatesThread(Thread):
+    def __init__(self):
+        self.delay = 1
+        super(ModemsStatesThread, self).__init__()
+
+    def run_forever(self):
+        try:
+            while not modems_states_thread_stop_event.is_set():
+                modems = app.modems_service.modems_observer.observe_status()
+                app.socketio.emit('modems', ModemState.schema().dump(modems, many=True), broadcast=True)
+                #app.socketio.sleep(1)
+                sleep(self.delay)
+
+        except KeyboardInterrupt:
+            # kill()
+            pass
+
+    def run(self):
+        self.run_forever()
 
 
 modems_details_thread_lock = Lock()
@@ -176,10 +199,16 @@ class ModemsAutoRotateThread(Thread):
 def connect():
     print('socketio: client connected')
 
-    global modems_status_thread
-    with modems_status_thread_lock:
-        if modems_status_thread is None:
-            modems_status_thread = app.socketio.start_background_task(background_thread_modems_status)
+    # global modems_status_thread
+    # with modems_status_thread_lock:
+    #     if modems_status_thread is None:
+    #         modems_status_thread = app.socketio.start_background_task(background_thread_modems_status)
+
+    global modems_states_thread
+    with modems_states_thread_lock:
+        if not modems_states_thread.is_alive():
+            modems_states_thread = ModemsStatesThread()
+            modems_states_thread.start()
 
     global modems_details_thread
     with modems_details_thread_lock:
