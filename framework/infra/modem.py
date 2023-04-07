@@ -309,7 +309,7 @@ class Modem:
                 self.log(modem_log_model)
                 
                 device_middleware = self.get_device_middleware()
-                new_ip = device_middleware.wan.try_get_current_ip(retries=60*3)
+                new_ip = device_middleware.wan.try_get_current_ip(retries=60*3, event_stop = self.event_stop)
 
             else:
                 if self.event_stop_is_set() == True: break            

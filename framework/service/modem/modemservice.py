@@ -119,7 +119,7 @@ class ModemsEventObserver():
                 self._observers[old_observer_index]['is_connected'] = observer['is_connected']
                 continue
             
-            if observer['lock'] == None:
+            if self._observers[old_observer_index]['lock'] == None and observer['lock'] == None:
                 if self._observers[old_observer_index]['is_connected'] == True and observer['is_connected'] == False:
                     self._observers[old_observer_index]['is_connected'] = observer['is_connected']                    
                     self.notify(EventType.UNEXPECTED_MODEM_DISCONNECT, observer)

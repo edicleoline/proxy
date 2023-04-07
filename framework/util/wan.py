@@ -46,14 +46,14 @@ class Wan:
                 sys.stdout.flush()
 
 
-    def try_get_current_ip(self, retries = 3, silence_mode = False):
+    def try_get_current_ip(self, retries = 3, silence_mode = False, event_stop = None):
         ip = None
         retry_ip = 0
         while True:
             retry_ip = retry_ip + 1
             ip = self.get_current_ip(silence_mode=silence_mode)    
             
-            if ip != None or retry_ip >= retries:
+            if ip != None or retry_ip >= retries or event_stop.is_set():
                 break
 
             time.sleep(1)

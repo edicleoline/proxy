@@ -48,7 +48,7 @@ def main():
 
     server = ServerModel.find_by_id(1)
     server_modem = ServerModemModel.find_by_modem_id(_args.modem_id)
-    modem = server_modem.modem()
+    modem = server_modem.modem
 
     imodem = IModem(server_modem)
     
