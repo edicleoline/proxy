@@ -59,13 +59,13 @@ class Modem:
 
     def modem(self):
         if not self._modem:
-            self._modem = self.server_modem_model.modem()
+            self._modem = self.server_modem_model.modem
 
         return self._modem
 
     def usb_port(self):
         if not self._usb_port:
-            self._usb_port = self.server_modem_model.usb_port()
+            self._usb_port = self.server_modem_model.usb
 
         return self._usb_port
 

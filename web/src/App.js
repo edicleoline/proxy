@@ -28,11 +28,13 @@ socket.on('modems', (modems) => {
     }
 
     store.dispatch(setModemsItems(modems, replaceItems));
+    // store.dispatch(setModemsItems(modems, []));
+    // console.log(modems);
 });
 
-socket.on('modems_details', (modems) => {
-    store.dispatch(setModemsDetailsItems(modems));
-});
+// socket.on('modems_details', (modems) => {
+//     store.dispatch(setModemsDetailsItems(modems));
+// });
 
 socket.on('server_control', (serverControl) => {
     addCommandInQueue(serverControl);

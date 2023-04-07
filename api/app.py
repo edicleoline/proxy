@@ -1,7 +1,9 @@
+import json
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
+from service.modems import ModemState
 from resources.modem import ModemReboot, ModemRotate, ModemScheduleAutoRotate, Modems, Modem, ModemLogs
 from resources.proxyuser import ProxyUserByUsername, ProxyUserModemFilters, ProxyUsers
 
@@ -119,7 +121,7 @@ modems_status_thread_lock = Lock()
 def background_thread_modems_status():
     while True:
         modems = app.modems_service.modems_status()
-        app.socketio.emit('modems', modems, broadcast=True)
+        app.socketio.emit('modems', ModemState.schema().dump(modems, many=True), broadcast=True)
         app.socketio.sleep(1)
 
 
@@ -135,7 +137,7 @@ class ModemsDetailsThread(Thread):
         try:
             while not modems_details_thread_stop_event.isSet():
                 modems = app.modems_service.modems_details()
-                app.socketio.emit('modems_details', modems, broadcast=True)
+                # app.socketio.emit('modems_details', modems, broadcast=True)
                 sleep(self.delay)
 
         except KeyboardInterrupt:

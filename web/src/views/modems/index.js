@@ -255,7 +255,7 @@ const Modems = () => {
         _dockLogItems.current.push({
             id: modem.modem.id,
             title: `Log modem ${modem.modem.id}`,
-            content: <ModemLog modem={modem} />,
+            content: <ModemLog modem={modem.modem} />,
             state: DockItemState.maximized
         });
 
@@ -332,55 +332,55 @@ const Modems = () => {
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {modems.map((modem) => (
+                                            {modems.map((item) => (
                                                 <TableRow
                                                     hover
-                                                    key={modem.modem.id}
+                                                    key={item.modem.id}
                                                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                                 >
                                                     <TableCell component="th" scope="row" sx={{ minWidth: '100px', position: 'relative' }}>
                                                         <Grid container justifyContent="flex-start" alignItems="center" direction="row">
                                                             <Grid item>
                                                                 <IconButton
-                                                                    id={`modem-button-${modem.modem.id}`}
+                                                                    id={`modem-button-${item.modem.id}`}
                                                                     aria-label="Modem Options"
                                                                     size="small"
-                                                                    aria-controls={`modem-menu-${modem.modem.id}`}
+                                                                    aria-controls={`modem-menu-${item.modem.id}`}
                                                                     aria-haspopup="true"
-                                                                    onClick={handleModemOpenMenuClick(modem.modem.id)}
+                                                                    onClick={handleModemOpenMenuClick(item.modem.id)}
                                                                 >
                                                                     <IconDotsVertical />
                                                                 </IconButton>
                                                             </Grid>
                                                             <Grid item>
                                                                 <ModemIdWrapper>
-                                                                    {modem.auto_rotate == true ? (
+                                                                    {item.modem.auto_rotate == true ? (
                                                                         <ModemAutoRotateFlag
-                                                                            modem={modem}
+                                                                            modem={item.modem}
                                                                             onAutoRotateIconClick={handleModemAutoRotateFlagClick}
                                                                         />
                                                                     ) : null}
-                                                                    &nbsp;&nbsp;{modem.modem.id}
+                                                                    &nbsp;&nbsp;{item.modem.modem.id}
                                                                 </ModemIdWrapper>
                                                             </Grid>
                                                         </Grid>
                                                         <Menu
-                                                            id={`modem-menu-${modem.modem.id}`}
+                                                            id={`modem-menu-${item.modem.id}`}
                                                             anchorEl={anchorModemMenuEl}
-                                                            open={openModemMenuElem === modem.modem.id}
+                                                            open={openModemMenuElem === item.modem.id}
                                                             onClose={handleModemCloseMenu}
                                                             MenuListProps={{
-                                                                'aria-labelledby': `modem-button-${modem.modem.id}`
+                                                                'aria-labelledby': `modem-button-${item.modem.id}`
                                                             }}
                                                         >
-                                                            {modem.lock != null && modem.lock.task && modem.lock.task.name == 'ROTATE' ? (
+                                                            {item.lock != null && item.lock.task && item.lock.task.name == 'ROTATE' ? (
                                                                 <MenuItem
                                                                     onClick={() => {
-                                                                        handleCancelModemRotateClick(modem);
+                                                                        handleCancelModemRotateClick(item.modem);
                                                                         handleModemCloseMenu();
                                                                     }}
                                                                     disabled={
-                                                                        modem.lock && modem.lock.task && modem.lock.task.stopping == true
+                                                                        item.lock && item.lock.task && item.lock.task.stopping == true
                                                                     }
                                                                 >
                                                                     Cancelar rotacionamento
@@ -388,44 +388,44 @@ const Modems = () => {
                                                             ) : (
                                                                 <MenuItem
                                                                     onClick={() => {
-                                                                        handleModemRotateClick(modem);
+                                                                        handleModemRotateClick(item.modem);
                                                                         handleModemCloseMenu();
                                                                     }}
-                                                                    disabled={!modem.is_connected || modem.lock != null}
+                                                                    disabled={!item.is_connected || item.lock != null}
                                                                 >
                                                                     Rotacionar IP
                                                                 </MenuItem>
                                                             )}
                                                             <MenuItem
                                                                 onClick={() => {
-                                                                    handleModemRebootClick(modem);
+                                                                    handleModemRebootClick(item.modem);
                                                                     handleModemCloseMenu();
                                                                 }}
-                                                                disabled={modem.lock != null}
+                                                                disabled={item.lock != null}
                                                             >
                                                                 Reiniciar
                                                             </MenuItem>
                                                             <Divider />
                                                             <MenuItem
                                                                 onClick={() => {
-                                                                    handleModemDiagnoseClick(modem);
+                                                                    handleModemDiagnoseClick(item.modem);
                                                                     handleModemCloseMenu();
                                                                 }}
-                                                                disabled={modem.lock != null}
+                                                                disabled={item.lock != null}
                                                             >
                                                                 Executar diagnóstico
                                                             </MenuItem>
                                                             <MenuItem
                                                                 onClick={() => {
                                                                     handleModemCloseMenu();
-                                                                    addDockLog(modem);
+                                                                    addDockLog(item.modem);
                                                                 }}
                                                             >
                                                                 Log
                                                             </MenuItem>
                                                             <MenuItem
                                                                 onClick={() => {
-                                                                    handleModemSettingsClick(modem);
+                                                                    handleModemSettingsClick(item.modem);
                                                                     handleModemCloseMenu();
                                                                 }}
                                                             >
@@ -442,12 +442,12 @@ const Modems = () => {
                                                             </MenuItem>
                                                         </Menu>
                                                     </TableCell>
-                                                    <TableCell align="left">{modem.modem.device.model}</TableCell>
-                                                    <TableCell align="left">{modem.usb.port}</TableCell>
+                                                    <TableCell align="left">{item.modem.modem.device.model}</TableCell>
+                                                    <TableCell align="left">{item.modem.usb.port}</TableCell>
                                                     <TableCell align="left" sx={{ position: 'relative' }}>
                                                         <ModemStatus
-                                                            lock={modem.lock}
-                                                            connected={modem.is_connected}
+                                                            lock={item.lock}
+                                                            connected={item.is_connected}
                                                             onStoppingTaskClick={() => {
                                                                 setTaskStoppingHelpDialog({
                                                                     ...taskStoppingHelpDialog,
@@ -462,22 +462,24 @@ const Modems = () => {
                                                             }}
                                                         />
                                                     </TableCell>
-                                                    <TableCell align="left">{modem.external_ip ? modem.external_ip : '-'}</TableCell>
-                                                    <TableCell align="right">
-                                                        {modem.device_network_provider ? modem.device_network_provider : '-'}
+                                                    <TableCell align="left">
+                                                        {item.connectivity?.external_ip ? item.connectivity?.external_ip : '-'}
                                                     </TableCell>
                                                     <TableCell align="right">
-                                                        {modem.device_network_type ? modem.device_network_type : '-'}
+                                                        {item.connectivity?.network_provider ? item.connectivity?.network_provider : '-'}
+                                                    </TableCell>
+                                                    <TableCell align="right">
+                                                        {item.connectivity?.network_type ? item.connectivity?.network_type : '-'}
                                                     </TableCell>
                                                     <TableCell align="center">
-                                                        {modem.device_network_signalbar ? (
-                                                            <SignalBar signal={modem.device_network_signalbar} />
+                                                        {item.connectivity?.network_signalbar ? (
+                                                            <SignalBar signal={item.connectivity?.network_signalbar} />
                                                         ) : (
                                                             <SignalBar signal={0} />
                                                         )}
                                                     </TableCell>
                                                     <TableCell align="left">
-                                                        {modem.external_ip && modem.proxy ? (
+                                                        {item.connectivity?.external_ip && item.modem.proxy ? (
                                                             <Grid
                                                                 container
                                                                 justifyContent="flex-start"
@@ -489,8 +491,8 @@ const Modems = () => {
                                                                         <ProxyConnection
                                                                             type={'http'}
                                                                             ip={server.external_ip}
-                                                                            port={modem.proxy.ipv4.http.port}
-                                                                            status={modem.proxy.ipv4.http.status}
+                                                                            port={item.modem.proxy.ipv4.http.port}
+                                                                            status={item.modem.proxy.ipv4.http.status}
                                                                         />
                                                                     ) : (
                                                                         <span>-</span>
@@ -501,8 +503,8 @@ const Modems = () => {
                                                                         <ProxyConnection
                                                                             type={'socks'}
                                                                             ip={server.external_ip}
-                                                                            port={modem.proxy.ipv4.socks.port}
-                                                                            status={modem.proxy.ipv4.socks.status}
+                                                                            port={item.modem.proxy.ipv4.socks.port}
+                                                                            status={item.modem.proxy.ipv4.socks.status}
                                                                         />
                                                                     ) : (
                                                                         <span>-</span>
@@ -514,7 +516,7 @@ const Modems = () => {
                                                         )}
                                                     </TableCell>
                                                     <TableCell align="left">
-                                                        {modem.external_ip && modem.proxy ? (
+                                                        {item.connectivity?.external_ip && item.modem.proxy ? (
                                                             <Grid
                                                                 container
                                                                 justifyContent="flex-start"
@@ -526,8 +528,8 @@ const Modems = () => {
                                                                         <ProxyConnection
                                                                             type={'http'}
                                                                             ip={server.external_ip}
-                                                                            port={modem.proxy.ipv6.http.port}
-                                                                            status={modem.proxy.ipv6.http.status}
+                                                                            port={item.modem.proxy.ipv6.http.port}
+                                                                            status={item.modem.proxy.ipv6.http.status}
                                                                         />
                                                                     ) : (
                                                                         <span>-</span>
@@ -538,8 +540,8 @@ const Modems = () => {
                                                                         <ProxyConnection
                                                                             type={'socks'}
                                                                             ip={server.external_ip}
-                                                                            port={modem.proxy.ipv6.socks.port}
-                                                                            status={modem.proxy.ipv6.socks.status}
+                                                                            port={item.modem.proxy.ipv6.socks.port}
+                                                                            status={item.modem.proxy.ipv6.socks.status}
                                                                         />
                                                                     ) : (
                                                                         <span>-</span>
@@ -551,10 +553,10 @@ const Modems = () => {
                                                         )}
                                                     </TableCell>
                                                     <TableCell align="right">
-                                                        {modem.data && modem.data.receive ? (
+                                                        {item.connectivity?.data_traffic ? (
                                                             <DataUsage
-                                                                download={modem.data.receive.formatted}
-                                                                upload={modem.data.transmit.formatted}
+                                                                download={item.connectivity?.data_traffic?.receive.formatted}
+                                                                upload={item.connectivity?.data_traffic?.transmit.formatted}
                                                             />
                                                         ) : (
                                                             <span>-</span>

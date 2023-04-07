@@ -1,21 +1,23 @@
 from framework.models.device import DeviceModel
 from db import connection
+from dataclasses import dataclass
+from dataclasses_json import dataclass_json
 
+@dataclass_json
+@dataclass
 class ModemModel():
+    id: int
+    imei: str
+    addr_id: str
+    device: DeviceModel    
+
     def __init__(self, id = None, imei = None, device_id = None, addr_id = None, created_at = None):
         self.id = id
         self.imei = imei
         self.device_id = device_id
+        self._device = None
         self.addr_id = addr_id
         self.created_at = created_at
-    
-    def json(self):
-        return {
-            'id': self.id,
-            'imei': self.imei,
-            'device_id': self.device_id,
-            'addr_id': self.addr_id
-        }
 
     @classmethod
     def find_by_id(cls, id: int):
@@ -28,8 +30,11 @@ class ModemModel():
 
         return ModemModel(id = row[0], imei = row[1], device_id = row[2], addr_id = row[3], created_at = row[4])
 
+    @property
     def device(self):
-        return None if self.device_id == None else DeviceModel.find_by_id(self.device_id)
+        if self._device: return self._device
+        self._device = None if self.device_id == None else DeviceModel.find_by_id(self.device_id)
+        return self._device
 
     def save_to_db(self):
         conn = connection()

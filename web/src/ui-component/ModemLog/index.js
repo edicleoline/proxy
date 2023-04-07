@@ -47,7 +47,7 @@ const ModemLog = (props) => {
         setContainers(containers);
     };
 
-    const _logs = useLiveQuery(() => modemLog.where({ modem_id: modem.modem.id }).toArray());
+    const _logs = useLiveQuery(() => modemLog.where({ modem_id: modem.id }).toArray());
     useEffect(() => {
         _makeContainers(_logs);
 

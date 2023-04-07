@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
 
-from framework.models.server import ServerModel
+from framework.models.server import ServerModel, USBPortModel
 
 class Server(Resource):
     # @jwt_required()
@@ -24,7 +24,7 @@ class ServerUSBPorts(Resource):
         
         usb_ports = server.usb_ports()
 
-        items = [item.json() for item in usb_ports]
+        items = USBPortModel.schema().dump(usb_ports, many=True)
       
         return {"items": items}, 200
 

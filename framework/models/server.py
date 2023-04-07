@@ -99,24 +99,37 @@ class ServerModel():
         conn.close(True)
 
 
+class USBPortStatusField(fields.Field):
+    def _serialize(self, value, attr, obj, **kwargs):
+        return value.name
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        return USBPortStatusField[value]
+    
+usb_port_status_type_field = {
+    "dataclasses_json": {
+        "encoder": lambda type: type.name,
+        "decoder": lambda name: USBPortStatusField(name),
+        "mm_field": USBPortStatusField(),
+    }
+}
+
 class USBPortStatus(Enum):
     ON  = 'on'
     OFF = 'off'
 
-
+@dataclass_json
+@dataclass
 class USBPortModel():
+    id: int
+    port: int  
+    status: USBPortStatus = field(metadata=usb_port_status_type_field)
+
     def __init__(self, id = None, port = None, status = None, server_id = None):
         self.id = id
         self.port = port
         self.status = status
         self.server_id = server_id
-
-    def json(self):
-        return {
-            'id': self.id,
-            'port': self.port,
-            'status': self.get_status().name
-        }
 
     @classmethod
     def find_by_id(cls, id: int):
@@ -127,13 +140,7 @@ class USBPortModel():
         if row == None:
             return None
 
-        return USBPortModel(id = row[0], port = row[1], status = row[2], server_id = row[3])
-
-    def set_status(self, status:USBPortStatus):
-        self.status = status.value
-
-    def get_status(self):
-        return USBPortStatus.ON if self.status == 'on' else USBPortStatus.OFF    
+        return USBPortModel(id = row[0], port = row[1], status = USBPortStatus(row[2]), server_id = row[3])   
 
     def get_real_port(self):
         return self.port - 1
@@ -143,17 +150,30 @@ class USBPortModel():
 
         if self.id == None:
             conn.execute("insert into usb_port (port, status, server_id) values (?, ?, ?)", (
-                self.port, self.status, self.server_id
-                ))
+                self.port, self.status.value, self.server_id
+            ))
             self.id = conn.last_insert_rowid()
         else:
             conn.execute("update usb_port set status=? where id = ?", (
-                self.status, self.id
-                ))
+                self.status.value, self.id
+            ))
 
         conn.close(True)
 
+@dataclass_json
+@dataclass
 class ServerModemModel():
+    id: int
+    usb: USBPortModel
+    modem: ModemModel
+    prevent_same_ip_users: bool = None
+    auto_rotate: bool = None
+    auto_rotate_time: int = None
+    auto_rotate_hard_reset: bool = None
+    auto_rotate_filter: ProxyUserIPFilterModel = None
+    schedule: ModemsAutoRotateAgendaItem = None
+    proxy: dict
+
     def __init__(
             self, id = None, 
             server_id = None, 
@@ -174,7 +194,9 @@ class ServerModemModel():
         self.id = id
         self.server_id = server_id
         self.modem_id = modem_id
+        self._modem = None
         self.usb_port_id = usb_port_id
+        self._usb = None
         self.proxy_ipv4_http_port = proxy_ipv4_http_port
         self.proxy_ipv4_socks_port = proxy_ipv4_socks_port
         self.proxy_ipv6_http_port = proxy_ipv6_http_port
@@ -186,54 +208,6 @@ class ServerModemModel():
         self.auto_rotate_filter = auto_rotate_filter
         self.schedule = schedule
         self.created_at = created_at
-
-    def json(self):
-        usb_port = self.usb_port()
-        modem = self.modem()
-        device = modem.device()
-        return {
-            'id': self.id,
-            # 'server_id': self.server_id,
-            'usb': {
-                'id': usb_port.id,
-                'port': usb_port.port,
-                'status': usb_port.status
-            },
-            'proxy': {
-                'ipv4': {
-                    'http': {
-                        'port': self.proxy_ipv4_http_port
-                    },
-                    'socks': {
-                        'port': self.proxy_ipv4_socks_port
-                    }                    
-                },
-                'ipv6': {
-                    'http': {
-                        'port': self.proxy_ipv6_http_port
-                    },
-                    'socks': {
-                        'port': self.proxy_ipv6_socks_port
-                    }                    
-                }                
-            },
-            'modem': {
-                'id': modem.id,
-                'imei': modem.imei,
-                'addr_id': modem.addr_id,
-                'device': {
-                    'id': device.id,
-                    'model': device.model,
-                    'type': device.type
-                },
-            },
-            'prevent_same_ip_users': self.prevent_same_ip_users,
-            'auto_rotate': self.auto_rotate,
-            'auto_rotate_time': self.auto_rotate_time,
-            'auto_rotate_hard_reset': self.auto_rotate_hard_reset,
-            'auto_rotate_filter': json.loads(ProxyUserIPFilterModel.schema().dumps(self.auto_rotate_filter, many=True)) if self.auto_rotate_filter else None,
-            'schedule': json.loads(ModemsAutoRotateAgendaItem.schema().dumps(self.schedule, many=False)) if self.schedule else None
-        }
 
     @classmethod
     def find_by_id(cls, id: int):
@@ -292,15 +266,42 @@ class ServerModemModel():
             return None
 
         return cls.find_by_id(row[0])
+    
+    @property
+    def proxy(self):
+        return {
+            'ipv4': {
+                'http': {
+                    'port': self.proxy_ipv4_http_port
+                },
+                'socks': {
+                    'port': self.proxy_ipv4_socks_port
+                }                    
+            },
+            'ipv6': {
+                'http': {
+                    'port': self.proxy_ipv6_http_port
+                },
+                'socks': {
+                    'port': self.proxy_ipv6_socks_port
+                }                    
+            }      
+        }
 
-    def usb_port(self):
-        return None if self.usb_port_id == None else USBPortModel.find_by_id(self.usb_port_id)
+    @property
+    def usb(self):
+        if self._usb: return self._usb
+        self._usb = None if self.usb_port_id == None else USBPortModel.find_by_id(self.usb_port_id)    
+        return self._usb
 
     def server(self):
         return None if self.server_id == None else ServerModel.find_by_id(self.server_id)
 
+    @property
     def modem(self):
-        return None if self.modem_id == None else ModemModel.find_by_id(self.modem_id)
+        if self._modem: return self._modem
+        self._modem = None if self.modem_id == None else ModemModel.find_by_id(self.modem_id)
+        return self._modem
 
     def save_to_db(self):
         conn = connection()

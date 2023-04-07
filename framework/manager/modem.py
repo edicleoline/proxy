@@ -5,6 +5,8 @@ from threading import Event
 from enum import Enum
 from framework.manager.error.exception import ModemLockedByOtherThreadException, ModemRebootException, NoTaskRunningException
 from framework.proxy.factory import ProxyService
+from dataclasses import dataclass, field
+from dataclasses_json import dataclass_json, config
 
 class ModemManager():
     def __init__(self, proxy_service: ProxyService):
@@ -101,10 +103,21 @@ class ModemThreadStatus(Enum):
     SUSPENDED_BY_USER = 3
 
 
+@dataclass_json
+@dataclass
 class ModemThreadData():
+    task: dict
+
     def __init__(self, infra_modem: IModem, action: ModemThreadAction, thread: Thread, event_stop: Event):
         self.infra_modem = infra_modem
         self.action = action
         self.thread = thread
         self.event_stop = event_stop
         self.started_at = datetime.now()
+
+    @property
+    def task(self):
+        return {
+            'name': self.action.name,
+            'stopping': True if self.event_stop.is_set() else False
+        }

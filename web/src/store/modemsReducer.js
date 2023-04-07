@@ -33,38 +33,34 @@ const merge = (oldState, newItems = [], replaceItems = []) => {
     let updated = false;
 
     const items = oldItems.map(function (oldItem) {
-        newItems.forEach((newItem) => {
-            if (oldItem.id !== newItem.id) {
-                return;
+        console.log(oldItem);
+        for (let newItem of newItems) {
+            if (oldItem.modem.id !== newItem.modem.id) {
+                continue;
             }
 
             if (replaceItems) {
                 const found = replaceItems.find((x) => x.modem.id === newItem.modem.id);
                 if (found) {
                     updated = true;
-                    const oldItemCloned = cloneDeep(oldItem);
                     oldItem = newItem;
-                    if ('external_ip' in oldItemCloned) oldItem.external_ip = oldItemCloned.external_ip;
-                    if ('device_network_type' in oldItemCloned) oldItem.device_network_type = oldItemCloned.device_network_type;
-                    if ('device_network_provider' in oldItemCloned) oldItem.device_network_provider = oldItemCloned.device_network_provider;
-                    if ('device_network_signalbar' in oldItemCloned)
-                        oldItem.device_network_signalbar = oldItemCloned.device_network_signalbar;
-                    if ('data' in oldItemCloned) oldItem.data = oldItemCloned.data;
-                    return;
+                    continue;
                 }
             }
 
             if (oldItem.is_connected !== newItem.is_connected) {
                 updated = true;
                 oldItem.is_connected = newItem.is_connected;
-
                 if (!newItem.is_connected) {
-                    delete oldItem.external_ip;
-                    delete oldItem.device_network_type;
-                    delete oldItem.device_network_provider;
-                    delete oldItem.device_network_signalbar;
-                    delete oldItem.data;
+                    oldItem.connectivity = null;
                 }
+            }
+
+            const oldItemConnectivityHash = newItem.connectivity ? objectHash(newItem.connectivity) : objectHash({});
+            const newItemConnectivityHash = oldItem.connectivity ? objectHash(oldItem.connectivity) : objectHash({});
+            if (oldItemConnectivityHash !== newItemConnectivityHash) {
+                updated = true;
+                oldItem.connectivity = newItem.connectivity;
             }
 
             const oldItemLockHash = oldItem.lock != null ? objectHash(oldItem.lock) : objectHash({});
@@ -74,16 +70,19 @@ const merge = (oldState, newItems = [], replaceItems = []) => {
                 oldItem.lock = newItem.lock;
             }
 
-            if (oldItem.schedule != newItem.schedule || objectHash.MD5(oldItem.schedule) != objectHash.MD5(newItem.schedule)) {
+            if (
+                oldItem.modem.schedule != newItem.modem.schedule ||
+                objectHash.MD5(oldItem.modem.schedule) != objectHash.MD5(newItem.modem.schedule)
+            ) {
                 if (
-                    newItem.schedule?.time_left_to_run <= config.options.autoRotateNotifyIn ||
-                    oldItem.schedule?.added_at != newItem.schedule?.added_at
+                    newItem.modem.schedule?.time_left_to_run <= config.options.autoRotateNotifyIn ||
+                    oldItem.modem.schedule?.added_at != newItem.modem.schedule?.added_at
                 ) {
-                    oldItem.schedule = newItem.schedule;
+                    oldItem.modem.schedule = newItem.modem.schedule;
                     updated = true;
                 }
             }
-        });
+        }
 
         return oldItem;
     });

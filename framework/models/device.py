@@ -1,6 +1,13 @@
 from db import connection
+from dataclasses import dataclass
+from dataclasses_json import dataclass_json
 
+@dataclass_json
+@dataclass
 class DeviceModel():
+    id: int
+    model: str
+    type: str    
     def __init__(self, id = None, model = None, type = None, created_at = None):
         self.id = id
         self.model = model

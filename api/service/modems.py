@@ -1,14 +1,14 @@
 from datetime import datetime, timedelta
 import json
-from api.service.serverevent import Event, EventType, ServerEvent
-from framework.manager.modem import ModemManager
+from framework.service.modem.modemservice import ModemConnectivity, ModemConnectivityData, ModemConnectivityTraffic, ModemState
+from service.serverevent import Event, EventType, ServerEvent
+from framework.manager.modem import ModemManager, ModemThreadData
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 from framework.models.schedule import ModemsAutoRotateAgendaItem
-from framework.models.server import ServerModel
+from framework.models.server import ServerModel, ServerModemModel
 from framework.infra.modem import Modem as IModem
 from dataclasses import dataclass, field
 from dataclasses_json import dataclass_json, config
-from marshmallow import fields
 import json
 import copy
 from framework.proxy.factory import ProxyService
@@ -16,50 +16,119 @@ from framework.service.route.routeservice import RouteService
 
 from framework.util.format import HumanBytes
 
+# @dataclass_json
+# @dataclass
+# class ModemConnectivityData():
+#     bytes: int
+#     formatted: str
+
+#     def __init__(self, bytes: int, formatted: str):
+#         self.bytes = bytes
+#         self.formatted = formatted
+
+# @dataclass_json
+# @dataclass
+# class ModemConnectivityTraffic():
+#     receive: ModemConnectivityData
+#     transmit: ModemConnectivityData
+
+#     def __init__(self, receive: ModemConnectivityData, transmit: ModemConnectivityData):
+#         self.receive = receive
+#         self.transmit = transmit
+
+# @dataclass_json
+# @dataclass
+# class ModemConnectivity():
+#     interface: str
+#     internal_ip: str
+#     network_type: str
+#     network_provider: str 
+#     network_signalbar: str
+#     external_ip: str
+#     data_traffic: ModemConnectivityTraffic
+
+#     def __init__(
+#             self,
+#             interface: str,
+#             internal_ip: str,
+#             network_type: str,
+#             network_provider: str, 
+#             network_signalbar: str,
+#             external_ip: str,
+#             data_traffic: ModemConnectivityTraffic
+#     ):
+#         self.interface = interface
+#         self.internal_ip = internal_ip
+#         self.network_type = network_type
+#         self.network_provider = network_provider
+#         self.network_signalbar = network_signalbar
+#         self.external_ip = external_ip
+#         self.data_traffic = data_traffic
+
+# @dataclass_json
+# @dataclass
+# class ModemState():
+#     modem: ServerModemModel
+#     lock: ModemThreadData
+#     is_connected: bool    
+#     connectivity: ModemConnectivity
+
+#     def __init__(
+#             self, 
+#             modem: ServerModemModel, 
+#             infra_modem: IModem = None, 
+#             lock: ModemThreadData = None,
+#             is_connected: bool = None,
+#             connectivity: ModemConnectivity = None
+#     ):
+#         self.modem = modem
+#         self.infra_modem = infra_modem
+#         self.lock = lock
+#         self.is_connected = is_connected
+#         self.connectivity = connectivity
+
+
 class ModemsEventObserver():
     def __init__(self, server_event):
-        self._observers = []
+        self._observers = None
         self.server_event = server_event
 
-    def subscribe(self, observers):
-        self._observers = observers   
-        self.subscribe_connected()     
-    
-    def subscribe_connected(self):
-        self._observers_connected = []
-        for observer in self._observers:
-            copied = copy.copy(observer)
-            copied['is_connected'] = None
-            copied['lock'] = None
-            self._observers_connected.append(copied)
+    def observe(self, observers):
+        json_observers = ModemState.schema().dump(observers, many=True)
+        
+        if self._observers == None:
+            self._observers = json_observers
+            return
+        
+        self._observe_connected(json_observers)  
+        self._observers = json_observers
 
     def _index_by_id(self, array, id):
         for index, item in enumerate(array):
-            if item['id'] == id:
-                return index
+            if item['modem']['id'] == id: return index
+
         return -1
-    
-    def update(self, observers):
-        self._observe_connected(observers)
 
-    def _observe_connected(self, observers):        
+    def _observe_connected(self, observers):  
         for observer in observers:            
-            observer_index = self._index_by_id(self._observers_connected, observer['id'])
+            old_observer_index = self._index_by_id(self._observers, observer['modem']['id'])
 
-            if self._observers_connected[observer_index]['is_connected'] == None:
-                self._observers_connected[observer_index]['is_connected'] = observer['is_connected']
+            if old_observer_index < 0: continue       
+
+            if self._observers[old_observer_index]['is_connected'] == None:
+                self._observers[old_observer_index]['is_connected'] = observer['is_connected']
                 continue
-
+            
             if observer['lock'] == None:
-                if self._observers_connected[observer_index]['is_connected'] == True and observer['is_connected'] == False:
-                    self._observers_connected[observer_index]['is_connected'] = observer['is_connected']
+                if self._observers[old_observer_index]['is_connected'] == True and observer['is_connected'] == False:
+                    self._observers[old_observer_index]['is_connected'] = observer['is_connected']                    
                     self.notify(EventType.UNEXPECTED_MODEM_DISCONNECT, observer)
                     continue
 
-                if self._observers_connected[observer_index]['is_connected'] == False and observer['is_connected'] == True:
-                    self._observers_connected[observer_index]['is_connected'] = observer['is_connected']
-                    self.notify(EventType.MODEM_CONNECT, observer)
-                    continue
+                if self._observers[old_observer_index]['is_connected'] == False and observer['is_connected'] == True:
+                    self._observers[old_observer_index]['is_connected'] = observer['is_connected']
+                    self.notify(EventType.MODEM_CONNECT, observer)                    
+                    continue  
 
     def notify(self, type: EventType, data):
         self.server_event.emit(Event(type = type, data = data))
@@ -68,7 +137,7 @@ class ModemsEventObserver():
             modem_log_model = ModemLogModel(
                 modem_id=data['modem']['id'],
                 owner=ModemLogOwner.SYSTEM, 
-                type=ModemLogType.WARNING, 
+                type=ModemLogType.ERROR, 
                 message='app.log.modem.unexpectedDisconnect',
                 logged_at = datetime.now()
             )
@@ -87,20 +156,109 @@ class ModemsEventObserver():
             self.server_event.emit(Event(type = EventType.MODEM_LOG, data = modem_log_model))
 
 class ModemsService():
-    def __init__(self, server: ServerModel, modems_manager: ModemManager, server_event: ServerEvent, route_service: RouteService):        
+    def __init__(self, server: ServerModel, modems_manager: ModemManager, route_service: RouteService):                
         self.server = server        
         self.modems_manager = modems_manager
-        self.server_event = server_event
-        self.route_service = route_service
-        self.modems_event_observer = ModemsEventObserver(self.server_event)        
+        self.route_service = route_service        
+
+        self.server_modems = []
+        self.modems_states = []
+        self.modems_states_subscribers = []
         self.reload_modems()
+
+    def subscribe_modems_states(self, callback):
+        self.modems_states_subscribers.append(callback)
+
+    def notify_modems_states_subscribers(self):
+        for callback in self.modems_states_subscribers: callback(self.modems_states)
 
     def reload_modems(self):
         self.server_modems = self.server.modems()
-        self.modems_event_observer.subscribe([item.json() for item in self.server_modems])
-        self.modems_manager.proxy_service.update_modems(self.server_modems)
-        self.route_service.update_modems(self.server_modems)
 
+        copied_modems_states = copy.copy(self.modems_states)
+
+        modems_states = []
+        for server_modem in self.server_modems:            
+            modem_state = ModemState(modem = server_modem)
+            copied_modem_state_index = self.modem_state_index_by_server_modem_id(copied_modems_states, server_modem.id)
+            if copied_modem_state_index > -1:
+                modem_state.connectivity = copied_modems_states[copied_modem_state_index].connectivity
+                modem_state.lock = copied_modems_states[copied_modem_state_index].lock
+
+            modems_states.append(modem_state)
+
+        self.modems_states = modems_states
+        self.notify_modems_states_subscribers()
+
+        # self.modems_event_observer.subscribe([item.json() for item in self.server_modems])
+        # self.modems_manager.proxy_service.update_modems(self.server_modems)
+        # self.route_service.update_modems(self.server_modems) 
+
+    def modem_state_index_by_server_modem_id(self, modems_states, server_modem_id):
+        if not modems_states: return -1        
+        for index, modem_state in enumerate(modems_states): 
+            if modem_state.modem.id == server_modem_id: return index
+        return -1       
+
+    def modems_status(self):
+        if not self.server_modems: return []
+
+        for server_modem in self.server_modems:
+            modem_state_index = self.modem_state_index_by_server_modem_id(self.modems_states, server_modem.id)
+            modem_state = self.modems_states[modem_state_index] if modem_state_index > -1 else None
+
+            if modem_state == None: continue
+
+            if modem_state.infra_modem == None: modem_state.infra_modem = IModem(modem_state.modem)
+                
+            modem_state.is_connected = modem_state.infra_modem.is_connected()
+            modem_state.lock = self.get_lock(modem_state.infra_modem)
+
+            if modem_state.is_connected != True:
+                modem_state.connectivity = None
+
+        self.notify_modems_states_subscribers()
+
+        return self.modems_states
+    
+    def get_lock(self, infra_modem: IModem):
+        return self.modems_manager.running(infra_modem)
+
+    def modems_details(self):
+        if not self.server_modems: return []
+
+        for server_modem in self.server_modems:
+            modem_state_index = self.modem_state_index_by_server_modem_id(self.modems_states, server_modem.id)
+            modem_state = self.modems_states[modem_state_index] if modem_state_index > -1 else None
+
+            if modem_state == None or modem_state.infra_modem == None or modem_state.is_connected != True: continue
+
+            imodem_iface = modem_state.infra_modem.iface()
+            if imodem_iface == None or imodem_iface.interface == None: continue
+
+            device_middleware = modem_state.infra_modem.get_device_middleware()
+            if device_middleware == None: continue
+
+            device_details = device_middleware.details()
+            network_type = device_details['network_type'] if device_details else None
+            network_provider = device_details['network_provider'] if device_details else None
+            network_signalbar = device_details['signalbar'] if device_details else None  
+
+            modem_ifaddresses = imodem_iface.ifaddresses
+
+            modem_state.connectivity = ModemConnectivity(
+                interface = imodem_iface.interface,
+                internal_ip = modem_ifaddresses[0]['addr'] if modem_ifaddresses else None,
+                network_type = network_type,
+                network_provider = network_provider,
+                network_signalbar = network_signalbar,
+                external_ip = modem_state.infra_modem.external_ip_through_device(silence_mode=True, retries=1),
+                data_traffic = ModemConnectivityTraffic(
+                    receive = ModemConnectivityData(bytes = None, formatted = HumanBytes.format(imodem_iface.rx_bytes, True, 1)),
+                    transmit = ModemConnectivityData(bytes = None, formatted = HumanBytes.format(imodem_iface.tx_bytes, True, 1))
+                )
+            )  
+    
     def server_modem_model_index_by_id(self, server_modem_model_id):
         if not self.server_modems:
             return -1
@@ -110,85 +268,6 @@ class ModemsService():
                 return index
 
         return -1
-
-    def get_lock(self, infra_modem: IModem):
-        return self.modems_manager.running(infra_modem)
-
-    def modems_status(self):
-        items = [item.json() for item in self.server_modems]
-        for x, item in enumerate(items):
-            imodem = IModem(self.server_modems[x])
-            item['is_connected'] = imodem.is_connected()
-
-            lock = self.get_lock(imodem)
-            if lock == None:
-                item['lock'] = None
-            else:
-                item['lock'] = {
-                    'task': {
-                        'name': lock.action.name,
-                        'stopping': lock.event_stop.is_set()
-                    }
-                }
-
-        self.modems_event_observer.update(items)
-        return items
-
-    def modems_details(self):
-        items = [item.json() for item in self.server_modems]
-        result = []
-
-        for x, item in enumerate(items):
-            imodem = IModem(self.server_modems[x])
-            item['is_connected'] = imodem.is_connected()
-
-            if item['is_connected'] == False:
-                continue
-
-            imodem_iface = imodem.iface()
-
-            if imodem_iface == None or imodem_iface.interface == None:
-                continue
-
-            device_middleware = imodem.get_device_middleware()
-
-            device_details = device_middleware.details()
-            network_type = device_details['network_type'] if device_details else None
-            network_provider = device_details['network_provider'] if device_details else None
-            signalbar = device_details['signalbar'] if device_details else None                                
-
-            item['interface'] = imodem_iface.interface
-
-            modem_ifaddresses = imodem_iface.ifaddresses
-            if modem_ifaddresses:
-                modem_ifaddress = modem_ifaddresses[0]                           
-                item['internal_ip'] = modem_ifaddress['addr']
-
-            item['device_network_type'] = network_type
-            item['device_network_provider'] = network_provider
-            item['device_network_signalbar'] = signalbar
-
-            item['external_ip_through_device'] = imodem.external_ip_through_device(silence_mode=True, retries=1)
-
-            item['data'] = {
-                'receive': {
-                    # 'bytes': imodem_iface.rx_bytes
-                    'formatted': HumanBytes.format(imodem_iface.rx_bytes, True, 1)
-                },
-                'transmit': {
-                    # 'bytes': imodem_iface.tx_bytes    
-                    'formatted': HumanBytes.format(imodem_iface.tx_bytes, True, 1)  
-                }
-            }
-
-            item['is_connected'] = imodem.is_connected()
-
-            if item['is_connected'] == False:
-                continue
-
-            result.append(item)
-
-        return result
 
 class ModemsAutoRotateSchedule():
     def __init__(self, modems_service: ModemsService, modems_manager):

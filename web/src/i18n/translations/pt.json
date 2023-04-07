@@ -59,7 +59,7 @@
     "app.log.modem.unexpectedDisconnect": "O modem foi desconectado de forma inesperada",
     "app.log.modem.connect": "O modem foi conectado",
 
-    "app.notification.modem.unexpectedDisconnect": "O modem {modemId} foi desconectado de forma inesperada.",
-    "app.notification.modem.connect": "O modem {modemId} foi conectado."
+    "app.notification.modem.unexpectedDisconnect": "O modem {modemId} foi desconectado de forma inesperada",
+    "app.notification.modem.connect": "O modem {modemId} foi conectado"
 
 }

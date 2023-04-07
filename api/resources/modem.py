@@ -124,11 +124,10 @@ class Modem(Resource):
 
         data_modem = data['modem']
         if data_modem != None:
-            modem = server_modem.modem()            
             if 'addr_id' in data_modem and data_modem['addr_id'] != None:
-                modem.addr_id = data_modem['addr_id']
+                server_modem.modem.addr_id = data_modem['addr_id']
                 
-            modem.save_to_db()
+            server_modem.modem.save_to_db()
 
         data_proxy = data['proxy']
         if data_proxy != None:
