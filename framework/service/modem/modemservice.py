@@ -157,11 +157,9 @@ class ModemsEventObserver():
 
 
 class ModemsObserver():
-    def __init__(self, server: ServerModel, modems_manager: ModemManager, route_service: RouteService):       
+    def __init__(self, server: ServerModel, modems_manager: ModemManager):       
         self.server = server        
-        self.modems_manager = modems_manager
-        self.route_service = route_service        
-
+        self.modems_manager = modems_manager       
         self.server_modems = []
         self.modems_states = []
         self.modems_states_subscribers = []
@@ -253,19 +251,21 @@ class ModemsObserver():
             modem_ifaddresses = imodem_iface.ifaddresses
 
             external_ip = modem_state.infra_modem.external_ip_through_device(silence_mode=True, retries=1)
-            if modem_state.is_connected == True:
-                modem_state.connectivity = ModemConnectivity(
-                    interface = imodem_iface.interface,
-                    internal_ip = modem_ifaddresses[0]['addr'] if modem_ifaddresses else None,
-                    network_type = network_type,
-                    network_provider = network_provider,
-                    network_signalbar = network_signalbar,
-                    external_ip = external_ip,
-                    data_traffic = ModemConnectivityTraffic(
-                        receive = ModemConnectivityData(bytes = None, formatted = HumanBytes.format(imodem_iface.rx_bytes, True, 1)),
-                        transmit = ModemConnectivityData(bytes = None, formatted = HumanBytes.format(imodem_iface.tx_bytes, True, 1))
-                    )
-                )  
+
+            if modem_state.is_connected != True: continue
+
+            modem_state.connectivity = ModemConnectivity(
+                interface = imodem_iface.interface,
+                internal_ip = modem_ifaddresses[0]['addr'] if modem_ifaddresses else None,
+                network_type = network_type,
+                network_provider = network_provider,
+                network_signalbar = network_signalbar,
+                external_ip = external_ip,
+                data_traffic = ModemConnectivityTraffic(
+                    receive = ModemConnectivityData(bytes = None, formatted = HumanBytes.format(imodem_iface.rx_bytes, True, 1)),
+                    transmit = ModemConnectivityData(bytes = None, formatted = HumanBytes.format(imodem_iface.tx_bytes, True, 1))
+                )
+            )  
 
         self.notify_modems_states_subscribers()
     
@@ -319,11 +319,10 @@ class ModemsObserveConnectivityThread(Thread):
 
 
 class ModemsService():
-    def __init__(self, server: ServerModel, modems_manager: ModemManager, route_service: RouteService):                
+    def __init__(self, server: ServerModel, modems_manager: ModemManager):                
         self.server = server        
         self.modems_manager = modems_manager
-        self.route_service = route_service 
-        self.modems_observer = ModemsObserver(server = server, modems_manager = modems_manager, route_service = route_service)
+        self.modems_observer = ModemsObserver(server = server, modems_manager = modems_manager)
 
         self._modems_observe_status_lock = Lock()
         self._modems_observe_status_stop_event = Event()
