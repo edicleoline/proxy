@@ -29,12 +29,11 @@ class ModemsAutoRotateAgendaItem():
     )
     time_left_to_run: int
 
-    def __init__(self, server_modem_model, infra_modem, added_at, run_at, now = None):
-        self.server_modem_model = server_modem_model
-        self.infra_modem = infra_modem
+    def __init__(self, modem_state, added_at, run_at, now = None): 
+        self.modem_state = modem_state       
         self.added_at = added_at
         self.run_at = run_at
-        self.now = None
+        self.now = now
         self.time_left_to_run = None
 
     def ready_to_run(self):

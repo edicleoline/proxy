@@ -1,2 +1,2 @@
-import sys, os
+import sys
 sys.path.append("../")

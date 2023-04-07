@@ -1,9 +1,8 @@
 from flask_restful import Resource, reqparse, request
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
 import requests
-from api.service.modems import ModemsAutoRotateAgendaItem
 from api.service.servercontrol import ServerControlAction, ServerControlEvent
-from api.service.serverevent import Event, EventType
+from framework.service.server.servereventservice import Event, EventType
 from framework.helper.database.pagination import PaginateDirection, PaginateOrder
 from framework.models.modem import ModemModel
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType

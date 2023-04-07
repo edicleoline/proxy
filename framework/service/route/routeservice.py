@@ -5,9 +5,9 @@ from threading import Thread, Event, Lock
 from time import sleep
 
 class RouteServiceObserverThread(Thread):
-    def __init__(self, modems: List[ServerModemModel] = [], stop_event: Event = None):
+    def __init__(self, modems_states = [], stop_event: Event = None):
         self.delay = 3
-        self.modems = modems
+        self.modems_states = modems_states
         self.stop_event = stop_event
         super(RouteServiceObserverThread, self).__init__()
 
@@ -25,30 +25,28 @@ class RouteServiceObserverThread(Thread):
         self.run_forever()
 
     def _resolve_routes(self):
-        if not self.modems:
-            return
+        if not self.modems_states: return
         
-        for modem in self.modems:
-            imodem = IModem(modem)
-            if imodem.is_connected() == True:
-                imodem.resolve_route()
+        for modems_state in self.modems_states:
+            if modems_state.infra_modem.is_connected() == True:
+                modems_state.infra_modem.resolve_route()
 
 
 class RouteServiceObserver():
-    def __init__(self, modems: List[ServerModemModel]):
-        self.modems = modems
+    def __init__(self, modems_states):
+        self.modems_states = modems_states
         self.lock = Lock()
         self.stop_event = Event()
         self.thread = RouteServiceObserverThread()
 
-    def update_modems(self, modems: List[ServerModemModel]):
-        self.modems = modems
-        self.thread.modems = self.modems
+    def update_modems(self, modems_states):
+        self.modems_states = modems_states
+        self.thread.modems_states = self.modems_states
 
     def start(self):
         with self.lock:
             if not self.thread.is_alive():
-                self.thread = RouteServiceObserverThread(modems = self.modems, stop_event = self.stop_event)
+                self.thread = RouteServiceObserverThread(modems_states = self.modems_states, stop_event = self.stop_event)
                 self.thread.start()
 
     def stop(self):
@@ -56,18 +54,15 @@ class RouteServiceObserver():
 
 
 class RouteService():
-    def __init__(self, server: ServerModel, modems: List[ServerModemModel] = []):
+    def __init__(self, server: ServerModel, modems_states = []):
         self.server = server
         self.observer = None
-        self.modems = modems
-        self.observer = RouteServiceObserver(self.modems)
+        self.modems_states = modems_states
+        self.observer = RouteServiceObserver(self.modems_states)
 
-    def update_modems(self, modems: List[ServerModemModel]):
-        self.modems = modems
-        self.observer.update_modems(self.modems)
-
-    def resolve(self, modem: ServerModemModel):
-        pass
+    def update_modems(self, modems_states):
+        self.modems_states = modems_states
+        self.observer.update_modems(self.modems_states)
 
     def observe(self):
         self.observer.start()

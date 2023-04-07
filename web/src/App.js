@@ -19,6 +19,7 @@ import addNotification from 'store/actions/addNotification';
 import { FormattedMessage } from 'react-intl';
 
 socket.on('modems', (modems) => {
+    console.log(modems);
     const pendingReloads = pendingReloadModemsInQueue();
     const replaceItems = pendingReloads.map((replaceItem) => {
         return { modem: { id: replaceItem.data.modem.id } };
@@ -29,7 +30,6 @@ socket.on('modems', (modems) => {
 
     store.dispatch(setModemsItems(modems, replaceItems));
     // store.dispatch(setModemsItems(modems, []));
-    // console.log(modems);
 });
 
 // socket.on('modems_details', (modems) => {
