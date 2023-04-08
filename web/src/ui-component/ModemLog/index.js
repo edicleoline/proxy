@@ -7,7 +7,9 @@ import PropTypes from 'prop-types';
 import { modemLog, bulkStoreModemLog } from 'storage/modem/log';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { logs } from 'services/api/modem/log';
+import Empty from './Empty';
 import MessageLine from './MessageLine';
+import { height } from '@mui/system';
 
 const ModemLog = (props) => {
     const { modem, children } = props;
@@ -47,14 +49,17 @@ const ModemLog = (props) => {
         setContainers(containers);
     };
 
+    const [emptyLog, setEmptyLog] = useState(false);
+
     const _logs = useLiveQuery(() => modemLog.where({ modem_id: modem.id }).toArray());
     useEffect(() => {
         _makeContainers(_logs);
 
-        // if (_logs != undefined && _logs.length < 1) {
-        //     console.log('empty logs!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-        //     _loadFromApi();
-        // }
+        if (_logs != undefined && _logs.length < 1) {
+            //     console.log('empty logs!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+            //     _loadFromApi();
+            setEmptyLog(true);
+        }
     }, [_logs]);
 
     const _loadFromApi = () => {
@@ -90,14 +95,18 @@ const ModemLog = (props) => {
     return (
         <Paper elevation={0} sx={{ borderRadius: 0 }} style={{ position: 'absolute', height: '100%', width: '100%' }}>
             <Card style={{ backgroundColor: '#f0f0f0', borderRadius: '0', position: 'relative', height: '100%', overflowY: 'auto' }}>
-                <CardContent>
-                    <Grid container justifyContent="end" alignItems="end" direction="column" style={{ width: '100%' }}>
-                        {containers != null
-                            ? containers.map((container, index) => <MessageLine key={index} container={container} />)
-                            : null}
-                    </Grid>
+                <CardContent style={{ minHeight: '100%', display: 'flex' }}>
+                    {emptyLog ? (
+                        <Empty modem={modem} />
+                    ) : containers != null ? (
+                        <Grid container justifyContent="end" alignItems="end" direction="column" style={{ width: '100%' }}>
+                            {containers.map((container, index) => (
+                                <MessageLine key={index} container={container} />
+                            ))}
+                            <div style={{ float: 'left', clear: 'both' }} ref={contentEndAnchor}></div>
+                        </Grid>
+                    ) : null}
                     {children}
-                    <div style={{ float: 'left', clear: 'both' }} ref={contentEndAnchor}></div>
                 </CardContent>
             </Card>
         </Paper>
