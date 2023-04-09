@@ -58,6 +58,7 @@
     "app.log.modem.rotate.automated": "Automatizado de acordo com suas configurações",
     "app.log.modem.unexpectedDisconnect": "O modem foi desconectado de forma inesperada",
     "app.log.modem.connect": "O modem foi conectado",
+    "app.log.modem.empty": "Nenhum log registrado até agora.\nQuando algum evento for disparado, ele aparecerá aqui.",
 
     "app.notification.modem.unexpectedDisconnect": "O modem {modemId} foi desconectado de forma inesperada",
     "app.notification.modem.connect": "O modem {modemId} foi conectado"

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { FormattedMessage } from 'react-intl';
-import { Grid, Card, CardContent } from '@mui/material';
+import { Grid, Card, CardContent, Typography } from '@mui/material';
 import Lottie from 'react-lottie';
 import * as animationAstronaut from 'assets/animation/astronaut';
 
@@ -21,12 +21,12 @@ const Empty = ({ modem }) => {
     };
 
     return (
-        <Grid container direction="column" justifyContent="end" alignItems="center">
-            <Grid item style={{ opacity: '0.2' }}>
+        <Grid container direction="column" justifyContent="center" alignItems="center">
+            {/* <Grid item style={{ opacity: '0.2' }}>
                 <Lottie options={lottieDefaultOptions} height={80} width={120} isStopped={false} isPaused={false} />
-            </Grid>
-            <Grid item sx={{ marginTop: '32px' }}>
-                Até agora, nada por aqui
+            </Grid> */}
+            <Grid item sx={{ opacity: '0.5', whiteSpace: 'pre-line', textAlign: 'center', maxWidth: '90% !important' }}>
+                <FormattedMessage id="app.log.modem.empty" values={{ modemId: modem.id }} />
             </Grid>
         </Grid>
     );

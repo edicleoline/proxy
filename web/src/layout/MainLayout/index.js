@@ -25,6 +25,8 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import MuiAlert from '@mui/material/Alert';
 
+import { Docker } from 'ui-component/Dock/Docker';
+
 // styles
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
     ...theme.typography.mainContent,
@@ -148,6 +150,7 @@ const MainLayout = () => {
                     ) : null}
                 </Snackbar>
             ))}
+            <Docker />
         </Box>
     );
 };

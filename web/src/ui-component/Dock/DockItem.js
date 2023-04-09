@@ -6,9 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { IconChevronUp, IconChevronDown } from '@tabler/icons';
 
-const DockItem = (props) => {
-    const { title, children, onClose, onChangeState, state } = props;
-
+const DockItem = ({ id, title, children, onClose, onChangeState, state, toolbarChildren }) => {
     const minimizedWidth = 265;
 
     const getWidth = (state) => {
@@ -21,18 +19,11 @@ const DockItem = (props) => {
 
     const [_width, _setWidth] = useState(getWidth(state));
 
-    const [_state, _setState] = useState(state);
-
-    const _onChangeState = (state) => {
-        _setWidth(getWidth(state));
-        onChangeState(state);
-    };
-
     const handleToggleMinimize = () => {
-        if (_state == DockItemState.maximized) {
-            _setState(DockItemState.minimized);
+        if (state == DockItemState.maximized) {
+            onChangeState(id, DockItemState.minimized);
         } else {
-            _setState(DockItemState.maximized);
+            onChangeState(id, DockItemState.maximized);
         }
     };
 
@@ -43,8 +34,8 @@ const DockItem = (props) => {
     };
 
     useEffect(() => {
-        _onChangeState(_state);
-    }, [_state]);
+        _setWidth(getWidth(state));
+    }, [state]);
 
     const styles = {
         item: {
@@ -120,6 +111,7 @@ const DockItem = (props) => {
                                                                         alignItems="start"
                                                                         direction="row"
                                                                     >
+                                                                        {toolbarChildren}
                                                                         <Grid item>
                                                                             <IconButton
                                                                                 aria-label="maximize"
@@ -128,7 +120,7 @@ const DockItem = (props) => {
                                                                                     handleToggleMinimize();
                                                                                 }}
                                                                             >
-                                                                                {_state == DockItemState.maximized ? (
+                                                                                {state == DockItemState.maximized ? (
                                                                                     <IconChevronDown size={18} />
                                                                                 ) : (
                                                                                     <IconChevronUp size={18} />
@@ -149,7 +141,7 @@ const DockItem = (props) => {
                                                                     </Grid>
                                                                 </Grid>
                                                             </Grid>
-                                                            {_state == DockItemState.maximized ? (
+                                                            {state == DockItemState.maximized ? (
                                                                 <div
                                                                     style={{
                                                                         maxHeight: '300px',

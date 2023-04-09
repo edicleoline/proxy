@@ -15,9 +15,10 @@ const StoppingContainer = styled.div`
 
 const ModemStatus = ({ lock, connected, onStoppingTaskClick }) => {
     if (!lock) {
-        const color = connected ? 'success.light' : 'orange.light';
+        const bgcolor = connected ? 'success.light' : 'orange.light';
+        const color = connected ? '#428554' : '#916a45';
         const title = connected ? 'Conectado' : 'Desconectado';
-        return <ModemStatusBox bgcolor={color} title={title} dark style={{ width: '100%' }} />;
+        return <ModemStatusBox bgcolor={bgcolor} color={color} title={title} style={{ width: '100%' }} />;
     }
 
     let lockLabel = lock.task.name;
@@ -30,7 +31,7 @@ const ModemStatus = ({ lock, connected, onStoppingTaskClick }) => {
     return (
         <>
             <div>
-                <ModemStatusBox bgcolor={'#e8e1ff'} title={lockLabel} dark />
+                <ModemStatusBox bgcolor="#e8e1ff" color="#635493" title={lockLabel} />
                 {lock.task.stopping == true ? (
                     <StoppingContainer>
                         <Tooltip title="Cancelando tarefa">

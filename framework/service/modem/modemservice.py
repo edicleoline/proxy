@@ -118,6 +118,9 @@ class ModemsEventObserver():
             if self._observers[old_observer_index]['is_connected'] == None:
                 self._observers[old_observer_index]['is_connected'] = observer['is_connected']
                 continue
+
+            if self._observers[old_observer_index]['modem']['modem']['addr_id'] != observer['modem']['modem']['addr_id'] == None:
+                continue
             
             if self._observers[old_observer_index]['lock'] == None and observer['lock'] == None:
                 if self._observers[old_observer_index]['is_connected'] == True and observer['is_connected'] == False:

@@ -48,7 +48,9 @@ import ProxyConnection from './ProxyConnection';
 import DataUsage from './DataUsage';
 import SignalBar from './SignalBar';
 
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { ADD_DOCK } from 'store/actions/types';
+import { DOCK_TYPE, addDock, Docker } from 'ui-component/Dock/Docker';
 
 const ModemIdWrapper = styled.div`
     position: relative;
@@ -86,36 +88,11 @@ const Modems = () => {
     }, []);
 
     const [modems, setModems] = useState([]);
-
     const _modems = useSelector((state) => state.modems);
-    const _modemsDetails = useSelector((state) => state.modemsDetails);
 
     useEffect(() => {
-        // console.log('UPDATED MODEMS ITEMS!', _modems);
         setModems(_modems.items);
     }, [_modems]);
-
-    useEffect(() => {
-        // console.log('UPDATED MODEMS___DETAILS ITEMS!', _modems);
-        _modems.items.map((modem) => {
-            _modemsDetails.items.forEach((modemDetail) => {
-                if (modem.modem.id === modemDetail.modem.id) {
-                    modem.device_network_type = modemDetail.device_network_type;
-                    modem.device_network_provider = modemDetail.device_network_provider;
-                    modem.device_network_signalbar = modemDetail.device_network_signalbar;
-                    modem.data = modemDetail.data;
-
-                    if (modem.external_ip !== modemDetail.external_ip_through_device) {
-                        testProxies(modem, modemDetail.external_ip_through_device);
-                    }
-
-                    modem.external_ip = modemDetail.external_ip_through_device;
-                }
-            });
-
-            return modem;
-        });
-    }, [_modemsDetails]);
 
     const testProxies = (modem, ip) => {
         testModemProxyIPv4HTTP(modem, ip);
@@ -241,37 +218,9 @@ const Modems = () => {
         setModemDiagnoseDialog({ ...modemDiagnoseDialog, open: false });
     };
 
-    // const dockLog = useMemo(() => <Dock items={dockLogItems} />, []);
-    const _dockLogItems = useRef([]);
-
     const addDockLog = (modem) => {
-        const dockItemIndex = _dockLogItems.current.findIndex((item) => item.id == modem.modem.id);
-        if (dockItemIndex > -1) {
-            _dockLogItems.current[dockItemIndex].state = DockItemState.maximized;
-            setDockLogItems(_dockLogItems.current);
-            return false;
-        }
-
-        _dockLogItems.current.push({
-            id: modem.modem.id,
-            title: `Log modem ${modem.modem.id}`,
-            content: <ModemLog modem={modem.modem} />,
-            state: DockItemState.maximized
-        });
-
-        setDockLogItems(_dockLogItems.current);
-        return true;
+        addDock(`modem_log_${modem.modem.id}`, DOCK_TYPE.MODEM_LOG, DockItemState.maximized, modem.modem);
     };
-
-    const handleCloseDock = (item) => {
-        const copy = [..._dockLogItems.current];
-        const index = copy.map((item) => item.id).indexOf(item.id);
-        copy.splice(index, 1);
-        _dockLogItems.current = copy;
-        setDockLogItems(copy);
-    };
-
-    const [dockLogItems, setDockLogItems] = useState(_dockLogItems.current);
 
     const [taskStoppingHelpDialog, setTaskStoppingHelpDialog] = useState({
         open: false,
@@ -631,8 +580,6 @@ const Modems = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-            <Dock items={dockLogItems} onClose={handleCloseDock} />
-            {/* {dockLog} */}
             <Popover
                 id={autoRotateInfoPopoverId}
                 open={autoRotateInfoOpen}

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { Box, Card } from '@mui/material';
 
-const ModemStatusBox = ({ bgcolor, title, dark }) => {
+const ModemStatusBox = ({ bgcolor, color, title }) => {
     return (
         <>
             <Card sx={{ mb: 0, width: '100%' }}>
@@ -12,7 +12,7 @@ const ModemStatusBox = ({ bgcolor, title, dark }) => {
                         alignItems: 'center',
                         p: 1,
                         bgcolor,
-                        color: dark ? 'grey.800' : '#ffffff',
+                        color: color,
                         position: 'relative'
                     }}
                 >

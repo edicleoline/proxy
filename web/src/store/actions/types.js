@@ -13,3 +13,8 @@ export const SET_COMMANDS_CONTROL = '@server_control/SET_COMMANDS_CONTROL';
 
 export const ADD_NOTIFICATION = '@notification/ADD_NOTIFICATION';
 export const REMOVE_NOTIFICATION = '@notification/REMOVE_NOTIFICATION';
+
+export const ADD_DOCK = '@docker/ADD_DOCK';
+export const UPDATE_DOCK_STATE = '@docker/UPDATE_DOCK_STATE';
+export const REMOVE_DOCK = '@docker/REMOVE_DOCK';
+export const FIND_DOCK = '@docker/FIND_DOCK';

@@ -28,6 +28,7 @@ class RouteServiceObserverThread(Thread):
         if not self.modems_states: return
         
         for modems_state in self.modems_states:
+            if modems_state.infra_modem == None: continue
             if modems_state.infra_modem.is_connected() == True:
                 modems_state.infra_modem.resolve_route()
 

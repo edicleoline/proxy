@@ -59,6 +59,8 @@ const ModemLog = (props) => {
             //     console.log('empty logs!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
             //     _loadFromApi();
             setEmptyLog(true);
+        } else {
+            setEmptyLog(false);
         }
     }, [_logs]);
 

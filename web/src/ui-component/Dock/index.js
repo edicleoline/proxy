@@ -6,7 +6,7 @@ import DockItem from './DockItem';
 
 const DockContainer = styled.div`
     visibility: hidden;
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
     width: 100%;
@@ -27,9 +27,7 @@ const DockWrapper = styled.div`
     float: right;
 `;
 
-export const Dock = (props) => {
-    const { open, onClose, items } = props;
-
+export const Dock = ({ open, onClose, items }) => {
     const [_window, _setWindow] = useState({ width: 0, height: 0 });
 
     const _resize = () => {
@@ -57,11 +55,11 @@ export const Dock = (props) => {
                                 ? items.map((item) => (
                                       <DockItem
                                           key={item.id}
+                                          id={item.id}
                                           title={item.title}
                                           state={item.state}
-                                          onChangeState={(state) => {
-                                              console.log('dock item changed state', state);
-                                          }}
+                                          onChangeState={item.onChangeState}
+                                          toolbarChildren={item.toolbarChildren}
                                           onClose={() => {
                                               onClose(item);
                                           }}
