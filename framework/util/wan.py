@@ -4,6 +4,8 @@ import time
 import socket
 from datetime import datetime, timedelta
 
+from framework.error.exception import TimeoutException
+
 CRED = '\033[91m'
 CGREEN = '\033[92m'
 CYELLOW = '\033[93m'
@@ -54,7 +56,7 @@ class Wan:
         while True:
             diff_timeout_now = int((timeout_at - datetime.now()).total_seconds())
             if diff_timeout_now >= timeout:
-                break
+                raise TimeoutException('Timeout exception')
 
             retry_ip = retry_ip + 1
             ip = self.get_current_ip(silence_mode=silence_mode)    
