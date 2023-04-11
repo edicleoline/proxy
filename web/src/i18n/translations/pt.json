@@ -3,6 +3,13 @@
     "app.labels.no": "Não",
     "app.labels.reboot": "Reiniciar",
 
+    "app.components.modem.Diagnose.modal.header.title": "Executar diagnóstico",
+    "app.components.modem.Diagnose.start": "Iniciar",
+    "app.components.modem.Diagnose.stop": "Cancelar",
+    "app.components.modem.Diagnose.connection.checking": "Verificando conexão com o modem...\nSó vai levar uns segundos.",
+    "app.components.modem.Diagnose.connection.check": "Parece que seu modem está desconectado.\nTem certeza de que ele está ligado?",
+    "app.components.modem.Diagnose.connection.interface.select": "Seu modem foi resetado para as configurações de fábrica ou é a primeira conexão?\nVocê pode tentar atribuir uma das interfaces listadas.",
+
     "app.components.modem.Reboot.modal.header.title": "Reiniciar modem",
     "app.components.modem.Reboot.modal.body.question": "Tem certeza de que deseja reiniciar o modem {modemId}?",
     "app.components.modem.Reboot.modal.body.alert": "Antes de continuar, considere pausar quaiquer serviços que estiverem usando-o como proxy.",

@@ -21,8 +21,7 @@ import { SET_MENU, REMOVE_NOTIFICATION } from 'store/actions/types';
 import { IconChevronRight } from '@tabler/icons';
 
 import Snackbar from '@mui/material/Snackbar';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
+import Button from '@mui/material/IconButton';
 import MuiAlert from '@mui/material/Alert';
 
 import { Docker } from 'ui-component/Dock/Docker';
@@ -76,6 +75,41 @@ const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
+const Notification = (props) => {
+    const { notification } = props;
+    const dispatch = useDispatch();
+
+    const handleCloseNotification = () => {
+        dispatch({ type: REMOVE_NOTIFICATION, notification: notification });
+    };
+
+    return (
+        <Snackbar
+            key={notification.id}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            open={notification.props.open}
+            autoHideDuration={notification.props.autoHideDuration}
+            onClose={() => {
+                handleCloseNotification();
+            }}
+            message={notification.message}
+            action={
+                <React.Fragment>
+                    <Button aria-label="close" size="small" color="inherit" onClick={handleCloseNotification} sx={{ fontSize: '0.875rem' }}>
+                        Fechar
+                    </Button>
+                </React.Fragment>
+            }
+        >
+            {notification.props.alert === true ? (
+                <Alert onClose={handleCloseNotification} severity={notification.props.severity} sx={{ width: '100%' }}>
+                    {notification?.message}
+                </Alert>
+            ) : null}
+        </Snackbar>
+    );
+};
+
 const MainLayout = () => {
     const theme = useTheme();
     const matchDownMd = useMediaQuery(theme.breakpoints.down('md'));
@@ -92,10 +126,6 @@ const MainLayout = () => {
         console.log(_notifications);
         setNotifications(_notifications.items);
     }, [_notifications]);
-    const handleCloseNotification = (notification) => {
-        console.log(notification);
-        dispatch({ type: REMOVE_NOTIFICATION, notification: notification });
-    };
 
     return (
         <Box sx={{ display: 'flex' }}>
@@ -125,30 +155,8 @@ const MainLayout = () => {
                 <Breadcrumbs separator={IconChevronRight} navigation={navigation} icon title rightAlign />
                 <Outlet />
             </Main>
-            {notifications.map((notification) => (
-                <Snackbar
-                    key={notification.id}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                    open={notification.props.open}
-                    autoHideDuration={notification.props.autoHideDuration}
-                    onClose={() => {
-                        handleCloseNotification(notification);
-                    }}
-                    message={notification.message}
-                    // action={
-                    //     <React.Fragment>
-                    //         <IconButton aria-label="close" color="inherit" sx={{ p: 0.5 }} onClick={handleCloseNotification}>
-                    //             <CloseIcon />
-                    //         </IconButton>
-                    //     </React.Fragment>
-                    // }
-                >
-                    {notification.props.alert === true ? (
-                        <Alert onClose={handleCloseNotification} severity={notification.props.severity} sx={{ width: '100%' }}>
-                            {notification.message}
-                        </Alert>
-                    ) : null}
-                </Snackbar>
+            {notifications.map((notification, index) => (
+                <Notification key={index} notification={notification} />
             ))}
             <Docker />
         </Box>

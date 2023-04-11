@@ -1,6 +1,8 @@
 import sys, time
 import requests
 from threading import Event
+from framework.models.modemdiagnose import ModemDiagnoseModel, ModemDiagnoseOwner, ModemDiagnoseType
+from framework.models.modemthreadtask import TaskWizard, TaskWizardStep, TaskWizardStepType
 from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
 
 from framework.models.server import ServerModemModel
@@ -19,6 +21,7 @@ from datetime import datetime
 from enum import Enum
 
 from framework.proxy.factory import ProxyService
+from framework.util.object import Object
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
@@ -136,6 +139,9 @@ class Modem:
     def log(self, log: ModemLogModel):
         if self.callback: self.callback(log)
 
+    def log_diagnose(self, log: ModemDiagnoseModel):
+        if self.callback: self.callback(log)
+
     def resolve_proxy(self):
         if self.proxy_service:
             self.proxy_service.resolve(self.server_modem_model)
@@ -235,6 +241,70 @@ class Modem:
 
         self.wait_until_modem_connection()
         return True
+    
+    def wizard_wait_response(self, step: TaskWizardStep):
+        while True:
+            if self.event_stop and self.event_stop.is_set():
+                return None
+            
+            if step.response:
+                return step.response
+
+            time.sleep(1)
+    
+    def diagnose(self, get_threads):
+        modem_diagnose_model = ModemDiagnoseModel(
+            modem_id=self.modem().id,
+            owner=ModemDiagnoseOwner.SYSTEM, 
+            type=ModemDiagnoseType.INFO, 
+            message='app.modem.diagnose.starting',
+            logged_at = datetime.now()
+        )
+        self.log_diagnose(modem_diagnose_model)
+
+        time.sleep(0.2)
+
+        threads = get_threads()
+        self_thread = None
+        for thread in threads:
+            if thread.infra_modem.server_modem_model.id == self.server_modem_model.id:
+                self_thread = thread
+
+        self_thread.wizard = TaskWizard()
+
+        self_thread.wizard.add_step(TaskWizardStep(type = TaskWizardStepType.CHECKING_CONNECTION))
+        
+        is_connected = self.is_connected()
+
+        time.sleep(4)
+
+        response = None
+        if not is_connected:
+            step_check_connection = TaskWizardStep(type = TaskWizardStepType.CHECK_CONNECTION, require_response = True)
+            self_thread.wizard.add_step(step_check_connection)
+            response = self.wizard_wait_response(step = step_check_connection)
+
+        if not 'confirm_modem_on' in response:
+            print('invalid response')
+            return
+        
+        if response['confirm_modem_on'] == True:
+            step_list_interfaces = TaskWizardStep(type = TaskWizardStepType.SELECT_INTERFACE, require_response = True)
+            self_thread.wizard.add_step(step_list_interfaces)
+            response = self.wizard_wait_response(step = step_list_interfaces)
+
+        else:
+            # step_list_interfaces = TaskWizardStep(type = TaskWizardStepType.LIST_INTERFACES, require_response = True)
+            # self_thread.wizard.add_step(step_list_interfaces)
+            # response = self.wizard_wait_response(step = step_list_interfaces)
+            print('nothing to do fuck')
+
+        print('lets continue !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+
+        time.sleep(5)
+
+
+
 
         
     def rotate(

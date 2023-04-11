@@ -17,6 +17,8 @@ import { storeModemLog } from 'storage/modem/log';
 import { SERVER_EVENT_TYPE } from 'store/constant';
 import addNotification from 'store/actions/addNotification';
 import { FormattedMessage } from 'react-intl';
+import IntlMessageFormat from 'intl-messageformat';
+import { locale, messages } from 'i18n';
 
 socket.on('modems', (modems) => {
     //console.log(modems);
@@ -49,13 +51,14 @@ socket.on('event', (event) => {
     }
 
     if (event.type === SERVER_EVENT_TYPE.MODEM.UNEXPECTED_DISCONNECT) {
+        const translatedMessage = new IntlMessageFormat(messages[locale()]['app.notification.modem.unexpectedDisconnect'], locale());
         store.dispatch(
             addNotification({
                 id: event.id,
-                message: <FormattedMessage id={'app.notification.modem.unexpectedDisconnect'} values={{ modemId: event.data.modem.id }} />,
+                message: translatedMessage.format({ modemId: event.data.modem.id }),
                 props: {
                     open: true,
-                    autoHideDuration: 15000,
+                    autoHideDuration: 10000,
                     alert: false
                 },
                 ref: event
@@ -65,13 +68,14 @@ socket.on('event', (event) => {
     }
 
     if (event.type === SERVER_EVENT_TYPE.MODEM.CONNECT) {
+        const translatedMessage = new IntlMessageFormat(messages[locale()]['app.notification.modem.connect'], locale());
         store.dispatch(
             addNotification({
                 id: event.id,
-                message: <FormattedMessage id={'app.notification.modem.connect'} values={{ modemId: event.data.modem.id }} />,
+                message: translatedMessage.format({ modemId: event.data.modem.id }),
                 props: {
                     open: true,
-                    autoHideDuration: 15000,
+                    autoHideDuration: 10000,
                     alert: false
                 },
                 ref: event

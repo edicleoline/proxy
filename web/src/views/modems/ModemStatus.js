@@ -26,6 +26,8 @@ const ModemStatus = ({ lock, connected, onStoppingTaskClick }) => {
         lockLabel = 'Rotacionando';
     } else if (lock.task.name === 'REBOOT') {
         lockLabel = 'Reiniciando';
+    } else if (lock.task.name === 'DIAGNOSE') {
+        lockLabel = 'Diagnosticando';
     }
 
     return (

@@ -2,6 +2,8 @@ from flask_restful import Resource, reqparse, request
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
 import requests
 from api.service.servercontrol import ServerControlAction, ServerControlEvent
+from framework.models.modemdiagnose import ModemDiagnoseModel, ModemDiagnoseOwner, ModemDiagnoseType
+from framework.models.schedule import ModemsAutoRotateAgendaItem
 from framework.service.server.servereventservice import Event, EventType
 from framework.helper.database.pagination import PaginateDirection, PaginateOrder
 from framework.models.modem import ModemModel
@@ -314,6 +316,78 @@ class ModemRotate(Resource):
         return {"message": "OK"}, 200
 
 
+_server_modem_diagnose_parser = reqparse.RequestParser()
+# _server_modem_diagnose_parser.add_argument(
+#     "hard_reset", type=bool, required=True, help=""
+# )
+class ModemDiagnose(Resource):
+    def delete(self, modem_id):
+        server_modem = ServerModemModel.find_by_modem_id(modem_id)
+        imodem = IModem(server_modem)
+        try:
+            app.modems_manager.stop_task(infra_modem = imodem, callback = None)
+
+            # modem_log_model = ModemLogModel(
+            #     modem_id=modem_id,
+            #     owner=ModemLogOwner.USER, 
+            #     type=ModemLogType.INFO, 
+            #     message='app.log.modem.rotate.stop.by_user',
+            #     logged_at = datetime.now()
+            # )
+            # modem_log_model.save_to_db()
+
+            # app.server_event.emit(Event(type = EventType.MODEM_LOG, data = modem_log_model))
+        except NoTaskRunningException as err:
+            return {
+                "error": {
+                    "code": 790,
+                    "message": str(err)
+                }                
+            }, 400        
+
+        return {"message": "OK"}, 200
+    
+    # @jwt_required()
+    def post(self, modem_id): 
+        server_modem_model = ServerModemModel.find_by_modem_id(modem_id)
+
+        modem_diagnose_model = ModemDiagnoseModel(
+            modem_id=modem_id,
+            owner=ModemDiagnoseOwner.USER, 
+            type=ModemDiagnoseType.INFO, 
+            message='app.modem.diagnose.start',
+            logged_at = datetime.now()
+        )
+        app.server_event.emit(Event(type = EventType.MODEM_DIAGNOSE, data = modem_diagnose_model))
+
+        callback = lambda modem_diagnose_model: app.server_event.emit(Event(type = EventType.MODEM_DIAGNOSE, data = modem_diagnose_model))
+        imodem = IModem(server_modem_model=server_modem_model, callback=callback)
+
+        data = _server_modem_diagnose_parser.parse_args()
+
+        try:
+            app.modems_manager.diagnose(
+                infra_modem = imodem 
+                # hard_reset = data['hard_reset']
+            )     
+        except ModemLockedByOtherThreadException as err:
+            return {
+                "error": {
+                    "code": 780,
+                    "message": str(err)
+                }                
+            }, 400 
+        except OSError as error:
+            return {
+                "error": {
+                    "code": error.errno,
+                    "message": str(error)
+                }                
+            }, 500
+
+        return {"message": "OK"}, 200
+    
+
 class ModemLogs(Resource):
     # @jwt_required()
     def get(self, modem_id):
@@ -350,3 +424,22 @@ class ModemScheduleAutoRotate(Resource):
         
         agenda_item.now = datetime.now()
         return ModemsAutoRotateAgendaItem.schema().dump(agenda_item), 200
+    
+
+# _modem_lock_wizard_step_response_parser = reqparse.RequestParser()
+
+class ModemLockWizardStepResponse(Resource):
+    # @jwt_required()
+    def post(self, modem_id, lock_id, step_id):
+        server_modem_model = ServerModemModel.find_by_modem_id(modem_id)
+
+        if not server_modem_model:
+            return {"message": "Modem not found"}, 404
+        
+        thread = app.modems_manager.thread_by_id(lock_id)
+        step = thread.wizard.step_by_id(step_id)
+
+        data = request.get_json(force=True)
+        step.response = data
+
+        return {"message": "OK"}, 200

@@ -2,12 +2,9 @@ import { Grid, Box, Card, Typography } from '@mui/material';
 import SubCard from 'ui-component/cards/SubCard';
 import MainCard from 'ui-component/cards/MainCard';
 import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
-
 import { useEffect, useState, useRef } from 'react';
-
 import { getServer } from 'services/api/server';
 import { stopRotate } from 'services/api/modem';
-
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -38,16 +35,13 @@ import { Dock } from 'ui-component/Dock';
 import ModemLog from 'ui-component/ModemLog';
 import cloneDeep from 'lodash/cloneDeep';
 import { testProxyIPv4HTTP } from 'utils/proxy';
-
 import config from 'config';
 import styled from 'styled-components';
-
 import ModemStatus from './ModemStatus';
 import ModemAutoRotateFlag from './ModemAutoRotateFlag';
 import ProxyConnection from './ProxyConnection';
 import DataUsage from './DataUsage';
 import SignalBar from './SignalBar';
-
 import { useDispatch, useSelector } from 'react-redux';
 import { ADD_DOCK } from 'store/actions/types';
 import { DOCK_TYPE, addDock, Docker } from 'ui-component/Dock/Docker';
@@ -208,7 +202,6 @@ const Modems = () => {
         modem: null
     });
     const handleModemDiagnoseClick = (modem) => {
-        console.log(modem);
         setModemDiagnoseDialog({
             open: true,
             modem: modem
@@ -355,15 +348,26 @@ const Modems = () => {
                                                                 Reiniciar
                                                             </MenuItem>
                                                             <Divider />
-                                                            <MenuItem
-                                                                onClick={() => {
-                                                                    handleModemDiagnoseClick(item.modem);
-                                                                    handleModemCloseMenu();
-                                                                }}
-                                                                disabled={item.lock != null}
-                                                            >
-                                                                Executar diagnóstico
-                                                            </MenuItem>
+                                                            {item.lock?.task?.name === 'DIAGNOSE' ? (
+                                                                <MenuItem
+                                                                    onClick={() => {
+                                                                        handleModemDiagnoseClick(item);
+                                                                        handleModemCloseMenu();
+                                                                    }}
+                                                                >
+                                                                    Visualizar diagnóstico
+                                                                </MenuItem>
+                                                            ) : (
+                                                                <MenuItem
+                                                                    onClick={() => {
+                                                                        handleModemDiagnoseClick(item);
+                                                                        handleModemCloseMenu();
+                                                                    }}
+                                                                    disabled={item.lock != null}
+                                                                >
+                                                                    Executar diagnóstico
+                                                                </MenuItem>
+                                                            )}
                                                             <MenuItem
                                                                 onClick={() => {
                                                                     handleModemCloseMenu();
@@ -539,12 +543,7 @@ const Modems = () => {
                 onClose={handleModemRebootClose}
                 onConfirm={handleModemRebootClose}
             />
-            <DiagnoseDialog
-                open={modemDiagnoseDialog.open}
-                modem={modemDiagnoseDialog.modem}
-                onClose={handleModemDiagnoseClose}
-                onConfirm={handleModemDiagnoseClose}
-            />
+            <DiagnoseDialog open={modemDiagnoseDialog.open} modem={modemDiagnoseDialog.modem} onClose={handleModemDiagnoseClose} />
             <Dialog
                 open={taskStoppingHelpDialog.open}
                 onClose={() => {

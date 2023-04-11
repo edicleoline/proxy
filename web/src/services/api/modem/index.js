@@ -98,3 +98,42 @@ export function scheduleAutoRotate(id) {
         );
     });
 }
+
+export function diagnose(id) {
+    return new Promise((resolve, reject) => {
+        api.post(`/modem/${id}/diagnose`).then(
+            (response) => {
+                resolve(response.data);
+            },
+            (error) => {
+                reject(error);
+            }
+        );
+    });
+}
+
+export function stopDiagnose(id) {
+    return new Promise((resolve, reject) => {
+        api.delete(`/modem/${id}/diagnose`).then(
+            (response) => {
+                resolve(response.data);
+            },
+            (error) => {
+                reject(error);
+            }
+        );
+    });
+}
+
+export function postLockWizardStepResponse(modemId, lockId, stepId, response) {
+    return new Promise((resolve, reject) => {
+        api.post(`/modem/${modemId}/lock/${lockId}/wizard/step/${stepId}/response`, response).then(
+            (response) => {
+                resolve(response.data);
+            },
+            (error) => {
+                reject(error);
+            }
+        );
+    });
+}
