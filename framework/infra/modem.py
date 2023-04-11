@@ -348,7 +348,7 @@ class Modem:
 
             device_middleware = self.get_device_middleware()
             if device_middleware:
-                old_ip = device_middleware.wan.try_get_current_ip(retries=2)
+                old_ip = device_middleware.wan.try_get_current_ip(timeout = 30)
             else:
                 modem_log_model = ModemLogModel(
                     modem_id=self.modem().id, 
@@ -379,7 +379,7 @@ class Modem:
                 self.log(modem_log_model)
                 
                 device_middleware = self.get_device_middleware()
-                new_ip = device_middleware.wan.try_get_current_ip(retries=60*3, event_stop = self.event_stop, timeout = 60)
+                new_ip = device_middleware.wan.try_get_current_ip(event_stop = self.event_stop, timeout = 60)
 
             else:
                 if self.event_stop_is_set() == True: break            
@@ -581,11 +581,11 @@ class Modem:
             if self.event_stop_is_set() == True: break
             # time.sleep(1)
 
-    def external_ip_through_device(self, silence_mode = False, retries=2):
+    def external_ip_through_device(self, silence_mode = False, timeout=60):
         device_middleware = self.get_device_middleware()
         if device_middleware == None:
             return None
-        return device_middleware.wan.try_get_current_ip(retries=retries, silence_mode=silence_mode)
+        return device_middleware.wan.try_get_current_ip(timeout = timeout, silence_mode=silence_mode)
 
     def external_ip_through_proxy(self):
         proxies = { 

@@ -49,21 +49,20 @@ class Wan:
                 sys.stdout.flush()
 
 
-    def try_get_current_ip(self, retries = 3, silence_mode = False, event_stop = None, timeout = 60 * 1):
+    def try_get_current_ip(self, silence_mode = False, event_stop = None, timeout = 60 * 2):
         timeout_at = datetime.now() + timedelta(seconds=timeout)
-        ip = None
-        retry_ip = 0
+
         while True:
+            ip = self.get_current_ip(silence_mode=silence_mode)
+            if ip != None: return ip
+            
+            if event_stop and event_stop.is_set(): break
+
             diff_timeout_now = int((timeout_at - datetime.now()).total_seconds())
+            print(diff_timeout_now)
             if diff_timeout_now >= timeout:
                 raise TimeoutException('Timeout exception')
 
-            retry_ip = retry_ip + 1
-            ip = self.get_current_ip(silence_mode=silence_mode)    
-            
-            if event_stop and event_stop.is_set(): break
-            if ip != None or retry_ip >= retries: break
-
             time.sleep(1)
 
-        return ip
+        return None
