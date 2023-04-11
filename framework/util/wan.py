@@ -48,18 +48,20 @@ class Wan:
                 sys.stdout.write('{0}FAIL{1}\n'.format(CRED, CEND))
                 sys.stdout.flush()
 
+        return None
 
-    def try_get_current_ip(self, silence_mode = False, event_stop = None, timeout = 60 * 2):
+
+    def try_get_current_ip(self, event_stop = None, timeout = 60 * 2):
         timeout_at = datetime.now() + timedelta(seconds=timeout)
 
         while True:
-            ip = self.get_current_ip(silence_mode=silence_mode)
+            ip = self.get_current_ip()
             if ip != None: return ip
             
             if event_stop and event_stop.is_set(): break
 
             diff_timeout_now = int((timeout_at - datetime.now()).total_seconds())
-            print(diff_timeout_now)
+            print('timeout_diff {0}'.format(diff_timeout_now))
             if diff_timeout_now >= timeout:
                 raise TimeoutException('Timeout exception')
 
