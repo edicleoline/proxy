@@ -284,6 +284,9 @@ class Modem:
             self_thread.wizard.add_step(step_check_connection)
             response = self.wizard_wait_response(step = step_check_connection)
 
+        if not response:
+            return False
+
         if not 'confirm_modem_on' in response:
             print('invalid response')
             return
