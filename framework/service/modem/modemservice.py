@@ -1,5 +1,6 @@
 import copy
 from datetime import datetime, timedelta
+from framework.error.exception import TimeoutException
 from framework.manager.modem import ModemManager, ModemThreadData
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 from framework.models.server import ServerModel, ServerModemModel
@@ -250,7 +251,9 @@ class ModemsObserver():
 
             modem_ifaddresses = imodem_iface.ifaddresses
 
-            external_ip = modem_state.infra_modem.external_ip_through_device(timeout = 5)
+            external_ip = None
+            try: external_ip = modem_state.infra_modem.external_ip_through_device(timeout = 5)
+            except TimeoutException: pass
 
             if modem_state.is_connected != True: continue
 
