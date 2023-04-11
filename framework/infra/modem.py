@@ -1,6 +1,7 @@
 import sys, time
 import requests
 from threading import Event
+from framework.error.exception import TimeoutException
 from framework.models.modemdiagnose import ModemDiagnoseModel, ModemDiagnoseOwner, ModemDiagnoseType
 from framework.models.modemthreadtask import TaskWizard, TaskWizardStep, TaskWizardStepType
 from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
@@ -348,7 +349,8 @@ class Modem:
 
             device_middleware = self.get_device_middleware()
             if device_middleware:
-                old_ip = device_middleware.wan.try_get_current_ip(timeout = 30)
+                try: old_ip = device_middleware.wan.try_get_current_ip(timeout = 10)
+                except TimeoutException: pass
             else:
                 modem_log_model = ModemLogModel(
                     modem_id=self.modem().id, 
@@ -379,7 +381,8 @@ class Modem:
                 self.log(modem_log_model)
                 
                 device_middleware = self.get_device_middleware()
-                new_ip = device_middleware.wan.try_get_current_ip(event_stop = self.event_stop, timeout = 60)
+                try: new_ip = device_middleware.wan.try_get_current_ip(event_stop = self.event_stop, timeout = 30)
+                except TimeoutException: pass
 
             else:
                 if self.event_stop_is_set() == True: break            
@@ -581,10 +584,9 @@ class Modem:
             if self.event_stop_is_set() == True: break
             # time.sleep(1)
 
-    def external_ip_through_device(self, silence_mode = False, timeout=60):
+    def external_ip_through_device(self, timeout=60):
         device_middleware = self.get_device_middleware()
-        if device_middleware == None:
-            return None
+        if device_middleware == None: return None
         return device_middleware.wan.try_get_current_ip(timeout = timeout)
 
     def external_ip_through_proxy(self):
