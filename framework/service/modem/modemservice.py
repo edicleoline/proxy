@@ -250,7 +250,7 @@ class ModemsObserver():
 
             modem_ifaddresses = imodem_iface.ifaddresses
 
-            external_ip = modem_state.infra_modem.external_ip_through_device(silence_mode=True, retries=1)
+            external_ip = modem_state.infra_modem.external_ip_through_device(timeout = 5)
 
             if modem_state.is_connected != True: continue
 
