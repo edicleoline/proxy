@@ -585,7 +585,7 @@ class Modem:
         device_middleware = self.get_device_middleware()
         if device_middleware == None:
             return None
-        return device_middleware.wan.try_get_current_ip(timeout = timeout, silence_mode=silence_mode)
+        return device_middleware.wan.try_get_current_ip(timeout = timeout)
 
     def external_ip_through_proxy(self):
         proxies = { 
