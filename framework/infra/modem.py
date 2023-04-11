@@ -303,9 +303,6 @@ class Modem:
 
         time.sleep(5)
 
-
-
-
         
     def rotate(
             self, 
@@ -379,7 +376,7 @@ class Modem:
                 self.log(modem_log_model)
                 
                 device_middleware = self.get_device_middleware()
-                new_ip = device_middleware.wan.try_get_current_ip(retries=60*3, event_stop = self.event_stop)
+                new_ip = device_middleware.wan.try_get_current_ip(retries=60*3, event_stop = self.event_stop, timeout = 60)
 
             else:
                 if self.event_stop_is_set() == True: break            

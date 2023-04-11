@@ -2,6 +2,7 @@ import requests
 import sys
 import time
 import socket
+from datetime import datetime, timedelta
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
@@ -46,10 +47,15 @@ class Wan:
                 sys.stdout.flush()
 
 
-    def try_get_current_ip(self, retries = 3, silence_mode = False, event_stop = None):
+    def try_get_current_ip(self, retries = 3, silence_mode = False, event_stop = None, timeout = 60 * 1):
+        timeout_at = datetime.now() + timedelta(seconds=timeout)
         ip = None
         retry_ip = 0
         while True:
+            diff_timeout_now = int((timeout_at - datetime.now()).total_seconds())
+            if diff_timeout_now >= timeout:
+                break
+
             retry_ip = retry_ip + 1
             ip = self.get_current_ip(silence_mode=silence_mode)    
             
