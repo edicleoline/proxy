@@ -282,9 +282,9 @@ class Modem:
         if not response:
             return False
 
-        if not 'confirm_modem_on' in response:
+        if 'confirm_modem_on' not in response:
             print('invalid response')
-            return
+            return False
         
         if response['confirm_modem_on'] == True:
             step_list_interfaces = TaskWizardStep(type = TaskWizardStepType.SELECT_INTERFACE, require_response = True)
@@ -299,7 +299,8 @@ class Modem:
 
         print('lets continue !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 
-        time.sleep(5)
+        # time.sleep(5)
+        return True
 
         
     def rotate(

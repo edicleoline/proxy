@@ -27,6 +27,8 @@ const DiagnoseStepCheckConnection = ({ modem, running, onStart, onStop }) => {
         }
     };
 
+    const [sendingResponse, setSendingResponse] = useState(false);
+
     const handleClickYes = () => {
         sendResponse(true);
     };
@@ -40,6 +42,8 @@ const DiagnoseStepCheckConnection = ({ modem, running, onStart, onStop }) => {
         if (!steps) {
             return;
         }
+
+        setSendingResponse(true);
 
         let step = null;
         for (const s of steps) if (s.type === 'CHECK_CONNECTION') step = s;
@@ -84,12 +88,12 @@ const DiagnoseStepCheckConnection = ({ modem, running, onStart, onStop }) => {
                                     <Grid item sx={{ marginTop: '16px' }}>
                                         <Grid container direction="row" justifyContent="center" alignItems="start">
                                             <Grid item sx={{ paddingRight: '4px' }}>
-                                                <Button variant="outlined" onClick={handleClickYes}>
+                                                <Button variant="outlined" onClick={handleClickYes} disabled={sendingResponse}>
                                                     <FormattedMessage id="app.labels.yes" />
                                                 </Button>
                                             </Grid>
                                             <Grid item>
-                                                <Button variant="text" onClick={handleClickNo}>
+                                                <Button variant="text" onClick={handleClickNo} disabled={sendingResponse}>
                                                     <FormattedMessage id="app.labels.no" />
                                                 </Button>
                                             </Grid>
