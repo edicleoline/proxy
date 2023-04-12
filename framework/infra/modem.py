@@ -353,7 +353,11 @@ class Modem:
 
             device_middleware = self.get_device_middleware()
             if device_middleware:
-                try: old_ip = device_middleware.wan.try_get_current_ip(timeout = 10)
+                try:
+                    old_ip = device_middleware.wan.try_get_current_ip(
+                        event_stop = self.event_stop,
+                        timeout = self.settings.current_ip_before_rotate_timeout if self.settings else 10
+                    )
                 except TimeoutException: pass
             else:
                 modem_log_model = ModemLogModel(
@@ -385,7 +389,11 @@ class Modem:
                 self.log(modem_log_model)
                 
                 device_middleware = self.get_device_middleware()
-                try: new_ip = device_middleware.wan.try_get_current_ip(event_stop = self.event_stop, timeout = 30)
+                try:
+                    new_ip = device_middleware.wan.try_get_current_ip(
+                        event_stop = self.event_stop, 
+                        timeout = self.settings.current_ip_after_rotate_timeout if self.settings else 30
+                    )
                 except TimeoutException: pass
 
             else:
