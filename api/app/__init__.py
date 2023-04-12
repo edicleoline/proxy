@@ -14,6 +14,9 @@ class Object(object):
 
 app = Object
 
+app.config = Object
+app.config.timeout_current_ip = 30
+
 app.socketio = None
 
 app.server_control = ServerControl(socketio = lambda: app.socketio)

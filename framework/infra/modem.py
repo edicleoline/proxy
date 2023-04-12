@@ -5,24 +5,18 @@ from framework.error.exception import TimeoutException
 from framework.models.modemdiagnose import ModemDiagnoseModel, ModemDiagnoseOwner, ModemDiagnoseType
 from framework.models.modemthreadtask import TaskWizard, TaskWizardStep, TaskWizardStepType
 from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
-
 from framework.models.server import ServerModemModel
 from framework.models.modemiphistory import ModemIPHistoryModel
 from framework.models.proxyuseriphistory import ProxyUserIPHistoryModel
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
-
 from framework.infra.netiface import NetIface
 from framework.infra.usb import USB
 from framework.infra.route import Route
-
 from framework.device.zte.mf79s import MF79S
 from framework.device.zte.error.exception import ConnectException
-
 from datetime import datetime
 from enum import Enum
-
 from framework.proxy.factory import ProxyService
-from framework.util.object import Object
 
 CRED = '\033[91m'
 CGREEN = '\033[92m'
