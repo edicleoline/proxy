@@ -43,7 +43,6 @@ class Wan:
             if event_stop and event_stop.is_set(): break
 
             diff_timeout_now = int((datetime.now() - timeout_at).total_seconds())
-            print('timeout_diff {0}'.format(diff_timeout_now))
             if diff_timeout_now >= timeout:
                 raise TimeoutException('Timeout exception')
 
