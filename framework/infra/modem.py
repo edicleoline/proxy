@@ -237,8 +237,22 @@ class Modem:
         self.wait_until_modem_connection()
         return True
     
-    def wizard_wait_response(self, step: TaskWizardStep):
+    def _diagnose_interfaces(self):
+        ifaces = NetIface.get_all()
+        interfaces = []
+        for iface in ifaces:
+            interfaces.append({
+                'iface': iface.interface,
+                'ifaddresses': iface.ifaddresses
+            })
+
+        return {
+            'interfaces': interfaces
+        }
+    
+    def wizard_wait_response(self, step: TaskWizardStep, data_callback = None):
         while True:
+            if data_callback: step.data = data_callback()
             if self.event_stop and self.event_stop.is_set():
                 return None
             
@@ -289,7 +303,7 @@ class Modem:
         if response['confirm_modem_on'] == True:
             step_list_interfaces = TaskWizardStep(type = TaskWizardStepType.SELECT_INTERFACE, require_response = True)
             self_thread.wizard.add_step(step_list_interfaces)
-            response = self.wizard_wait_response(step = step_list_interfaces)
+            response = self.wizard_wait_response(step = step_list_interfaces, data_callback = lambda: self._diagnose_interfaces())
 
         else:
             # step_list_interfaces = TaskWizardStep(type = TaskWizardStepType.LIST_INTERFACES, require_response = True)

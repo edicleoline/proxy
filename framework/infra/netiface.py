@@ -1,7 +1,13 @@
 import netifaces
 import psutil
+from dataclasses import dataclass
+from dataclasses_json import dataclass_json
 
+@dataclass_json
+@dataclass
 class NetIface:
+    interface: str = None
+
     def __init__(self, interface, ifaddresses, rx_bytes = None, tx_bytes = None):
         self.interface = interface
         self.ifaddresses = ifaddresses

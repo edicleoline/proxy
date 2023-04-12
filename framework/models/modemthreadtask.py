@@ -33,12 +33,14 @@ class TaskWizardStep():
     type: TaskWizardStepTypeField = field(metadata=task_wizard_step_type_field)
     require_response: bool = False
     response: dict = None
+    data: dict = None
 
-    def __init__(self, type: TaskWizardStepType, require_response: bool = False, response: dict = None):
+    def __init__(self, type: TaskWizardStepType, require_response: bool = False, response: dict = None, data: dict = None):
         self.id = uuid.uuid4()
         self.type = type
         self.require_response = require_response
         self.response = response
+        self.data = data
 
 
 @dataclass_json
