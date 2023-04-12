@@ -4,6 +4,7 @@ from enum import Enum
 from marshmallow import fields
 import json
 import uuid
+from framework.settings import Settings
 
 class ServerControlActionField(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
@@ -40,7 +41,8 @@ class ServerControlEvent():
 
 
 class ServerControl():
-    def __init__(self, socketio):
+    def __init__(self, settings: Settings = None, socketio = None):
+        self.settings = settings
         self.socketio = socketio
     
     def emit(self, event: ServerControlEvent):

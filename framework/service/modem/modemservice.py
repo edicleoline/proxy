@@ -13,6 +13,7 @@ from framework.service.route.routeservice import RouteService
 from framework.service.server.servereventservice import EventType, Event as ServerEvent
 from framework.util.format import HumanBytes
 from time import sleep
+from framework.settings import Settings
 
 @dataclass_json
 @dataclass
@@ -90,9 +91,10 @@ class ModemState():
 
 
 class ModemsEventObserver():
-    def __init__(self, server_event):
+    def __init__(self, server_event, settings: Settings):
         self._observers = None
         self.server_event = server_event
+        self.settings = settings
 
     def observe(self, observers):
         json_observers = ModemState.schema().dump(observers, many=True)
@@ -213,7 +215,7 @@ class ModemsObserver():
 
             if modem_state == None: continue
 
-            if modem_state.infra_modem == None: modem_state.infra_modem = IModem(modem_state.modem)
+            if modem_state.infra_modem == None: modem_state.infra_modem = IModem(server_modem_model = modem_state.modem)
                 
             modem_state.is_connected = modem_state.infra_modem.is_connected()
             modem_state.lock = self.get_lock(modem_state.infra_modem)
@@ -322,10 +324,11 @@ class ModemsObserveConnectivityThread(Thread):
 
 
 class ModemsService():
-    def __init__(self, server: ServerModel, modems_manager: ModemManager):                
+    def __init__(self, server: ServerModel, modems_manager: ModemManager, settings: Settings):                
         self.server = server        
         self.modems_manager = modems_manager
         self.modems_observer = ModemsObserver(server = server, modems_manager = modems_manager)
+        self.settings = settings
 
         self._modems_observe_status_lock = Lock()
         self._modems_observe_status_stop_event = Event()
@@ -519,10 +522,11 @@ class ModemsAutoRotateObserveThread(Thread):
 
 
 class ModemsAutoRotateService():
-    def __init__(self, modems_service: ModemsService, modems_manager: ModemManager, server_event: ServerEvent):
+    def __init__(self, modems_service: ModemsService, modems_manager: ModemManager, server_event: ServerEvent, settings: Settings):
         self.modems_service = modems_service        
         self.modems_manager = modems_manager
         self.server_event = server_event
+        self.settings = settings
         self.modems_auto_rotate_observer = ModemsAutoRotateObserver(
             modems_service = modems_service, modems_manager = modems_manager, server_event = server_event)
 

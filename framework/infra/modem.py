@@ -1,4 +1,4 @@
-import sys, time
+import time
 import requests
 from threading import Event
 from framework.error.exception import TimeoutException
@@ -17,15 +17,7 @@ from framework.device.zte.error.exception import ConnectException
 from datetime import datetime
 from enum import Enum
 from framework.proxy.factory import ProxyService
-
-CRED = '\033[91m'
-CGREEN = '\033[92m'
-CYELLOW = '\033[93m'
-CBLUE = '\033[94m'
-CMAGENTA = '\033[95m'
-CGREY = '\033[90m'
-CBLAC = '\033[90m'
-CEND = '\033[0m'
+from framework.settings import Settings
 
 class Error(Enum):
     IP_NOT_CHANGED  = 300
@@ -46,7 +38,8 @@ class Modem:
             server_modem_model: ServerModemModel, 
             proxy_service: ProxyService = None, 
             event_stop: Event = None, 
-            callback = None
+            callback = None,
+            settings = None
     ):
         self.server_modem_model = server_modem_model   
         self.proxy_service = proxy_service     
@@ -54,6 +47,8 @@ class Modem:
         self.callback = callback
         self._modem = None
         self._usb_port = None
+        self.settings = settings
+
 
     def modem(self):
         if not self._modem:
@@ -424,8 +419,6 @@ class Modem:
                     modem_log_model.save_to_db()
                     self.log(modem_log_model)
                     break
-
-                # new_ip = '189.40.89.35' #TESTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT  
                 
             if self.event_stop_is_set() == True: break   
 

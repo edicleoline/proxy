@@ -11,7 +11,6 @@ from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 from framework.models.server import ServerModel, ServerModemModel
 from framework.infra.modem import Modem as IModem
 from framework.models.server import ServerModel, ServerModemModel
-from framework.infra.modem import Modem as IModem
 from flask import request
 import json
 from app import app
@@ -43,7 +42,7 @@ class Modems(Resource):
         items = [item.json() for item in modems]
 
         for x, item in enumerate(items):
-            imodem = IModem(modems[x])
+            imodem = IModem(server_modem_model = modems[x], settings = app.settings)
             item['is_connected'] = imodem.is_connected()
     
         return {"items": items}, 200
@@ -63,7 +62,7 @@ class Modem(Resource):
     # @jwt_required()
     def get(self, modem_id):
         server_modem = ServerModemModel.find_by_modem_id(modem_id)
-        imodem = IModem(server_modem)           
+        imodem = IModem(server_modem_model = server_modem, settings = app.settings)           
 
         json = server_modem.json()
 
@@ -192,7 +191,7 @@ class ModemReboot(Resource):
         app.server_event.emit(Event(type = EventType.MODEM_LOG, data = modem_log_model))
 
         callback = lambda modem_log_model: app.server_event.emit(Event(type = EventType.MODEM_LOG, data = modem_log_model))
-        imodem = IModem(server_modem_model=server_modem_model, callback=callback)
+        imodem = IModem(server_modem_model = server_modem_model, callback = callback, settings = app.settings)
 
         data = _server_modem_reboot_parser.parse_args()
 
@@ -232,7 +231,7 @@ _server_modem_rotate_parser.add_argument(
 class ModemRotate(Resource):
     def delete(self, modem_id):
         server_modem = ServerModemModel.find_by_modem_id(modem_id)
-        imodem = IModem(server_modem)
+        imodem = IModem(server_modem_model = server_modem, settings = app.settings)
         try:
             app.modems_manager.stop_task(infra_modem = imodem, callback = None)
 
@@ -272,7 +271,7 @@ class ModemRotate(Resource):
         app.server_event.emit(Event(type = EventType.MODEM_LOG, data = modem_log_model))
 
         callback = lambda modem_log_model: app.server_event.emit(Event(type = EventType.MODEM_LOG, data = modem_log_model))
-        imodem = IModem(server_modem_model=server_modem_model, callback=callback)   
+        imodem = IModem(server_modem_model = server_modem_model, callback = callback, settings = app.settings)   
 
         data = _server_modem_rotate_parser.parse_args() 
 
@@ -323,7 +322,7 @@ _server_modem_diagnose_parser = reqparse.RequestParser()
 class ModemDiagnose(Resource):
     def delete(self, modem_id):
         server_modem = ServerModemModel.find_by_modem_id(modem_id)
-        imodem = IModem(server_modem)
+        imodem = IModem(server_modem_model = server_modem, settings = app.settings)
         try:
             app.modems_manager.stop_task(infra_modem = imodem, callback = None)
 
@@ -361,7 +360,7 @@ class ModemDiagnose(Resource):
         app.server_event.emit(Event(type = EventType.MODEM_DIAGNOSE, data = modem_diagnose_model))
 
         callback = lambda modem_diagnose_model: app.server_event.emit(Event(type = EventType.MODEM_DIAGNOSE, data = modem_diagnose_model))
-        imodem = IModem(server_modem_model=server_modem_model, callback=callback)
+        imodem = IModem(server_modem_model = server_modem_model, callback = callback, settings = app.settings)
 
         data = _server_modem_diagnose_parser.parse_args()
 

@@ -8,7 +8,7 @@
     "app.components.modem.Diagnose.stop": "Cancelar",
     "app.components.modem.Diagnose.connection.checking": "Verificando conexão com o modem...\nSó vai levar uns segundos.",
     "app.components.modem.Diagnose.connection.check": "Parece que seu modem está desconectado.\nTem certeza de que ele está ligado?",
-    "app.components.modem.Diagnose.connection.interface.select": "Seu modem foi resetado para as configurações de fábrica ou é a primeira conexão?\nVocê pode tentar atribuir uma das interfaces listadas.",
+    "app.components.modem.Diagnose.connection.interface.select": "Parece que seu modem foi resetado para as configurações de fábrica ou ainda não foi configurado.\nRecomendamos desconectar todos os outros modems, manter o modem {modemId} conectado, e utilizar uma das interfaces disponíveis abaixo, para tentarmos estabelecer conexão.",
 
     "app.components.modem.Reboot.modal.header.title": "Reiniciar modem",
     "app.components.modem.Reboot.modal.body.question": "Tem certeza de que deseja reiniciar o modem {modemId}?",

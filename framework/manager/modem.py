@@ -9,12 +9,13 @@ from framework.proxy.factory import ProxyService
 from dataclasses import dataclass, field
 from dataclasses_json import dataclass_json, config
 from marshmallow import fields
-from typing import List
 import uuid
+from framework.settings import Settings
 
 class ModemManager():
-    def __init__(self, proxy_service: ProxyService):
+    def __init__(self, proxy_service: ProxyService, settings: Settings):
         self.proxy_service = proxy_service
+        self.settings = settings
         self.threads = []
 
     def reboot(self, infra_modem: IModem, hard_reset = False):

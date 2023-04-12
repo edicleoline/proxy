@@ -54,3 +54,11 @@ class NetIface:
     @staticmethod
     def get_gateway_from_ipv4(ipv4):
         return ipv4.rsplit('.', 1)[0] + '.1'
+    
+    @staticmethod
+    def possible_modem_interfaces():
+        all = NetIface.get_all()
+
+    @staticmethod
+    def possible_available_modem_interfaces():
+        pass

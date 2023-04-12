@@ -1,8 +1,7 @@
-from typing import List
 from framework.models.server import ServerModel, ServerModemModel
-from framework.infra.modem import Modem as IModem
 from threading import Thread, Event, Lock
 from time import sleep
+from framework.settings import Settings
 
 class RouteServiceObserverThread(Thread):
     def __init__(self, modems_states = [], stop_event: Event = None):
@@ -55,8 +54,9 @@ class RouteServiceObserver():
 
 
 class RouteService():
-    def __init__(self, server: ServerModel, modems_states = []):
+    def __init__(self, server: ServerModel, settings: Settings = None, modems_states = []):
         self.server = server
+        self.settings = settings
         self.observer = None
         self.modems_states = modems_states
         self.observer = RouteServiceObserver(self.modems_states)
