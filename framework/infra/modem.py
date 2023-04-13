@@ -14,11 +14,11 @@ from framework.infra.usb import USB
 from framework.infra.route import Route
 from framework.device.zte.mf79s import MF79S
 from framework.device.zte.error.exception import ConnectException
-from datetime import datetime
 from enum import Enum
 from framework.proxy.factory import ProxyService
 from framework.settings import Settings
 from framework.util.wan import Wan
+from datetime import datetime, timedelta
 
 class Error(Enum):
     IP_NOT_CHANGED  = 300
@@ -74,7 +74,6 @@ class Modem:
         USB(server=self.server_modem_model.server()).hard_turn_off(usb_port=self.usb_port())
 
     def wan(self):
-        wan = None
         iface = self.iface()
         if iface == None or iface.ifaddresses == None: return None
         return Wan(settings = self.settings, interface = iface.interface)
@@ -102,12 +101,24 @@ class Modem:
         return middleware
 
     def wait_until_modem_connection(self):
+        timeout_at = datetime.now() + timedelta(seconds = self.settings.wait_until_modem_connection_timeout)
         while(True):
             if self.event_stop_is_set(log = False): break
 
             inframodem_iface = self.iface()
-            if inframodem_iface != None:
-                break
+            if inframodem_iface != None: break
+
+            diff_timeout_now = int((datetime.now() - timeout_at).total_seconds())
+            if diff_timeout_now >= self.settings.wait_until_modem_connection_timeout:
+                modem_log_model = ModemLogModel(
+                    modem_id=self.modem().id, 
+                    owner=ModemLogOwner.SYSTEM, 
+                    type=ModemLogType.ERROR, 
+                    message='app.log.modem.rebooted.connection.timeout'
+                )
+                modem_log_model.save_to_db()
+                self.log(modem_log_model)
+                raise TimeoutException('Timeout exception')
 
             time.sleep(1)
 
@@ -238,7 +249,11 @@ class Modem:
             else:
                 device_middleware.reboot_and_wait()
 
-        self.wait_until_modem_connection()
+        try:
+            self.wait_until_modem_connection()
+        except TimeoutException:
+            return False
+        
         return True
     
     def _diagnose_interfaces(self):
