@@ -32,7 +32,7 @@ class Wan:
             return resp
         except Exception as e:
             print(str(e))
-            pass
+            raise e
 
         return None
 
