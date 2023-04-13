@@ -21,7 +21,6 @@ class Wan:
         self.interface = interface
 
     def get_current_ip(self):
-        print(self.settings)
         try:
             adapter = HTTPAdapterWithSocketOptions(socket_options=[(socket.SOL_SOCKET, socket.SO_BINDTODEVICE, self.interface.encode('utf-8'))])
             session = requests.session()
