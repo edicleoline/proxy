@@ -31,10 +31,7 @@ class Wan:
             print(resp)
             return resp
         except Exception as e:
-            print(str(e))
             raise e
-
-        return None
 
     def try_get_current_ip(self, event_stop = None, timeout = 60 * 2):
         timeout_at = datetime.now() + timedelta(seconds=timeout)
