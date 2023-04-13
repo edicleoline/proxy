@@ -9,11 +9,14 @@ from framework.infra.modem import Modem as IModem
 from dataclasses import dataclass
 from dataclasses_json import dataclass_json
 from threading import Thread, Event, Lock
+from framework.service.Cloacker import Cloacker, CloackerService
 from framework.service.route.routeservice import RouteService
 from framework.service.server.servereventservice import EventType, Event as ServerEvent
 from framework.util.format import HumanBytes
 from time import sleep
 from framework.settings import Settings
+
+EXTERNAL_IP_CLACKER_ID = 'modem_observer.modem_state.modem.id.{0}'
 
 @dataclass_json
 @dataclass
@@ -91,10 +94,11 @@ class ModemState():
 
 
 class ModemsEventObserver():
-    def __init__(self, server_event, settings: Settings):
+    def __init__(self, server_event, settings: Settings, cloacker_service: CloackerService):
         self._observers = None
         self.server_event = server_event
         self.settings = settings
+        self.cloacker_service = cloacker_service
 
     def observe(self, observers):
         json_observers = ModemState.schema().dump(observers, many=True)
@@ -130,6 +134,11 @@ class ModemsEventObserver():
 
                 if self._observers[old_observer_index]['is_connected'] == False and observer['is_connected'] == True:
                     self._observers[old_observer_index]['is_connected'] = observer['is_connected']
+
+                    external_ip_cloacker_id = EXTERNAL_IP_CLACKER_ID.format(self._observers[old_observer_index]['modem']['id'])
+                    external_ip_cloacker = self.cloacker_service.cloacker_by_id(external_ip_cloacker_id)
+                    if external_ip_cloacker: external_ip_cloacker.invert()
+
                     self.notify(EventType.MODEM_CONNECT, observer)                    
                     continue  
 
@@ -160,9 +169,11 @@ class ModemsEventObserver():
 
 
 class ModemsObserver():
-    def __init__(self, server: ServerModel, modems_manager: ModemManager):       
+    def __init__(self, server: ServerModel, modems_manager: ModemManager, settings: Settings, cloacker_service: CloackerService):       
         self.server = server        
-        self.modems_manager = modems_manager       
+        self.modems_manager = modems_manager  
+        self.settings = settings
+        self.cloacker_service = cloacker_service
         self.server_modems = []
         self.modems_states = []
         self.modems_states_subscribers = []
@@ -198,7 +209,14 @@ class ModemsObserver():
             modems_states.append(modem_state)
 
         self.modems_states = modems_states
+        self.invert_external_ip_cloackers()
         self.notify_modems_states_subscribers()
+
+    def invert_external_ip_cloackers(self):
+        for modem_state in self.modems_states:
+            external_ip_cloacker_id = EXTERNAL_IP_CLACKER_ID.format(modem_state.modem.id)
+            external_ip_cloacker = self.cloacker_service.cloacker_by_id(external_ip_cloacker_id)
+            if external_ip_cloacker: external_ip_cloacker.invert()
 
     def modem_state_index_by_server_modem_id(self, modems_states, server_modem_id):
         if not modems_states: return -1        
@@ -253,10 +271,22 @@ class ModemsObserver():
 
             modem_ifaddresses = imodem_iface.ifaddresses
 
-            external_ip = None
-            try: external_ip = modem_state.infra_modem.external_ip_through_device(timeout = 5)
-            except TimeoutException: pass
+            external_ip = modem_state.connectivity.external_ip if modem_state.connectivity else None
 
+            external_ip_cloacker_id = EXTERNAL_IP_CLACKER_ID.format(modem_state.modem.id)
+            external_ip_cloacker = self.cloacker_service.cloacker_by_id(external_ip_cloacker_id)
+            if external_ip_cloacker == None:
+                self.cloacker_service.add_or_update(Cloacker(id = external_ip_cloacker_id, interval = self.settings.modem_status_external_ip_interval))
+
+            if external_ip_cloacker == None or external_ip_cloacker and external_ip_cloacker.ready():
+                print('ready!!')
+                try:
+                    external_ip = modem_state.infra_modem.external_ip_through_device(timeout = self.settings.modem_status_external_ip_timeout)
+                except TimeoutException: pass
+
+                self.cloacker_service.add_or_update(Cloacker(id = external_ip_cloacker_id, interval = self.settings.modem_status_external_ip_interval))
+
+            # print(external_ip_cloacker)
             if modem_state.is_connected != True: continue
 
             modem_state.connectivity = ModemConnectivity(
@@ -324,11 +354,12 @@ class ModemsObserveConnectivityThread(Thread):
 
 
 class ModemsService():
-    def __init__(self, server: ServerModel, modems_manager: ModemManager, settings: Settings):                
+    def __init__(self, server: ServerModel, modems_manager: ModemManager, settings: Settings, cloacker_service: CloackerService):                
         self.server = server        
         self.modems_manager = modems_manager
-        self.modems_observer = ModemsObserver(server = server, modems_manager = modems_manager)
         self.settings = settings
+        self.cloacker_service = cloacker_service
+        self.modems_observer = ModemsObserver(server = server, modems_manager = modems_manager, settings = settings, cloacker_service = cloacker_service)        
 
         self._modems_observe_status_lock = Lock()
         self._modems_observe_status_stop_event = Event()
