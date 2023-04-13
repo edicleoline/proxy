@@ -100,8 +100,8 @@ class Modem:
 
         return middleware
 
-    def wait_until_modem_connection(self):
-        timeout_at = datetime.now() + timedelta(seconds = self.settings.wait_until_modem_connection_timeout)
+    def wait_until_modem_connection(self, timeout = 60):
+        timeout_at = datetime.now() + timedelta(seconds = timeout)
         while(True):
             if self.event_stop_is_set(log = False): break
 
@@ -109,15 +109,7 @@ class Modem:
             if inframodem_iface != None: break
 
             diff_timeout_now = int((datetime.now() - timeout_at).total_seconds())
-            if diff_timeout_now >= self.settings.wait_until_modem_connection_timeout:
-                modem_log_model = ModemLogModel(
-                    modem_id=self.modem().id, 
-                    owner=ModemLogOwner.SYSTEM, 
-                    type=ModemLogType.ERROR, 
-                    message='app.log.modem.rebooted.connection.timeout'
-                )
-                modem_log_model.save_to_db()
-                self.log(modem_log_model)
+            if diff_timeout_now >= timeout:
                 raise TimeoutException('Timeout exception')
 
             time.sleep(1)
@@ -250,8 +242,19 @@ class Modem:
                 device_middleware.reboot_and_wait()
 
         try:
-            self.wait_until_modem_connection()
+            self.wait_until_modem_connection(self.settings.wait_until_modem_connection_timeout)
         except TimeoutException:
+            modem_log_model = ModemLogModel(
+                modem_id=self.modem().id, 
+                owner=ModemLogOwner.SYSTEM, 
+                type=ModemLogType.ERROR, 
+                message='app.log.modem.reboot.error.connection.timeout',
+                params={
+                    'timeout': self.settings.wait_until_modem_connection_timeout
+                }
+            )
+            modem_log_model.save_to_db()
+            self.log(modem_log_model)
             return False
         
         return True
@@ -423,7 +426,22 @@ class Modem:
 
             else:
                 if self.event_stop_is_set() == True: break            
-                self.wait_until_modem_connection()                                
+                try:
+                    self.wait_until_modem_connection(self.settings.wait_until_modem_connection_timeout)
+                except TimeoutException:
+                    modem_log_model = ModemLogModel(
+                        modem_id=self.modem().id, 
+                        owner=ModemLogOwner.SYSTEM, 
+                        type=ModemLogType.ERROR, 
+                        message='app.log.modem.reboot.error.connection.timeout',
+                        params={
+                            'timeout': self.settings.wait_until_modem_connection_timeout
+                        }
+                    )
+                    modem_log_model.save_to_db()
+                    self.log(modem_log_model)
+                    break
+
                 if self.event_stop_is_set() == True: break   
                                          
                 device_middleware = self.get_device_middleware()
