@@ -148,8 +148,7 @@ class Modem:
         modem_ifaddress = inframodem_iface.ifaddresses[0]
         modem_gateway = NetIface.get_gateway_from_ipv4(ipv4 = modem_ifaddress['addr'])        
         route = Route(gateway=modem_gateway, interface=inframodem_iface.interface, ip=modem_ifaddress['addr'], table=self.modem().id)
-        route.resolve_route()
-        
+        route.resolve_route()        
 
     def resolve_connectivity(self):
         self.resolve_proxy()
@@ -396,6 +395,7 @@ class Modem:
                 modem_log_model.save_to_db()
                 self.log(modem_log_model)
                 
+                self.resolve_route()
                 device_middleware = self.get_device_middleware()
                 try:
                     new_ip = device_middleware.wan.try_get_current_ip(
@@ -403,6 +403,7 @@ class Modem:
                         timeout = self.settings.current_ip_after_rotate_timeout if self.settings else 30
                     )
                 except TimeoutException: pass
+                except requests.exceptions.ConnectionError: pass
 
             else:
                 if self.event_stop_is_set() == True: break            
