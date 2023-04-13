@@ -515,10 +515,15 @@ class Modem:
                     self.log(modem_log_model)
 
                     if callback: callback('success', {
-                        'external_ip': new_ip,                        
-                        'network_type': network_type,
-                        'network_provider': network_provider,
-                        'signalbar': signalbar
+                        'modem': {
+                            'id': self.server_modem_model.id
+                        },
+                        'connectivity': {
+                            'external_ip': new_ip,
+                            'network_type': network_type,
+                            'network_provider': network_provider,
+                            'signalbar': signalbar
+                        }
                     })
 
                     break

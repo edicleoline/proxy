@@ -195,10 +195,15 @@ class ModemsObserver():
         for callback in self.modems_connectivity_subscribers: callback(self.modems_states)
 
     def on_rotate_event(self, status, data):
-        print('on rotate event modem_service!!!')
-        print(status)
-        print(data)
-        print('on rotate event modem_service!!!*************************')
+        if data and 'connectivity' in data:
+            if self.modems_states:
+                modem_state = None
+                for ms in self.modems_states:
+                    if ms.modem.id == data['modem']['id']:
+                        modem_state = ms
+                        break
+                if modem_state and modem_state.connectivity:
+                    modem_state.connectivity.external_ip = data['connectivity']['external_ip']
 
     def reload_modems(self):
         self.server_modems = self.server.modems()
