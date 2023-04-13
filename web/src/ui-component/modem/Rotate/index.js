@@ -22,9 +22,7 @@ import Snackbar from '@mui/material/Snackbar';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import CircularProgress from '@mui/material/CircularProgress';
-
 import { FormattedMessage } from 'react-intl';
-
 import { rotate } from 'services/api/modem';
 import { getProxyUsers, getProxyUserByUsername, getProxyUserFilters } from 'services/api/proxy-user';
 import { BootstrapDialogTitle, BootstrapDialogActions } from 'ui-component/extended/BootstrapDialog';
@@ -209,7 +207,7 @@ const RotateDialog = (props) => {
                     </Stack>
                 </DialogContent>
                 <BootstrapDialogActions>
-                    <Button onClick={handleConfirmClick} variant="outlined">
+                    <Button onClick={handleConfirmClick} variant="outlined" disabled={isLoading}>
                         Rotacionar
                     </Button>
                 </BootstrapDialogActions>
