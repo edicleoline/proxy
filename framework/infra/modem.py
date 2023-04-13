@@ -360,7 +360,6 @@ class Modem:
 
             device_middleware = self.get_device_middleware()
             if device_middleware:
-                self.resolve_route()
                 try:
                     old_ip = device_middleware.wan.try_get_current_ip(
                         event_stop = self.event_stop,
@@ -397,7 +396,6 @@ class Modem:
                 modem_log_model.save_to_db()
                 self.log(modem_log_model)
                 
-                self.resolve_route()
                 device_middleware = self.get_device_middleware()
                 try:
                     new_ip = device_middleware.wan.try_get_current_ip(
