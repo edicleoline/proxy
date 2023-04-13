@@ -18,6 +18,7 @@ from datetime import datetime
 from enum import Enum
 from framework.proxy.factory import ProxyService
 from framework.settings import Settings
+from framework.util.wan import Wan
 
 class Error(Enum):
     IP_NOT_CHANGED  = 300
@@ -72,15 +73,17 @@ class Modem:
     def hard_turn_off(self):
         USB(server=self.server_modem_model.server()).hard_turn_off(usb_port=self.usb_port())
 
+    def wan(self):
+        wan = None
+        iface = self.iface()
+        if iface == None or iface.ifaddresses == None: return None
+        return Wan(settings = self.settings, interface = iface.interface)
+
     def get_device_middleware(self, retries_ip = 5):
         middleware = None
 
         iface = self.iface()
-        if iface == None:
-            return None
-
-        if iface.ifaddresses == None:
-            return None
+        if iface == None or iface.ifaddresses == None: return None
 
         ifaddress = iface.ifaddresses[0]
         gateway = NetIface.get_gateway_from_ipv4(ipv4 = ifaddress['addr'])
@@ -361,12 +364,11 @@ class Modem:
             device_middleware = self.get_device_middleware()
             if device_middleware:
                 try:
-                    old_ip = device_middleware.wan.try_get_current_ip(
+                    old_ip = self.wan().try_get_current_ip(
                         event_stop = self.event_stop,
                         timeout = self.settings.current_ip_before_rotate_timeout if self.settings else 10
                     )
-                except TimeoutException: pass
-                except requests.exceptions.ConnectionError: pass
+                except Exception: pass
             else:
                 modem_log_model = ModemLogModel(
                     modem_id=self.modem().id, 
@@ -398,12 +400,11 @@ class Modem:
                 
                 device_middleware = self.get_device_middleware()
                 try:
-                    new_ip = device_middleware.wan.try_get_current_ip(
+                    new_ip = self.wan().try_get_current_ip(
                         event_stop = self.event_stop, 
                         timeout = self.settings.current_ip_after_rotate_timeout if self.settings else 30
                     )
-                except TimeoutException: pass
-                except requests.exceptions.ConnectionError: pass
+                except Exception: pass
 
             else:
                 if self.event_stop_is_set() == True: break            
@@ -615,10 +616,8 @@ class Modem:
             if self.event_stop_is_set() == True: break
             # time.sleep(1)
 
-    def external_ip_through_device(self, timeout=60):
-        device_middleware = self.get_device_middleware()
-        if device_middleware == None: return None
-        return device_middleware.wan.try_get_current_ip(timeout = timeout)
+    def external_ip_through_device(self, timeout = 60):
+        return self.wan().try_get_current_ip(event_stop = self.event_stop, timeout = timeout)
 
     def external_ip_through_proxy(self):
         proxies = { 

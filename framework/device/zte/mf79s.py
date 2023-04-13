@@ -6,7 +6,6 @@ import json
 import sys
 from framework.device.zte.error.exception import ConnectException
 from framework.infra.netiface import NetIface
-from framework.settings import Settings
 
 sys.path.append('..')
 from framework.util.wan import Wan
@@ -22,7 +21,7 @@ CBLAC = '\033[90m'
 CEND = '\033[0m'
 
 class MF79S:
-    def __init__(self, settings: Settings, addr_id, interface, gateway, password, retries_ip):
+    def __init__(self, settings, addr_id, interface, gateway, password, retries_ip):
         self.settings = settings
         self.addr_id = addr_id
         self.interface = interface

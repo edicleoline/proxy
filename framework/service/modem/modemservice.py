@@ -302,10 +302,7 @@ class ModemsObserver():
                         self.cloacker_service.add_or_update(Cloacker(id = external_ip_cloacker_id, interval = self.settings.modem_status_external_ip_interval))
                     elif external_ip_cloacker: external_ip_cloacker.invert()
                 except TimeoutException: pass
-                except requests.exceptions.ConnectionError as e:
-                    print('maxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx retry error (requests)!!!')
-                    print(str(e))
-                    #HTTPSConnectionPool(host='ipecho.net', port=443): Max retries exceeded with url: /plain (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x726e6280>: Failed to establish a new connection: [Errno 113] No route to host'))
+                except Exception: pass
 
             if modem_state.is_connected != True: continue
 

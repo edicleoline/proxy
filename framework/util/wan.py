@@ -4,7 +4,6 @@ import time
 import socket
 from datetime import datetime, timedelta
 from framework.error.exception import TimeoutException
-from framework.settings import Settings
 
 class HTTPAdapterWithSocketOptions(requests.adapters.HTTPAdapter):
     def __init__(self, *args, **kwargs):
@@ -17,21 +16,21 @@ class HTTPAdapterWithSocketOptions(requests.adapters.HTTPAdapter):
         super(HTTPAdapterWithSocketOptions, self).init_poolmanager(*args, **kwargs)
 
 class Wan:
-    def __init__(self, settings: Settings, interface):
+    def __init__(self, settings, interface):
         self.settings = settings
         self.interface = interface
 
     def get_current_ip(self):
+        print(self.settings)
         try:
             adapter = HTTPAdapterWithSocketOptions(socket_options=[(socket.SOL_SOCKET, socket.SO_BINDTODEVICE, self.interface.encode('utf-8'))])
             session = requests.session()
             session.mount("http://", adapter)
             session.mount("https://", adapter)
             resp = session.get(self.settings.external_ip_url, timeout=5).text
-            print(resp)
             return resp
-        except Exception as e:
-            raise e
+        except Exception:
+            pass
 
     def try_get_current_ip(self, event_stop = None, timeout = 60 * 2):
         timeout_at = datetime.now() + timedelta(seconds=timeout)
