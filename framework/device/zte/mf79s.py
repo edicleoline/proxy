@@ -4,9 +4,9 @@ import sys
 import base64
 import json
 import sys
-
 from framework.device.zte.error.exception import ConnectException
 from framework.infra.netiface import NetIface
+from framework.settings import Settings
 
 sys.path.append('..')
 from framework.util.wan import Wan
@@ -22,14 +22,14 @@ CBLAC = '\033[90m'
 CEND = '\033[0m'
 
 class MF79S:
-    def __init__(self, addr_id, interface, gateway, password, retries_ip):
+    def __init__(self, settings: Settings, addr_id, interface, gateway, password, retries_ip):
+        self.settings = settings
         self.addr_id = addr_id
         self.interface = interface
         self.gateway = gateway
         self.password = base64.b64encode(str(password).encode("utf-8"))
         self.retries_ip = retries_ip
-        self.wan = Wan(interface=interface)
-
+        self.wan = Wan(settings = settings, interface = interface)
         self.session = requests.Session()
 
     def login(self):

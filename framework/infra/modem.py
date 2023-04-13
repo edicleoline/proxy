@@ -87,7 +87,14 @@ class Modem:
 
         if True:#device != None:
             if True:#modem.model == 'MF79S':
-                middleware = MF79S(addr_id = self.modem().addr_id, interface = iface.interface, gateway = gateway, password = 'vivo', retries_ip = retries_ip)
+                middleware = MF79S(
+                    settings = self.settings,
+                    addr_id = self.modem().addr_id,
+                    interface = iface.interface,
+                    gateway = gateway,
+                    password = 'vivo',
+                    retries_ip = retries_ip
+                )
 
         return middleware
 
