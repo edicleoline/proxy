@@ -1,5 +1,7 @@
 import copy
 from datetime import datetime, timedelta
+
+import urllib3
 from framework.error.exception import TimeoutException
 from framework.manager.modem import ModemManager, ModemThreadData
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
@@ -299,6 +301,8 @@ class ModemsObserver():
                         self.cloacker_service.add_or_update(Cloacker(id = external_ip_cloacker_id, interval = self.settings.modem_status_external_ip_interval))
                     elif external_ip_cloacker: external_ip_cloacker.invert()
                 except TimeoutException: pass
+                except urllib3.exceptions.MaxRetryError:
+                    print('maxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx retry error!!!')
 
             if modem_state.is_connected != True: continue
 
