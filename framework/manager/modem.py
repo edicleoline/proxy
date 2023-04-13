@@ -17,6 +17,16 @@ class ModemManager():
         self.proxy_service = proxy_service
         self.settings = settings
         self.threads = []
+        self.rotate_subscribers = []
+
+    def subscribe_rotate(self, callback):
+        self.rotate_subscribers.append(callback)
+
+    def notify_rotate_subscribers(self, status, data):
+        print('subscribed rotate callback')
+        print(data)
+        print('subscribed rotate callback***********')
+        for callback in self.rotate_subscribers: callback(data)
 
     def reboot(self, infra_modem: IModem, hard_reset = False):
         thread_running = self.running(infra_modem)
@@ -72,7 +82,7 @@ class ModemManager():
                 hard_reset, 
                 not_changed_try_count, 
                 not_ip_try_count,
-                lambda: self.get_threads()
+                lambda status, data: self.notify_rotate_subscribers(status, data)
             )
         )
         process_thread.start()
@@ -162,7 +172,6 @@ class ModemThreadData():
         self.event_stop = event_stop
         self.started_at = datetime.now()
         self.wizard = wizard
-        self.post_task = None
 
     @property
     def task(self):

@@ -320,14 +320,8 @@ class Modem:
             hard_reset = False, 
             not_changed_try_count = 3, 
             not_ip_try_count = 3,
-            get_threads = None
+            callback = None
     ):
-        self_thread = None
-        if get_threads != None:
-            threads = get_threads()
-            for thread in threads:
-                if thread.infra_modem.server_modem_model.id == self.server_modem_model.id: self_thread = thread
-
         modem_log_model = ModemLogModel(
             modem_id=self.modem().id, 
             owner=ModemLogOwner.SYSTEM, 
@@ -520,8 +514,12 @@ class Modem:
                     modem_log_model.save_to_db()
                     self.log(modem_log_model)
 
-                    if self_thread:
-                        self_thread.post_task = { 'external_ip': new_ip }
+                    if callback: callback('success', {
+                        'external_ip': new_ip,                        
+                        'network_type': network_type,
+                        'network_provider': network_provider,
+                        'signalbar': signalbar
+                    })
 
                     break
 
