@@ -302,10 +302,9 @@ class ModemsObserver():
                         self.cloacker_service.add_or_update(Cloacker(id = external_ip_cloacker_id, interval = self.settings.modem_status_external_ip_interval))
                     elif external_ip_cloacker: external_ip_cloacker.invert()
                 except TimeoutException: pass
-                except urllib3.exceptions.MaxRetryError:
-                    print('maxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx retry error!!!')
-                except requests.exceptions.ConnectionError:
+                except requests.exceptions.ConnectionError as e:
                     print('maxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx retry error (requests)!!!')
+                    print(str(e))
 
             if modem_state.is_connected != True: continue
 
