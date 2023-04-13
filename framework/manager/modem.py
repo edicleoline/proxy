@@ -23,10 +23,7 @@ class ModemManager():
         self.rotate_subscribers.append(callback)
 
     def notify_rotate_subscribers(self, status, data):
-        print('subscribed rotate callback')
-        print(data)
-        print('subscribed rotate callback***********')
-        for callback in self.rotate_subscribers: callback(data)
+        for callback in self.rotate_subscribers: callback(status, data)
 
     def reboot(self, infra_modem: IModem, hard_reset = False):
         thread_running = self.running(infra_modem)

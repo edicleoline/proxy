@@ -180,6 +180,8 @@ class ModemsObserver():
         self.modems_connectivity_subscribers = []
         self.reload_modems()
 
+        self.modems_manager.subscribe_rotate(self.on_rotate_event)
+
     def subscribe_modems_states(self, callback):
         self.modems_states_subscribers.append(callback)
 
@@ -191,6 +193,12 @@ class ModemsObserver():
 
     def notify_modems_connectivity_subscribers(self):
         for callback in self.modems_connectivity_subscribers: callback(self.modems_states)
+
+    def on_rotate_event(self, status, data):
+        print('on rotate event modem_service!!!')
+        print(status)
+        print(data)
+        print('on rotate event modem_service!!!*************************')
 
     def reload_modems(self):
         self.server_modems = self.server.modems()
