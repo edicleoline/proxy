@@ -246,7 +246,7 @@ class ModemsObserver():
 
             if modem_state == None: continue
 
-            if modem_state.infra_modem == None: modem_state.infra_modem = IModem(server_modem_model = modem_state.modem)
+            if modem_state.infra_modem == None: modem_state.infra_modem = IModem(server_modem_model = modem_state.modem, settings = self.settings)
                 
             modem_state.is_connected = modem_state.infra_modem.is_connected()
             modem_state.lock = self.get_lock(modem_state.infra_modem)
