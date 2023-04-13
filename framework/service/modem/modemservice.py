@@ -1,5 +1,6 @@
 import copy
 from datetime import datetime, timedelta
+import requests
 
 import urllib3
 from framework.error.exception import TimeoutException
@@ -303,6 +304,8 @@ class ModemsObserver():
                 except TimeoutException: pass
                 except urllib3.exceptions.MaxRetryError:
                     print('maxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx retry error!!!')
+                except requests.exceptions.ConnectionError:
+                    print('maxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx retry error (requests)!!!')
 
             if modem_state.is_connected != True: continue
 
