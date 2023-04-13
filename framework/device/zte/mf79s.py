@@ -163,7 +163,7 @@ class MF79S:
 
         time.sleep(5)
 
-        return self.wan.try_get_current_ip(retries=self.retries_ip)
+        return self.wan.try_get_current_ip(timeout = 30)
 
 
     def reboot(self):

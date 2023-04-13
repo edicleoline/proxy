@@ -71,7 +71,8 @@ class ModemManager():
                 proxy_username,
                 hard_reset, 
                 not_changed_try_count, 
-                not_ip_try_count
+                not_ip_try_count,
+                lambda: self.get_threads()
             )
         )
         process_thread.start()
@@ -161,6 +162,7 @@ class ModemThreadData():
         self.event_stop = event_stop
         self.started_at = datetime.now()
         self.wizard = wizard
+        self.post_task = None
 
     @property
     def task(self):
