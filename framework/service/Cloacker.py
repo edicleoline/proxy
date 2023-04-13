@@ -21,12 +21,10 @@ class Cloacker():
         if self.inverted == True: return True
 
         diff = int((self.ready_at - datetime.now()).total_seconds())
+        print('difffffffff {0} ready_at {1}'.format(diff, self.ready_at))
         ready = True if diff <= 0 and diff > -1 else False
-
         if diff < 0: self.reset()
-
         if ready: self.locked = True
-        
         return ready
     
     def reset(self):
