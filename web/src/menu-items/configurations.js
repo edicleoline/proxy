@@ -1,51 +1,68 @@
-// assets
-import { IconAdjustments, IconAccessPoint } from '@tabler/icons';
+import { IconTypography, IconPalette, IconShadow, IconWindmill } from '@tabler/icons';
+import { IconDeviceMobile, IconArrowAutofitContent, IconAdjustments } from '@tabler/icons';
 
-// constant
 const icons = {
-    IconAdjustments,
-    IconAccessPoint
+    IconTypography,
+    IconPalette,
+    IconShadow,
+    IconWindmill,
+
+    IconDeviceMobile,
+    IconArrowAutofitContent,
+    IconAdjustments
 };
 
-// ==============================|| EXTRA PAGES MENU ITEMS ||============================== //
-
 const configurations = {
-    id: 'configurations',
-    title: 'Gerenciamento',
-    caption: 'versão beta',
+    id: 'settings',
+    title: 'Configurações',
     type: 'group',
     children: [
         {
-            id: 'modems',
-            title: 'Modems',
+            id: 'settings-devices',
+            title: 'Dispositivos',
             type: 'item',
-            url: '/modems',
-            icon: icons.IconAccessPoint,
+            url: '/settings/devices',
+            icon: icons.IconDeviceMobile,
             breadcrumbs: false
         },
         {
-            id: 'settings',
-            title: 'Configurações',
-            type: 'collapse',
+            id: 'settings-middleware',
+            title: 'Middlewares',
+            type: 'item',
+            url: '/settings/middlewares',
+            icon: icons.IconArrowAutofitContent,
+            breadcrumbs: false
+        },
+        {
+            id: 'settings-general',
+            title: 'Ajustes gerais',
+            type: 'item',
+            url: '/settings',
             icon: icons.IconAdjustments,
-
-            children: [
-                {
-                    id: 'login3',
-                    title: 'Login',
-                    type: 'item',
-                    url: '/login',
-                    target: true
-                },
-                {
-                    id: 'register3',
-                    title: 'Register',
-                    type: 'item',
-                    url: '/register',
-                    target: true
-                }
-            ]
+            breadcrumbs: false
         }
+        // {
+        //     id: 'icons',
+        //     title: 'Icons',
+        //     type: 'collapse',
+        //     icon: icons.IconWindmill,
+        //     children: [
+        //         {
+        //             id: 'tabler-icons',
+        //             title: 'Tabler Icons',
+        //             type: 'item',
+        //             url: '/icons/tabler-icons',
+        //             breadcrumbs: false
+        //         },
+        //         {
+        //             id: 'material-icons',
+        //             title: 'Material Icons',
+        //             type: 'item',
+        //             url: '/icons/material-icons',
+        //             breadcrumbs: false
+        //         }
+        //     ]
+        // }
     ]
 };
 

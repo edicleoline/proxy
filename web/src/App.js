@@ -1,13 +1,10 @@
 import { useSelector } from 'react-redux';
 import { connect } from 'react-redux';
-
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline, StyledEngineProvider } from '@mui/material';
-
 import Routes from 'routes';
 import themes from 'themes';
 import NavigationScroll from 'layout/NavigationScroll';
-
 import socket from 'services/socketio';
 import { store } from 'store';
 import setModemsItems from 'store/actions/setModemsItems';
@@ -19,6 +16,7 @@ import addNotification from 'store/actions/addNotification';
 import { FormattedMessage } from 'react-intl';
 import IntlMessageFormat from 'intl-messageformat';
 import { locale, messages } from 'i18n';
+import { useEffect } from 'react';
 
 socket.on('modems', (modems) => {
     //console.log(modems);
@@ -95,6 +93,10 @@ socket.on('disconnect', () => {
 
 const App = () => {
     const customization = useSelector((state) => state.customization);
+
+    useEffect(() => {
+        store.dispatch(setModemsItems([], []));
+    }, []);
 
     return (
         <StyledEngineProvider injectFirst>

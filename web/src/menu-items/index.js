@@ -1,12 +1,12 @@
 import dashboard from './dashboard';
+import playground from './playground';
 import configurations from './configurations';
-import utilities from './utilities';
-import other from './other';
+import support from './support';
 
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-    items: [dashboard, configurations, utilities, other]
+    items: [dashboard, playground, configurations, support]
 };
 
 export default menuItems;
