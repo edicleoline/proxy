@@ -282,9 +282,9 @@ class ModemsObserver():
                 print('ready!!')
                 try:
                     external_ip = modem_state.infra_modem.external_ip_through_device(timeout = self.settings.modem_status_external_ip_timeout)
+                    if external_ip:
+                        self.cloacker_service.add_or_update(Cloacker(id = external_ip_cloacker_id, interval = self.settings.modem_status_external_ip_interval))
                 except TimeoutException: pass
-
-                self.cloacker_service.add_or_update(Cloacker(id = external_ip_cloacker_id, interval = self.settings.modem_status_external_ip_interval))
 
             # print(external_ip_cloacker)
             if modem_state.is_connected != True: continue
