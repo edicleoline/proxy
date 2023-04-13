@@ -28,7 +28,8 @@ class Wan:
             resp = session.get('https://ipecho.net/plain', timeout=5).text
             print(resp)
             return resp
-        except:
+        except Exception as e:
+            print(str(e))
             pass
 
         return None
