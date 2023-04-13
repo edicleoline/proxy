@@ -384,7 +384,7 @@ class Modem:
                 try:
                     old_ip = self.wan().try_get_current_ip(
                         event_stop = self.event_stop,
-                        timeout = self.settings.current_ip_before_rotate_timeout if self.settings else 10
+                        timeout = self.settings.external_ip_before_rotate_timeout if self.settings else 10
                     )
                 except Exception: pass
             else:
@@ -420,7 +420,7 @@ class Modem:
                 try:
                     new_ip = self.wan().try_get_current_ip(
                         event_stop = self.event_stop, 
-                        timeout = self.settings.current_ip_after_rotate_timeout if self.settings else 30
+                        timeout = self.settings.external_ip_after_rotate_timeout if self.settings else 30
                     )
                 except Exception: pass
 
