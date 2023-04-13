@@ -305,6 +305,7 @@ class ModemsObserver():
                 except requests.exceptions.ConnectionError as e:
                     print('maxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx retry error (requests)!!!')
                     print(str(e))
+                    #HTTPSConnectionPool(host='ipecho.net', port=443): Max retries exceeded with url: /plain (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x726e6280>: Failed to establish a new connection: [Errno 113] No route to host'))
 
             if modem_state.is_connected != True: continue
 
