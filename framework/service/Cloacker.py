@@ -18,10 +18,7 @@ class Cloacker():
     def ready(self):
         if self.suspended == True or self.locked == True: return False
 
-        if self.inverted == True:
-            self.inverted = False
-            self.reset()
-            return True
+        if self.inverted == True: return True
 
         diff = int((self.ready_at - datetime.now()).total_seconds())
         print('difffffffff {0} ready_at {1}'.format(diff, self.ready_at))
@@ -33,6 +30,7 @@ class Cloacker():
     def reset(self):
         self.ready_at = datetime.now() + timedelta(seconds = self.interval)
         self.locked = False
+        self.revert()
     
     def suspend(self):
         self.suspended = True
@@ -43,6 +41,8 @@ class Cloacker():
     def invert(self):
         self.inverted = True
 
+    def revert(self):
+        self.inverted = False
 
 class CloackerService():
     settings: Settings = None
