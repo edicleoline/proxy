@@ -26,6 +26,7 @@ class Wan:
             session.mount("http://", adapter)
             session.mount("https://", adapter)
             resp = session.get('https://ipecho.net/plain', timeout=5).text
+            print(resp)
             return resp
         except:
             pass
