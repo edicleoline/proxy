@@ -12,14 +12,7 @@ class DeviceModel():
         self.id = id
         self.model = model
         self.type = type
-        self.created_at = created_at    
-    
-    def json(self):
-        return {
-            'id': self.id,
-            'model': self.model,
-            'type': self.type
-        }
+        self.created_at = created_at        
 
     @classmethod
     def find_by_id(cls, id: int):
@@ -31,6 +24,20 @@ class DeviceModel():
             return None
 
         return DeviceModel(id = row[0], model = row[1], type = row[2], created_at = row[3])
+    
+    @classmethod
+    def all(cls):
+        conn = connection()
+        rows = conn.execute("select id from device order by id asc").fetchall()
+        conn.close(True)
+
+        devices = []
+        for row in rows:
+            devices.append(
+                DeviceModel.find_by_id(row[0])
+            )
+
+        return devices
 
     def save_to_db(self):
         conn = connection()

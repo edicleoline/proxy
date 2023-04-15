@@ -261,10 +261,10 @@ const Modems = () => {
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell>Modem</TableCell>
-                                                <TableCell align="left">Modelo</TableCell>
+                                                <TableCell align="left">Dispositivo</TableCell>
                                                 <TableCell align="left">Porta</TableCell>
                                                 <TableCell align="left">Status</TableCell>
-                                                <TableCell align="left">IP externo</TableCell>
+                                                <TableCell align="left">IPv4 externo</TableCell>
                                                 <TableCell align="right">Provedor</TableCell>
                                                 <TableCell align="right">Rede</TableCell>
                                                 <TableCell align="center">Sinal</TableCell>

@@ -6,6 +6,8 @@ import Loadable from 'ui-component/Loadable';
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 
 const Modems = Loadable(lazy(() => import('views/modems')));
+const ProxyUsers = Loadable(lazy(() => import('views/proxy/users')));
+
 const Sms = Loadable(lazy(() => import('views/sms')));
 
 const Devices = Loadable(lazy(() => import('views/settings/devices')));
@@ -37,11 +39,20 @@ const MainRoutes = {
             ]
         },
         {
-            path: '/',
+            path: 'proxy',
             children: [
                 {
                     path: 'modems',
                     element: <Modems />
+                }
+            ]
+        },
+        {
+            path: 'proxy',
+            children: [
+                {
+                    path: 'users',
+                    element: <ProxyUsers />
                 }
             ]
         },

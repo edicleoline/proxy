@@ -1,11 +1,11 @@
-import { IconAdjustments, IconAccessPoint, IconDeviceMobileMessage, IconRouter } from '@tabler/icons';
+import { IconDeviceMobileMessage, IconRouter, IconAccessPoint, IconGitBranch, IconUsers } from '@tabler/icons';
 
 const icons = {
-    IconAdjustments,
-    IconAccessPoint,
-
     IconRouter,
-    IconDeviceMobileMessage
+    IconDeviceMobileMessage,
+    IconAccessPoint,
+    IconGitBranch,
+    IconUsers
 };
 
 const playground = {
@@ -15,12 +15,28 @@ const playground = {
     type: 'group',
     children: [
         {
-            id: 'modems',
-            title: 'Modems',
-            type: 'item',
-            url: '/modems',
-            icon: icons.IconRouter,
-            breadcrumbs: false
+            id: 'playground-proxy',
+            title: 'Proxy',
+            type: 'collapse',
+            icon: icons.IconGitBranch,
+            children: [
+                {
+                    id: 'playground-proxy-modems',
+                    title: 'Modems',
+                    type: 'item',
+                    icon: icons.IconRouter,
+                    url: '/proxy/modems',
+                    target: false
+                },
+                {
+                    id: 'playground-proxy-users',
+                    title: 'Usuários',
+                    type: 'item',
+                    icon: icons.IconUsers,
+                    url: '/proxy/users',
+                    target: false
+                }
+            ]
         },
         {
             id: 'sms',
@@ -30,29 +46,6 @@ const playground = {
             icon: icons.IconDeviceMobileMessage,
             breadcrumbs: false
         }
-        // {
-        //     id: 'settings',
-        //     title: 'Configurações',
-        //     type: 'collapse',
-        //     icon: icons.IconAdjustments,
-
-        //     children: [
-        //         {
-        //             id: 'login3',
-        //             title: 'Login',
-        //             type: 'item',
-        //             url: '/login',
-        //             target: true
-        //         },
-        //         {
-        //             id: 'register3',
-        //             title: 'Register',
-        //             type: 'item',
-        //             url: '/register',
-        //             target: true
-        //         }
-        //     ]
-        // }
     ]
 };
 

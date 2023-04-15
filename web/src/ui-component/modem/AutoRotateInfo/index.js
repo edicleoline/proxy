@@ -80,7 +80,7 @@ const AutoRotateInfo = (props) => {
                     <AutoRotateInfoContent>
                         <FormattedMessage
                             id="app.components.modem.rotate.automated.info.description"
-                            values={{ modemId: modem?.id, formattedDateTime: runAtFormattedDateTime }}
+                            values={{ modemId: modem?.modem?.id, formattedDateTime: runAtFormattedDateTime }}
                         />
                         <br></br>
                         <FormattedMessage

@@ -1,5 +1,5 @@
 import { IconTypography, IconPalette, IconShadow, IconWindmill } from '@tabler/icons';
-import { IconDeviceMobile, IconArrowAutofitContent, IconAdjustments } from '@tabler/icons';
+import { IconDeviceMobile, IconArrowAutofitContent, IconAdjustments, IconRouter } from '@tabler/icons';
 
 const icons = {
     IconTypography,
@@ -9,7 +9,8 @@ const icons = {
 
     IconDeviceMobile,
     IconArrowAutofitContent,
-    IconAdjustments
+    IconAdjustments,
+    IconRouter
 };
 
 const configurations = {
@@ -17,6 +18,14 @@ const configurations = {
     title: 'Configurações',
     type: 'group',
     children: [
+        {
+            id: 'settings-modems',
+            title: 'Modems',
+            type: 'item',
+            url: '/settings/modems',
+            icon: icons.IconRouter,
+            breadcrumbs: false
+        },
         {
             id: 'settings-devices',
             title: 'Dispositivos',

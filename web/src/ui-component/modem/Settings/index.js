@@ -1,6 +1,5 @@
 import { Grid, Box, Card, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
-
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -21,16 +20,15 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Divider from '@mui/material/Divider';
-
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { BootstrapDialogTitle, BootstrapDialogActions } from 'ui-component/extended/BootstrapDialog';
 import { IpFilter } from 'ui-component/IpFilter';
-
-import { getUSBPorts } from 'services/api/server';
 import { saveModem } from 'services/api/modem';
 import cloneDeep from 'lodash/cloneDeep';
 import objectHash from 'object-hash';
+import DeviceSelector from 'ui-component/device/Selector';
+import ModemPortSelector from 'ui-component/modem-port/Selector';
 
 const SettingsDialog = (props) => {
     const { modem, open, onClose, onConfirm, ...other } = props;
@@ -71,9 +69,9 @@ const SettingsDialog = (props) => {
         _setModem(cloned);
     };
 
-    const handleChangeUSBPort = (portId) => {
+    const handleChangePort = (port) => {
         const modem = { ..._modem.modem };
-        modem.usb = { id: portId };
+        modem.usb = { id: port.id };
         const cloned = cloneDeep(_modem);
         cloned.usb = modem.usb;
         _setModem(cloned);
@@ -147,28 +145,12 @@ const SettingsDialog = (props) => {
             });
     };
 
-    const [isUSBPortsLoading, setIsUSBPortsLoading] = useState(false);
-    const [usbPorts, setUSBPorts] = useState([]);
+    const [isDevicesLoading, setDevicesLoading] = useState(false);
+    const [devices, setDevices] = useState([]);
 
-    useEffect(() => {
-        if (open == true) {
-            setIsUSBPortsLoading(true);
-            getUSBPorts()
-                .then(
-                    (response) => {
-                        if (response.items) {
-                            setUSBPorts(response.items);
-                        }
-                    },
-                    (err) => {
-                        console.log('ServerUSBPorts', err);
-                    }
-                )
-                .finally(() => {
-                    setIsUSBPortsLoading(false);
-                });
-        }
-    }, [open]);
+    const handleChangeDevice = (deviceId) => {
+        console.log(deviceId);
+    };
 
     return (
         <Dialog
@@ -186,22 +168,7 @@ const SettingsDialog = (props) => {
             <DialogContent>
                 <Stack spacing={2.5} sx={{ paddingTop: 0 }}>
                     <FormControl sx={{ maxWidth: 160 }}>
-                        <InputLabel id="modem-setting-port-label">Porta USB</InputLabel>
-                        <Select
-                            labelId="modem-setting-port-label"
-                            id="modem-setting-port-select"
-                            value={_modem ? _modem.usb?.id : ''}
-                            label="Porta USB"
-                            onChange={(event) => {
-                                handleChangeUSBPort(event.target.value);
-                            }}
-                        >
-                            {usbPorts.map((usbPort) => (
-                                <MenuItem value={usbPort.id} key={usbPort.id}>
-                                    {usbPort.port}
-                                </MenuItem>
-                            ))}
-                        </Select>
+                        <ModemPortSelector port={_modem?.usb} onChange={handleChangePort} />
                     </FormControl>
                     <TextField
                         sx={{ maxWidth: 250 }}
@@ -213,6 +180,9 @@ const SettingsDialog = (props) => {
                             handleChangeModemAddrId(event.target.value);
                         }}
                     />
+                    <FormControl sx={{ maxWidth: 250 }}>
+                        <DeviceSelector />
+                    </FormControl>
                     <Divider />
                     <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
                         Proxy
