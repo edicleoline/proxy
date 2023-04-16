@@ -5,14 +5,33 @@ import MenuItem from '@mui/material/MenuItem';
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import * as React from 'react';
+import { getDevices } from 'services/api/device';
 
 const DeviceSelector = ({ device, onChange }) => {
     const [loading, setLoading] = useState(false);
     const [devices, setDevices] = useState([]);
 
+    useEffect(() => {
+        setLoading(true);
+        getDevices()
+            .then(
+                (response) => {
+                    if (response.items) {
+                        setDevices(response.items);
+                    }
+                },
+                (err) => {
+                    console.log('device/selector', err);
+                }
+            )
+            .finally(() => {
+                setLoading(false);
+            });
+    }, []);
+
     const handleChange = (deviceId) => {
         console.log(deviceId);
-        onChange(deviceId);
+        if (onChange) onChange(devices.find((device) => device.id === deviceId));
     };
 
     return (
@@ -21,7 +40,7 @@ const DeviceSelector = ({ device, onChange }) => {
             <Select
                 labelId="device-label"
                 id="device-select"
-                value={device ? device.id : ''}
+                value={devices && devices.length > 0 && device ? device.id : ''}
                 label="Dispositivo"
                 onChange={(event) => {
                     handleChange(event.target.value);
@@ -29,7 +48,7 @@ const DeviceSelector = ({ device, onChange }) => {
             >
                 {devices.map((device) => (
                     <MenuItem value={device.id} key={device.id}>
-                        {device.name}
+                        {device.model}
                     </MenuItem>
                 ))}
             </Select>

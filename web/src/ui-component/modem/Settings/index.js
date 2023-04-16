@@ -145,11 +145,12 @@ const SettingsDialog = (props) => {
             });
     };
 
-    const [isDevicesLoading, setDevicesLoading] = useState(false);
-    const [devices, setDevices] = useState([]);
-
-    const handleChangeDevice = (deviceId) => {
-        console.log(deviceId);
+    const handleChangeDevice = (device) => {
+        const modem = { ..._modem.modem };
+        modem.modem.device = { id: device.id };
+        const cloned = cloneDeep(_modem);
+        cloned.device = modem.device;
+        _setModem(cloned);
     };
 
     return (
@@ -181,7 +182,7 @@ const SettingsDialog = (props) => {
                         }}
                     />
                     <FormControl sx={{ maxWidth: 250 }}>
-                        <DeviceSelector />
+                        <DeviceSelector device={_modem?.modem.device} onChange={handleChangeDevice} />
                     </FormControl>
                     <Divider />
                     <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>

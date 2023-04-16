@@ -10,10 +10,6 @@ const ModemPortSelector = ({ port, onChange }) => {
     const [loading, setLoading] = useState(false);
     const [ports, setPorts] = useState([]);
 
-    const handleChange = (portId) => {
-        onChange(ports.find((port) => port.id == portId));
-    };
-
     useEffect(() => {
         setLoading(true);
         getUSBPorts()
@@ -31,6 +27,10 @@ const ModemPortSelector = ({ port, onChange }) => {
                 setLoading(false);
             });
     }, []);
+
+    const handleChange = (portId) => {
+        if (onChange) onChange(ports.find((port) => port.id === portId));
+    };
 
     return (
         <React.Fragment>

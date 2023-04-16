@@ -1,4 +1,5 @@
 import sys
+from framework.models.middleware import MiddlewareModel
 from framework.models.server import ServerModel
 from framework.models.user import UserModel
 from framework.models.device import DeviceModel
@@ -70,13 +71,29 @@ if __name__ == '__main__':
 
     try:
         conn.execute("""
+            CREATE TABLE middleware (
+            id INTEGER NOT NULL, 
+            name VARCHAR(80), 
+            class_name VARCHAR(80), 
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+            PRIMARY KEY (id),
+            UNIQUE (class_name)
+            )
+            """)
+    except SQLError:
+        pass
+
+    try:
+        conn.execute("""
             CREATE TABLE device (
             id INTEGER NOT NULL, 
             model VARCHAR(40), 
             type VARCHAR(80), 
+            middleware_id INTEGER,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
             PRIMARY KEY (id),
-            UNIQUE (model, type)
+            UNIQUE (model, type),
+            FOREIGN KEY(middleware_id) REFERENCES middleware (id)
             )
             """)
     except SQLError:
@@ -245,11 +262,21 @@ if __name__ == '__main__':
         pass
 
     try:
+        middlewares = [
+            { 'name': 'MF79S', 'class_name': 'MF79S' }            
+        ]
+        for d in middlewares:
+            middleware_model = MiddlewareModel(name = d['name'], class_name = d['class_name'])
+            middleware_model.save_to_db()
+    except ConstraintError:
+        pass
+
+    try:
         devices = [
-            { 'model': 'MF79S', 'type': '4G_DONGLE' }            
+            { 'model': 'MF79S', 'type': '4G_DONGLE', 'middleware_id': 1 }            
         ]
         for d in devices:
-            device_model = DeviceModel(model = d['model'], type = d['type'])
+            device_model = DeviceModel(model = d['model'], type = d['type'], middleware_id = d['middleware_id'])
             device_model.save_to_db()
     except ConstraintError:
         pass

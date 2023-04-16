@@ -153,12 +153,12 @@ class USBPortModel():
 
         if self.id == None:
             conn.execute("insert into usb_port (port, status, server_id) values (?, ?, ?)", (
-                self.port, self.status.value, self.server_id
+                self.port, self.status, self.server_id
             ))
             self.id = conn.last_insert_rowid()
         else:
             conn.execute("update usb_port set status=? where id = ?", (
-                self.status.value, self.id
+                self.status, self.id
             ))
 
         conn.close(True)

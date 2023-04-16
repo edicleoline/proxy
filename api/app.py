@@ -8,6 +8,7 @@ from flask_jwt_extended import JWTManager
 from resources.modem import ModemDiagnose, ModemLockWizardStepResponse, ModemReboot, ModemRotate, ModemScheduleAutoRotate, Modems, Modem, ModemLogs
 from resources.proxyuser import ProxyUserByUsername, ProxyUserModemFilters, ProxyUsers
 from resources.device import Devices
+from resources.middleware import Middlewares
 from blocklist import BLOCKLIST
 from resources.user import UserRegister, UserLogin, TokenRefresh, UserLogout
 from resources.server import Server, ServerUSBPorts
@@ -112,6 +113,7 @@ api.add_resource(ProxyUserByUsername, "/proxy-user/by-username/<string:username>
 api.add_resource(ProxyUserModemFilters, "/proxy-user/<int:proxy_user_id>/modem/<int:modem_id>/filters")
 
 api.add_resource(Devices, "/devices")
+api.add_resource(Middlewares, "/middlewares")
 
 #https://github.com/ajaichemmanam/react-flask-socketio/blob/7cdfe2c76a8ad4eb36e097dd30e2b273882a08fb/server.py
 

@@ -54,14 +54,6 @@ const Modems = () => {
     // const [isLoading, setLoading] = useState(true);
 
     const [server, setServer] = useState([]);
-    const loadServer = () => {
-        getServer().then(
-            (response) => {
-                setServer(response);
-            },
-            (error) => console.log('server error', error)
-        );
-    };
 
     const [tableMaxHeight, setTableMaxHeight] = useState(null);
     const _resizeTable = () => {
@@ -71,7 +63,13 @@ const Modems = () => {
     };
 
     useEffect(() => {
-        loadServer();
+        getServer().then(
+            (response) => {
+                setServer(response);
+            },
+            (error) => console.log('server error', error)
+        );
+
         _resizeTable();
 
         window.addEventListener('resize', _resizeTable);
@@ -245,11 +243,8 @@ const Modems = () => {
     return (
         <MainCard
             title="Modems"
-            contentClass={'test'}
             secondary={<SecondaryAction link="https://next.material-ui.com/system/typography/" />}
             contentSX={{ padding: '0 !important' }}
-            sx={{ maxHeight: '900px' }}
-            id="modems-main-paper"
         >
             <Grid container spacing={0}>
                 <Grid item xs={12} sm={12}>
