@@ -2,6 +2,7 @@ import time
 import requests
 from threading import Event
 from framework.error.exception import TimeoutException
+from framework.middleware.factory import MiddlewareFactory
 from framework.models.modemdiagnose import ModemDiagnoseModel, ModemDiagnoseOwner, ModemDiagnoseType
 from framework.models.modemthreadtask import TaskWizard, TaskWizardStep, TaskWizardStepType
 from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
@@ -12,7 +13,7 @@ from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 from framework.infra.netiface import NetIface
 from framework.infra.usb import USB
 from framework.infra.route import Route
-from framework.device.zte.mf79s import MF79S
+# from framework.device.zte.mf79s import MF79S
 from framework.device.zte.error.exception import ConnectException
 from enum import Enum
 from framework.proxy.factory import ProxyService
@@ -78,27 +79,35 @@ class Modem:
         if iface == None or iface.ifaddresses == None: return None
         return Wan(settings = self.settings, interface = iface.interface)
 
-    def get_device_middleware(self, retries_ip = 5):
-        middleware = None
-
+    def get_device_middleware(self, retries_ip = 5):        
         iface = self.iface()
         if iface == None or iface.ifaddresses == None: return None
 
-        ifaddress = iface.ifaddresses[0]
-        gateway = NetIface.get_gateway_from_ipv4(ipv4 = ifaddress['addr'])
+        middleware_factory = MiddlewareFactory(
+            middleware = self.modem()._device.middleware,
+            params = { 'password': 'vivo' },
+            iface = iface,
+            settings = self.settings
+        )
+        middleware_instance = middleware_factory.instance()
+        return middleware_instance
+    
+        # middleware = None
 
-        if True:#device != None:
-            if True:#modem.model == 'MF79S':
-                middleware = MF79S(
-                    settings = self.settings,
-                    addr_id = self.modem().addr_id,
-                    interface = iface.interface,
-                    gateway = gateway,
-                    password = 'vivo',
-                    retries_ip = retries_ip
-                )
+        # ifaddress = iface.ifaddresses[0]
+        # gateway = NetIface.get_gateway_from_ipv4(ipv4 = ifaddress['addr'])
 
-        return middleware
+        # if True:#device != None:
+        #     if True:#modem.model == 'MF79S':
+        #         middleware = MF79S(
+        #             settings = self.settings,
+        #             addr_id = self.modem().addr_id,
+        #             interface = iface.interface,
+        #             gateway = gateway,
+        #             password = 'vivo',
+        #             retries_ip = retries_ip
+        #         )
+        # return middleware
 
     def wait_until_modem_connection(self, timeout = 60):
         timeout_at = datetime.now() + timedelta(seconds = timeout)
