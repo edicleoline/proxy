@@ -13,8 +13,6 @@ from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 from framework.infra.netiface import NetIface
 from framework.infra.usb import USB
 from framework.infra.route import Route
-# from framework.device.zte.mf79s import MF79S
-from framework.device.zte.error.exception import ConnectException
 from enum import Enum
 from framework.proxy.factory import ProxyService
 from framework.settings import Settings
@@ -84,7 +82,7 @@ class Modem:
         if iface == None or iface.ifaddresses == None: return None
 
         middleware_factory = MiddlewareFactory(
-            middleware = self.modem()._device.middleware,
+            middleware = self.modem().device.middleware,
             params = { 'password': 'vivo' },
             iface = iface,
             settings = self.settings

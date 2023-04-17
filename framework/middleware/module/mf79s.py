@@ -159,6 +159,7 @@ class MF79S:
         
     def reboot_and_wait(self):
         self.reboot()
+
         while True:            
             if self.is_interface_connected == False: break
             time.sleep(1)

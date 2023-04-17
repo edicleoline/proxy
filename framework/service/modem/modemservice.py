@@ -1,8 +1,5 @@
 import copy
 from datetime import datetime, timedelta
-import requests
-
-import urllib3
 from framework.error.exception import TimeoutException
 from framework.manager.modem import ModemManager, ModemThreadData
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
@@ -13,7 +10,6 @@ from dataclasses import dataclass
 from dataclasses_json import dataclass_json
 from threading import Thread, Event, Lock
 from framework.service.Cloacker import Cloacker, CloackerService
-from framework.service.route.routeservice import RouteService
 from framework.service.server.servereventservice import EventType, Event as ServerEvent
 from framework.util.format import HumanBytes
 from time import sleep

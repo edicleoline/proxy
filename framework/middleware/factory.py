@@ -11,7 +11,6 @@ class MiddlewareFactory():
         self.iface = iface
         self.settings = settings
 
-    @classmethod
     def instance(self):
         middleware = MF79S(
             iface = self.iface,
