@@ -263,7 +263,7 @@ if __name__ == '__main__':
 
     try:
         middlewares = [
-            { 'name': 'MF79S', 'class_name': 'MF79S' }            
+            { 'name': 'ZTE MF79S', 'class_name': 'MF79S' }            
         ]
         for d in middlewares:
             middleware_model = MiddlewareModel(name = d['name'], class_name = d['class_name'])

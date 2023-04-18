@@ -70,6 +70,8 @@
     "app.log.modem.empty": "Nenhum log registrado até agora.\nQuando algum evento for disparado, ele aparecerá aqui.",
 
     "app.notification.modem.unexpectedDisconnect": "O modem {modemId} foi desconectado de forma inesperada",
-    "app.notification.modem.connect": "O modem {modemId} foi conectado"
+    "app.notification.modem.connect": "O modem {modemId} foi conectado",
+
+    "app.middleware.model.mf79s.description": "Funciona para modem 4G ZTE MF79S\nhttps://configuraraparelhos.claro.com.br/zte/mf79s"
 
 }

@@ -40,7 +40,7 @@ const Devices = () => {
     const [loading, setLoading] = useState(false);
     const [devices, setDevices] = useState([]);
 
-    useEffect(() => {
+    const loadDevices = () => {
         setLoading(true);
         getDevices()
             .then(
@@ -56,6 +56,10 @@ const Devices = () => {
             .finally(() => {
                 setLoading(false);
             });
+    };
+
+    useEffect(() => {
+        loadDevices();
     }, []);
 
     const [anchorDeviceMenuEl, setAnchorDeviceMenuEl] = useState(null);
@@ -120,7 +124,7 @@ const Devices = () => {
                                                     </TableCell>
                                                     <TableCell align="left">{device.model}</TableCell>
                                                     <TableCell align="left">{deviceTypeString(device.type)}</TableCell>
-                                                    <TableCell align="left"></TableCell>
+                                                    <TableCell align="left">{device?.middleware?.name}</TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>

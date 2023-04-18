@@ -14,9 +14,10 @@ import * as React from 'react';
 import { getMiddlewares } from 'services/api/middleware';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import { IconDotsVertical } from '@tabler/icons';
-import MiddlewareActions from './actions';
+import { FormattedMessage } from 'react-intl';
 
 const Middlewares = () => {
     const [tableMaxHeight, setTableMaxHeight] = useState(null);
@@ -39,7 +40,7 @@ const Middlewares = () => {
     const [loading, setLoading] = useState(false);
     const [middlewares, setMiddlewares] = useState([]);
 
-    useEffect(() => {
+    const loadMiddlewares = () => {
         setLoading(true);
         getMiddlewares()
             .then(
@@ -55,6 +56,10 @@ const Middlewares = () => {
             .finally(() => {
                 setLoading(false);
             });
+    };
+
+    useEffect(() => {
+        loadMiddlewares();
     }, []);
 
     const [anchorMiddlewareMenuEl, setAnchorMiddlewareMenuEl] = useState(null);
@@ -69,7 +74,7 @@ const Middlewares = () => {
     };
 
     return (
-        <MainCard title="Middlewares" contentSX={{ padding: '0 !important' }} secondary={<MiddlewareActions />}>
+        <MainCard title="Middlewares" contentSX={{ padding: '0 !important' }}>
             <Grid container spacing={0}>
                 <Grid item xs={12} sm={12}>
                     <SubCard contentSX={{ padding: '0 !important' }} sx={{ border: 'none 0', borderRadius: '0' }}>
@@ -81,8 +86,8 @@ const Middlewares = () => {
                                             <TableRow>
                                                 <TableCell>Middleware</TableCell>
                                                 <TableCell align="left">Nome</TableCell>
-                                                <TableCell align="left">Tipo</TableCell>
-                                                <TableCell align="left">Middleware</TableCell>
+                                                <TableCell align="left">Versão</TableCell>
+                                                <TableCell align="left">Descrição</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -117,13 +122,19 @@ const Middlewares = () => {
                                                                 'aria-labelledby': `middleware-button-${middleware.id}`
                                                             }}
                                                         >
-                                                            <MenuItem>Alterar</MenuItem>
-                                                            <MenuItem>Excluir</MenuItem>
+                                                            <MenuItem>Verificar atualização</MenuItem>
                                                         </Menu>
                                                     </TableCell>
                                                     <TableCell align="left">{middleware.name}</TableCell>
-                                                    <TableCell align="left">{middleware.type}</TableCell>
-                                                    <TableCell align="left"></TableCell>
+                                                    <TableCell align="left">1.0.0</TableCell>
+                                                    <TableCell align="left">
+                                                        <span style={{ whiteSpace: 'pre-wrap' }}>
+                                                            <FormattedMessage
+                                                                id="app.middleware.model.mf79s.description"
+                                                                values={{ name: middleware.name }}
+                                                            />
+                                                        </span>
+                                                    </TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>

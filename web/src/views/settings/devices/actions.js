@@ -98,7 +98,7 @@ const DeviceActions = () => {
     };
 
     return (
-        <Button variant="contained" onClick={handleClick}>
+        <Button variant="outlined" onClick={handleClick}>
             Adicionar dispositivo
         </Button>
     );

@@ -390,7 +390,12 @@ const Modems = () => {
                                                             </MenuItem>
                                                         </Menu>
                                                     </TableCell>
-                                                    <TableCell align="left">{item.modem.modem.device.model}</TableCell>
+                                                    <TableCell align="left">
+                                                        <Grid container justifyContent="flex-start" alignItems="start" direction="column">
+                                                            {/* <Grid item>{item.modem.modem.device.type}</Grid> */}
+                                                            <Grid item>{item.modem.modem.device.model}</Grid>
+                                                        </Grid>
+                                                    </TableCell>
                                                     <TableCell align="left">{item.modem.usb.port}</TableCell>
                                                     <TableCell align="left" sx={{ position: 'relative' }}>
                                                         <ModemStatus

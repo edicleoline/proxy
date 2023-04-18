@@ -11,7 +11,7 @@ from framework.settings import Settings
 sys.path.append('..')
 from framework.util.wan import Wan
 
-class MF79S:
+class mf79s:
     def __init__(self, iface: NetIface, params: dict, settings: Settings):
         self.iface = iface
         self.params = params

@@ -77,35 +77,15 @@ class Modem:
         if iface == None or iface.ifaddresses == None: return None
         return Wan(settings = self.settings, interface = iface.interface)
 
-    def get_device_middleware(self, retries_ip = 5):        
-        iface = self.iface()
-        if iface == None or iface.ifaddresses == None: return None
-
+    def get_device_middleware(self):        
         middleware_factory = MiddlewareFactory(
             middleware = self.modem().device.middleware,
             params = { 'password': 'vivo' },
-            iface = iface,
+            iface = self.iface(),
             settings = self.settings
         )
         middleware_instance = middleware_factory.instance()
         return middleware_instance
-    
-        # middleware = None
-
-        # ifaddress = iface.ifaddresses[0]
-        # gateway = NetIface.get_gateway_from_ipv4(ipv4 = ifaddress['addr'])
-
-        # if True:#device != None:
-        #     if True:#modem.model == 'MF79S':
-        #         middleware = MF79S(
-        #             settings = self.settings,
-        #             addr_id = self.modem().addr_id,
-        #             interface = iface.interface,
-        #             gateway = gateway,
-        #             password = 'vivo',
-        #             retries_ip = retries_ip
-        #         )
-        # return middleware
 
     def wait_until_modem_connection(self, timeout = 60):
         timeout_at = datetime.now() + timedelta(seconds = timeout)
