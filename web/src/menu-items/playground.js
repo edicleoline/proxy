@@ -44,7 +44,8 @@ const playground = {
             type: 'item',
             url: '/sms',
             icon: icons.IconDeviceMobileMessage,
-            breadcrumbs: false
+            breadcrumbs: false,
+            badge: '3'
         }
     ]
 };

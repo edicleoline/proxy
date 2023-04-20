@@ -150,11 +150,11 @@ const DiagnoseStepper = ({ modem }) => {
                     />
                     <BootstrapDialogActions>
                         {!running ? (
-                            <Button onClick={handleStart} variant="outlined" disabled={starting}>
+                            <Button onClick={handleStart} variant="contained" disabled={starting}>
                                 <FormattedMessage id="app.components.modem.Diagnose.start" />
                             </Button>
                         ) : (
-                            <Button onClick={handleStop} variant="outlined" disabled={enableCancel}>
+                            <Button onClick={handleStop} variant="contained" disabled={enableCancel}>
                                 <FormattedMessage id="app.components.modem.Diagnose.stop" />
                             </Button>
                         )}

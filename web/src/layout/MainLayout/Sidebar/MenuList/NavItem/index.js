@@ -2,18 +2,11 @@ import PropTypes from 'prop-types';
 import { forwardRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-
-// material-ui
 import { useTheme } from '@mui/material/styles';
 import { Avatar, Chip, ListItemButton, ListItemIcon, ListItemText, Typography, useMediaQuery } from '@mui/material';
-
-// project imports
 import { MENU_OPEN, SET_MENU } from 'store/actions/types';
-
-// assets
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-
-// ==============================|| SIDEBAR MENU LIST ITEMS ||============================== //
+import NavItemBadge from './NavItemBadge';
 
 const NavItem = ({ item, level }) => {
     const theme = useTheme();
@@ -94,6 +87,7 @@ const NavItem = ({ item, level }) => {
                     )
                 }
             />
+            {item.badge && <NavItemBadge content={item.badge} active={customization.isOpen.findIndex((id) => id === item.id) > -1} />}
             {item.chip && (
                 <Chip
                     color={item.chip.color}

@@ -47,7 +47,7 @@ const SettingsDialog = (props) => {
 
     const handleChangeProxyIpv4Http = (port) => {
         const http = { ..._modem.proxy.ipv4.http };
-        http.port = parseInt(port);
+        http.port = port && port.replace(/\s/g, '') != '' ? parseInt(port) : port;
         const cloned = cloneDeep(_modem);
         cloned.proxy.ipv4.http = http;
         _setModem(cloned);
@@ -55,7 +55,7 @@ const SettingsDialog = (props) => {
 
     const handleChangeProxyIpv4Socks = (port) => {
         const socks = { ..._modem.proxy.ipv4.socks };
-        socks.port = parseInt(port);
+        socks.port = port && port.replace(/\s/g, '') != '' ? parseInt(port) : port;
         const cloned = cloneDeep(_modem);
         cloned.proxy.ipv4.socks = socks;
         _setModem(cloned);
@@ -208,6 +208,19 @@ const SettingsDialog = (props) => {
                             handleChangeProxyIpv4Socks(event.target.value);
                         }}
                     />
+                    <FormControl sx={{ maxWidth: 300 }}>
+                        <InputLabel id="auth-type-label">Tipo de autenticação</InputLabel>
+                        <Select
+                            labelId="auth-type-label"
+                            id="auth-type-select"
+                            // value={ports && ports.length > 0 && port ? port.id : ''}
+                            label="Tipo de autenticação"
+                            // onChange={(event) => handleChange(event.target.value)}
+                        >
+                            <MenuItem value={0}>Nenhuma</MenuItem>
+                            <MenuItem value={1}>Usuário e senha</MenuItem>
+                        </Select>
+                    </FormControl>
                     <Divider />
                     <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
                         Rotacionamento
@@ -267,7 +280,7 @@ const SettingsDialog = (props) => {
                 </Stack>
             </DialogContent>
             <BootstrapDialogActions>
-                <Button onClick={handleApplyClick} variant="outlined" disabled={!_modemChanged}>
+                <Button onClick={handleApplyClick} variant="contained" disabled={!_modemChanged}>
                     Aplicar
                 </Button>
             </BootstrapDialogActions>

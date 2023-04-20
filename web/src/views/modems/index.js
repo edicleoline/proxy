@@ -236,7 +236,7 @@ const Modems = () => {
 
     useEffect(() => {
         if (modems && autoRotateInfoModem) {
-            setAutoRotateInfoModem(modems.find((modem) => modem.id == autoRotateInfoModem.id));
+            setAutoRotateInfoModem(modems.find((modem) => modem.modem.id == autoRotateInfoModem.modem.id).modem);
         }
     }, [modems]);
 

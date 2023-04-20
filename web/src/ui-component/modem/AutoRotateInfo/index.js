@@ -22,9 +22,7 @@ const AutoRotateInfoFooter = styled.div`
     padding: 0 16px 16px 16px;
 `;
 
-const AutoRotateInfo = (props) => {
-    const { modem, open, onClose, ...other } = props;
-
+const AutoRotateInfo = ({ modem, open, onClose }) => {
     const [autoRotateSchedule, setAutoRotateSchedule] = useState(null);
     const [runAtFormattedDateTime, setRunAtFormattedDateTime] = useState(null);
 

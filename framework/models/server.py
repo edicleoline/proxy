@@ -1,5 +1,7 @@
 from enum import Enum
 import json
+from framework.enum.proxyauthtype import ProxyAuthType
+from framework.enum.proxyauthtype import proxy_auth_type_field
 from framework.models.installation import InstallationModel
 from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
 import psutil
@@ -163,25 +165,27 @@ class USBPortModel():
 
         conn.close(True)
 
+
 @dataclass_json
 @dataclass
-class ServerModemModel():
-    id: int
-    usb: USBPortModel
-    modem: ModemModel
+class ServerModemModel():    
+    id: int = None    
+    usb: USBPortModel = None
+    modem: ModemModel = None
     prevent_same_ip_users: bool = None
     auto_rotate: bool = None
     auto_rotate_time: int = None
     auto_rotate_hard_reset: bool = None
     auto_rotate_filter: ProxyUserIPFilterModel = None
-    schedule: ModemsAutoRotateAgendaItem = None
-    proxy: dict
+    schedule: ModemsAutoRotateAgendaItem = None    
+    proxy: dict = None    
 
     def __init__(
             self, id = None, 
             server_id = None, 
             modem_id = None, 
             usb_port_id = None, 
+            proxy_auth_type = ProxyAuthType.NONE,
             proxy_ipv4_http_port = None, 
             proxy_ipv4_socks_port = None, 
             proxy_ipv6_http_port = None, 
@@ -191,8 +195,8 @@ class ServerModemModel():
             auto_rotate_time = None,
             auto_rotate_hard_reset = True,
             auto_rotate_filter = None,
-            schedule: ModemsAutoRotateAgendaItem = None,
-            created_at = None
+            schedule: ModemsAutoRotateAgendaItem = None,            
+            created_at = None,            
         ):
         self.id = id
         self.server_id = server_id
@@ -200,6 +204,7 @@ class ServerModemModel():
         self._modem = None
         self.usb_port_id = usb_port_id
         self._usb = None
+        self.proxy_auth_type = proxy_auth_type
         self.proxy_ipv4_http_port = proxy_ipv4_http_port
         self.proxy_ipv4_socks_port = proxy_ipv4_socks_port
         self.proxy_ipv6_http_port = proxy_ipv6_http_port
@@ -209,7 +214,7 @@ class ServerModemModel():
         self.auto_rotate_time = auto_rotate_time
         self.auto_rotate_hard_reset = auto_rotate_hard_reset
         self.auto_rotate_filter = auto_rotate_filter
-        self.schedule = schedule
+        self.schedule = schedule        
         self.created_at = created_at
 
     @classmethod
@@ -230,6 +235,7 @@ class ServerModemModel():
                 auto_rotate_time,
                 auto_rotate_hard_reset,
                 auto_rotate_filter,
+                proxy_auth_type,
                 created_at 
                     FROM modem_server 
                     WHERE id=?""", 
@@ -255,7 +261,8 @@ class ServerModemModel():
             auto_rotate=True if row[9] and int(row[9]) == 1 else False,
             auto_rotate_time=row[10],
             auto_rotate_hard_reset=True if row[11] and int(row[11]) == 1 else False,
-            auto_rotate_filter=ProxyUserIPFilterModel.schema().loads(row[12], many=True) if row[12] != None else None
+            auto_rotate_filter=ProxyUserIPFilterModel.schema().loads(row[12], many=True) if row[12] != None else None,
+            proxy_auth_type=ProxyAuthType(row[13]) if row[13] else ProxyAuthType.NONE 
             # created_at=row[11]
         )
 
@@ -273,6 +280,7 @@ class ServerModemModel():
     @property
     def proxy(self):
         return {
+            'auth_type': self.proxy_auth_type.value,
             'ipv4': {
                 'http': {
                     'port': self.proxy_ipv4_http_port
@@ -327,9 +335,10 @@ class ServerModemModel():
                         auto_rotate,
                         auto_rotate_time,
                         auto_rotate_hard_reset,
-                        auto_rotate_filter
+                        auto_rotate_filter,
+                        proxy_auth_type
                     ) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", 
                 (
                     self.server_id, 
                     self.modem_id, 
@@ -342,7 +351,8 @@ class ServerModemModel():
                     1 if self.auto_rotate == True else 0,
                     int(self.auto_rotate_time) if self.auto_rotate_time else None,
                     1 if self.auto_rotate_hard_reset == True else 0,
-                    ProxyUserIPFilterModel.schema().dumps(self.auto_rotate_filter, many=True) if self.auto_rotate_filter else None
+                    ProxyUserIPFilterModel.schema().dumps(self.auto_rotate_filter, many=True) if self.auto_rotate_filter else None,
+                    self.proxy_auth_type.value if self.proxy_auth_type else ProxyAuthType.NONE
                 )
             )
             self.id = conn.last_insert_rowid()
@@ -357,7 +367,8 @@ class ServerModemModel():
                         auto_rotate=?,
                         auto_rotate_time=?,
                         auto_rotate_hard_reset=?,
-                        auto_rotate_filter=?
+                        auto_rotate_filter=?,
+                        proxy_auth_type=?
                             WHERE id = ?""", 
                 (
                     self.usb_port_id, 
@@ -368,6 +379,7 @@ class ServerModemModel():
                     int(self.auto_rotate_time) if self.auto_rotate_time else None,
                     1 if self.auto_rotate_hard_reset == True else 0,
                     ProxyUserIPFilterModel.schema().dumps(self.auto_rotate_filter, many=True) if self.auto_rotate_filter else None,
+                    self.proxy_auth_type.value if self.proxy_auth_type else ProxyAuthType.NONE,
                     self.id
                 )
             )

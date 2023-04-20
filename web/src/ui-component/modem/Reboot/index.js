@@ -122,7 +122,7 @@ const RebootDialog = (props) => {
                     </FormGroup>
                 </DialogContent>
                 <BootstrapDialogActions>
-                    <Button onClick={handleConfirmClick} disabled={isLoading} variant="outlined">
+                    <Button onClick={handleConfirmClick} disabled={isLoading} variant="contained">
                         <FormattedMessage id="app.labels.reboot" />
                     </Button>
                 </BootstrapDialogActions>

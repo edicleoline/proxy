@@ -78,6 +78,15 @@ const MainRoutes = {
             path: 'settings',
             children: [
                 {
+                    path: 'modems',
+                    element: <Modems />
+                }
+            ]
+        },
+        {
+            path: 'settings',
+            children: [
+                {
                     path: 'devices',
                     element: <Devices />
                 }

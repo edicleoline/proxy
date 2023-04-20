@@ -94,11 +94,9 @@ const Notification = (props) => {
             }}
             message={notification.message}
             action={
-                <React.Fragment>
-                    <Button aria-label="close" size="small" color="inherit" onClick={handleCloseNotification} sx={{ fontSize: '0.875rem' }}>
-                        Fechar
-                    </Button>
-                </React.Fragment>
+                <Button aria-label="close" size="small" color="inherit" onClick={handleCloseNotification} sx={{ fontSize: '0.875rem' }}>
+                    Fechar
+                </Button>
             }
         >
             {notification.props.alert === true ? (

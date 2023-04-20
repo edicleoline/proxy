@@ -207,7 +207,7 @@ const RotateDialog = (props) => {
                     </Stack>
                 </DialogContent>
                 <BootstrapDialogActions>
-                    <Button onClick={handleConfirmClick} variant="outlined" disabled={isLoading}>
+                    <Button onClick={handleConfirmClick} variant="contained" disabled={isLoading}>
                         Rotacionar
                     </Button>
                 </BootstrapDialogActions>

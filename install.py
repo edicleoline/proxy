@@ -1,4 +1,5 @@
 import sys
+from framework.enum.proxyauthtype import ProxyAuthType
 from framework.models.middleware import MiddlewareModel
 from framework.models.server import ServerModel
 from framework.models.user import UserModel
@@ -122,6 +123,7 @@ if __name__ == '__main__':
             server_id INTEGER, 
             modem_id INTEGER, 
             usb_port_id INTEGER,
+            proxy_auth_type VARCHAR(15),
             proxy_ipv4_http_port INTEGER,
             proxy_ipv4_socks_port INTEGER,
             proxy_ipv6_http_port INTEGER,
@@ -130,7 +132,7 @@ if __name__ == '__main__':
             auto_rotate INTEGER NOT NULL DEFAULT 0,
             auto_rotate_time INTEGER,
             auto_rotate_hard_reset INTEGER NOT NULL DEFAULT 1,
-            auto_rotate_filter VARCHAR(240),
+            auto_rotate_filter VARCHAR(240),            
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
             PRIMARY KEY (id), 
             FOREIGN KEY(server_id) REFERENCES server (id), 
@@ -301,14 +303,14 @@ if __name__ == '__main__':
 
     try:
         server_modems = [
-            { 'server_id': 1, 'modem_id': 1, 'usb_port_id': 7, 'proxy_ipv4_http_port': 1025, 'proxy_ipv4_socks_port': 2025, 'proxy_ipv6_http_port': 3025, 'proxy_ipv6_socks_port': 4025 },
-            { 'server_id': 1, 'modem_id': 2, 'usb_port_id': 8, 'proxy_ipv4_http_port': 1026, 'proxy_ipv4_socks_port': 2026, 'proxy_ipv6_http_port': 3026, 'proxy_ipv6_socks_port': 4026 },
-            { 'server_id': 1, 'modem_id': 3, 'usb_port_id': 7, 'proxy_ipv4_http_port': 1027, 'proxy_ipv4_socks_port': 2027, 'proxy_ipv6_http_port': 3027, 'proxy_ipv6_socks_port': 4027 },
-            { 'server_id': 1, 'modem_id': 4, 'usb_port_id': 5, 'proxy_ipv4_http_port': 1028, 'proxy_ipv4_socks_port': 2028, 'proxy_ipv6_http_port': 3028, 'proxy_ipv6_socks_port': 4028 },
-            { 'server_id': 1, 'modem_id': 5, 'usb_port_id': 6, 'proxy_ipv4_http_port': 1029, 'proxy_ipv4_socks_port': 2029, 'proxy_ipv6_http_port': 3029, 'proxy_ipv6_socks_port': 4029 },
-            { 'server_id': 1, 'modem_id': 6, 'usb_port_id': 5, 'proxy_ipv4_http_port': 1030, 'proxy_ipv4_socks_port': 2030, 'proxy_ipv6_http_port': 3030, 'proxy_ipv6_socks_port': 4030 },
-            { 'server_id': 1, 'modem_id': 7, 'usb_port_id': 7, 'proxy_ipv4_http_port': 1031, 'proxy_ipv4_socks_port': 2031, 'proxy_ipv6_http_port': 3031, 'proxy_ipv6_socks_port': 4031 },
-            { 'server_id': 1, 'modem_id': 8, 'usb_port_id': 8, 'proxy_ipv4_http_port': 1032, 'proxy_ipv4_socks_port': 2032, 'proxy_ipv6_http_port': 3032, 'proxy_ipv6_socks_port': 4032 },
+            { 'server_id': 1, 'modem_id': 1, 'usb_port_id': 7, 'proxy_ipv4_http_port': 1025, 'proxy_ipv4_socks_port': 2025, 'proxy_ipv6_http_port': 3025, 'proxy_ipv6_socks_port': 4025, 'proxy_auth_type': ProxyAuthType.NONE },
+            { 'server_id': 1, 'modem_id': 2, 'usb_port_id': 8, 'proxy_ipv4_http_port': 1026, 'proxy_ipv4_socks_port': 2026, 'proxy_ipv6_http_port': 3026, 'proxy_ipv6_socks_port': 4026, 'proxy_auth_type': ProxyAuthType.USER_PASSWORD },
+            { 'server_id': 1, 'modem_id': 3, 'usb_port_id': 7, 'proxy_ipv4_http_port': 1027, 'proxy_ipv4_socks_port': 2027, 'proxy_ipv6_http_port': 3027, 'proxy_ipv6_socks_port': 4027, 'proxy_auth_type': ProxyAuthType.NONE },
+            { 'server_id': 1, 'modem_id': 4, 'usb_port_id': 5, 'proxy_ipv4_http_port': 1028, 'proxy_ipv4_socks_port': 2028, 'proxy_ipv6_http_port': 3028, 'proxy_ipv6_socks_port': 4028, 'proxy_auth_type': ProxyAuthType.NONE },
+            { 'server_id': 1, 'modem_id': 5, 'usb_port_id': 6, 'proxy_ipv4_http_port': 1029, 'proxy_ipv4_socks_port': 2029, 'proxy_ipv6_http_port': 3029, 'proxy_ipv6_socks_port': 4029, 'proxy_auth_type': ProxyAuthType.NONE },
+            { 'server_id': 1, 'modem_id': 6, 'usb_port_id': 5, 'proxy_ipv4_http_port': 1030, 'proxy_ipv4_socks_port': 2030, 'proxy_ipv6_http_port': 3030, 'proxy_ipv6_socks_port': 4030, 'proxy_auth_type': ProxyAuthType.NONE },
+            { 'server_id': 1, 'modem_id': 7, 'usb_port_id': 7, 'proxy_ipv4_http_port': 1031, 'proxy_ipv4_socks_port': 2031, 'proxy_ipv6_http_port': 3031, 'proxy_ipv6_socks_port': 4031, 'proxy_auth_type': ProxyAuthType.NONE },
+            { 'server_id': 1, 'modem_id': 8, 'usb_port_id': 8, 'proxy_ipv4_http_port': 1032, 'proxy_ipv4_socks_port': 2032, 'proxy_ipv6_http_port': 3032, 'proxy_ipv6_socks_port': 4032, 'proxy_auth_type': ProxyAuthType.NONE },
         ]
         for s in server_modems:
             server_modem_model = ServerModemModel(
@@ -321,7 +323,8 @@ if __name__ == '__main__':
                 proxy_ipv6_socks_port = s['proxy_ipv6_socks_port'],
                 prevent_same_ip_users=True,
                 auto_rotate=False,
-                auto_rotate_time=None
+                auto_rotate_time=None,
+                proxy_auth_type=s['proxy_auth_type']
                 )            
             server_modem_model.save_to_db()
 
