@@ -61,6 +61,14 @@ const SettingsDialog = (props) => {
         _setModem(cloned);
     };
 
+    const handleChangeProxyAuthType = (authType) => {
+        const proxy = { ..._modem.proxy };
+        proxy.auth_type = authType;
+        const cloned = cloneDeep(_modem);
+        cloned.proxy.auth_type = authType;
+        _setModem(cloned);
+    };
+
     const handleChangeModemAddrId = (addrId) => {
         const modem = { ..._modem.modem };
         modem.addr_id = addrId;
@@ -213,12 +221,12 @@ const SettingsDialog = (props) => {
                         <Select
                             labelId="auth-type-label"
                             id="auth-type-select"
-                            // value={ports && ports.length > 0 && port ? port.id : ''}
+                            value={_modem ? _modem.proxy?.auth_type : ''}
                             label="Tipo de autenticação"
-                            // onChange={(event) => handleChange(event.target.value)}
+                            onChange={(event) => handleChangeProxyAuthType(event.target.value)}
                         >
-                            <MenuItem value={0}>Nenhuma</MenuItem>
-                            <MenuItem value={1}>Usuário e senha</MenuItem>
+                            <MenuItem value="none">Nenhuma</MenuItem>
+                            <MenuItem value="user_password">Usuário e senha</MenuItem>
                         </Select>
                     </FormControl>
                     <Divider />

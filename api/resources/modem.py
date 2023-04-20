@@ -2,6 +2,7 @@ from flask_restful import Resource, reqparse, request
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
 import requests
 from api.service.servercontrol import ServerControlAction, ServerControlEvent
+from framework.enum.proxyauthtype import ProxyAuthType
 from framework.models.modemdiagnose import ModemDiagnoseModel, ModemDiagnoseOwner, ModemDiagnoseType
 from framework.models.schedule import ModemsAutoRotateAgendaItem
 from framework.service.server.servereventservice import Event, EventType
@@ -136,6 +137,9 @@ class Modem(Resource):
 
             if 'ipv4' in data_proxy and 'socks' in data_proxy['ipv4'] and 'port' in data_proxy['ipv4']['socks'] and data_proxy['ipv4']['socks']['port'] != None:
                 server_modem.proxy_ipv4_socks_port = data_proxy['ipv4']['socks']['port']
+
+            if 'auth_type' in data_proxy and data_proxy['auth_type'] != None:
+                server_modem.proxy_auth_type = ProxyAuthType(data_proxy['auth_type'])
         
         data_usb = data['usb']
         if data_usb != None:
