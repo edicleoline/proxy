@@ -6,4 +6,5 @@ class Settings():
         self.modem_status_external_ip_timeout = 5
         self.wait_until_modem_connection_timeout = 60
         self.external_ip_url = 'https://ipecho.net/plain'
-        # self.external_ip_url = 'https://api.ipify.org/'
+        # self.external_ip_url = 'https://api.ipify.org/',
+        self.server_service_state_update_interval = 1

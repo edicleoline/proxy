@@ -192,7 +192,7 @@ const RotateDialog = (props) => {
                                     }}
                                 />
                             )}
-                            loading={true}
+                            loading={false}
                         />
                         <IpFilter value={ipv4Filter} onChange={handleIpv4FilterChange} />
                         <FormGroup>

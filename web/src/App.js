@@ -19,7 +19,6 @@ import { locale, messages } from 'i18n';
 import { useEffect } from 'react';
 
 socket.on('modems', (modems) => {
-    //console.log(modems);
     const pendingReloads = pendingReloadModemsInQueue();
     const replaceItems = pendingReloads.map((replaceItem) => {
         return { modem: { id: replaceItem.data.modem.id } };
@@ -29,12 +28,11 @@ socket.on('modems', (modems) => {
     }
 
     store.dispatch(setModemsItems(modems, replaceItems));
-    // store.dispatch(setModemsItems(modems, []));
 });
 
-// socket.on('modems_details', (modems) => {
-//     store.dispatch(setModemsDetailsItems(modems));
-// });
+socket.on('server_state', (serverState) => {
+    console.log(serverState);
+});
 
 socket.on('server_control', (serverControl) => {
     addCommandInQueue(serverControl);

@@ -296,7 +296,6 @@ class ModemsObserver():
                 external_ip_cloacker == None or
                 external_ip_cloacker and external_ip_cloacker.ready()
             ):
-                print('Trying get IPv4 to modem {0}'.format(external_ip_cloacker_id))
                 try:
                     external_ip = modem_state.infra_modem.external_ip_through_device(timeout = self.settings.modem_status_external_ip_timeout)
                     if external_ip:

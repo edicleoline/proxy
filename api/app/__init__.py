@@ -7,6 +7,7 @@ from framework.service.Cloacker import CloackerService
 from framework.service.modem.modemservice import ModemsEventObserver, ModemsService, ModemsAutoRotateService
 from framework.service.route.routeservice import RouteService
 from framework.service.server.servereventservice import ServerEvent
+from framework.service.server.serverservice import ServerService, ServerState
 from framework.settings import Settings
 
 sys.path.append("../")
@@ -24,6 +25,10 @@ app.cloacker_service = CloackerService(settings = app.settings)
 app.server_control = ServerControl(settings = app.settings, socketio = lambda: app.socketio)
 
 app.server_event = ServerEvent(settings = app.settings, socketio = lambda: app.socketio)
+
+app.server_service = ServerService(settings = app.settings)
+app.server_service.observe()
+app.server_service.subscribe(lambda server_state: app.socketio.emit('server_state', ServerState.schema().dump(server_state, many=False), broadcast=True) if app.socketio else None)
 
 server = ServerModel.find_by_id(1)
 

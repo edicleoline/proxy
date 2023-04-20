@@ -141,7 +141,6 @@ export const Docker = () => {
     };
 
     useEffect(() => {
-        console.log('updated docks from redux', _docks);
         _dockItems.current = _docks.map((item) => {
             return {
                 id: item.dock.id,
