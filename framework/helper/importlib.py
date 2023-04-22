@@ -4,7 +4,6 @@ import logging
 def class_factory(module_class_string, **kwargs):
     """
     :param module_class_string: full name of the class to create an object of
-    :param super_cls: expected super class for validity, None if bypass
     :param kwargs: parameters to pass
     :return:
     """
