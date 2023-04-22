@@ -5,6 +5,7 @@ import modemsDetailsReducer from './modemsDetailsReducer';
 import modemsReducer from './modemsReducer';
 import notificationsReducer from './notificationsReducer';
 import serverControlReducer from './serverControlReducer';
+import serverStateReducer from './serverStateReducer';
 
 const persistedState = localStorage.getItem('reduxState') ? JSON.parse(localStorage.getItem('reduxState')) : {};
 
@@ -15,7 +16,8 @@ const store = configureStore({
         // modemsDetails: modemsDetailsReducer,
         serverControl: serverControlReducer,
         notifications: notificationsReducer,
-        docker: dockerReducer
+        docker: dockerReducer,
+        serverState: serverStateReducer
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

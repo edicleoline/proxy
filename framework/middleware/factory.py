@@ -2,6 +2,7 @@ from framework.infra.netiface import NetIface
 from framework.models.middleware import MiddlewareModel
 from framework.settings import Settings
 
+from framework.helper.importlib import class_factory
 from framework.middleware.module.mf79s import mf79s
 
 class MiddlewareFactory():
@@ -13,6 +14,8 @@ class MiddlewareFactory():
 
     def instance(self):
         if self.iface == None or self.iface.ifaddresses == None: return None
+
+        class_factory('framework.middleware.module.mf79s', self.iface, self.params, self.settings)
 
         middleware = mf79s(
             iface = self.iface,

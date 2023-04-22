@@ -18,3 +18,5 @@ export const ADD_DOCK = '@docker/ADD_DOCK';
 export const UPDATE_DOCK_STATE = '@docker/UPDATE_DOCK_STATE';
 export const REMOVE_DOCK = '@docker/REMOVE_DOCK';
 export const FIND_DOCK = '@docker/FIND_DOCK';
+
+export const SET_SERVER_STATE = '@server_state/SET_SERVER_STATE';

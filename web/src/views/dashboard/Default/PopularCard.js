@@ -1,23 +1,19 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
-
-// material-ui
 import { useTheme } from '@mui/material/styles';
 import { Avatar, Button, CardActions, CardContent, Divider, Grid, Menu, MenuItem, Typography } from '@mui/material';
-
-// project imports
 import BajajAreaChartCard from './BajajAreaChartCard';
 import MainCard from 'ui-component/cards/MainCard';
 import SkeletonPopularCard from 'ui-component/cards/Skeleton/PopularCard';
 import { gridSpacing } from 'store/constant';
-
-// assets
 import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
 import MoreHorizOutlinedIcon from '@mui/icons-material/MoreHorizOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
-
-// ==============================|| DASHBOARD DEFAULT - POPULAR CARD ||============================== //
+import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { useRef } from 'react';
+import cloneDeep from 'lodash/cloneDeep';
 
 const PopularCard = ({ isLoading }) => {
     const theme = useTheme();
@@ -32,6 +28,81 @@ const PopularCard = ({ isLoading }) => {
         setAnchorEl(null);
     };
 
+    const serverState = useSelector((state) => state.serverState.state);
+
+    const _chartData = useRef({
+        type: 'area',
+        height: 95,
+        options: {
+            chart: {
+                id: 'support-chart',
+                sparkline: {
+                    enabled: true
+                },
+                animations: {
+                    enabled: true,
+                    easing: 'linear',
+                    dynamicAnimation: {
+                        speed: 1000
+                    }
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 1
+            },
+            xaxis: {
+                // type: 'datetime',
+                range: 10
+            },
+            yaxis: {
+                min: 0,
+                max: 100,
+                labels: {
+                    show: false
+                }
+            },
+            tooltip: {
+                fixed: {
+                    enabled: false
+                },
+                x: {
+                    show: false
+                },
+                y: {
+                    title: 'Ticket '
+                },
+                marker: {
+                    show: false
+                }
+            }
+        },
+        series: [
+            {
+                data: []
+            }
+        ]
+    });
+
+    const [chartData, setChartData] = useState(_chartData.current);
+
+    // useEffect(() => {
+    //     const clonedChartData = cloneDeep(_chartData.current);
+    //     clonedChartData.series[0].data.push(serverState.cpu_percent);
+    //     // if (clonedChartData.series[0].data.length > 10) {
+    //     //     clonedChartData.series[0].data.slice(Math.max(clonedChartData.series[0].data.length - 3, 0));
+    //     // }
+    //     clonedChartData.series[0].data = clonedChartData.series[0].data.slice(
+    //         clonedChartData.series[0].data.length - 200,
+    //         clonedChartData.series[0].data.length
+    //     );
+    //     _chartData.current = clonedChartData;
+    //     setChartData(_chartData.current);
+    // }, [serverState]);
+
     return (
         <>
             {isLoading ? (
@@ -43,7 +114,7 @@ const PopularCard = ({ isLoading }) => {
                             <Grid item xs={12}>
                                 <Grid container alignContent="center" justifyContent="space-between">
                                     <Grid item>
-                                        <Typography variant="h4">Popular Stocks</Typography>
+                                        <Typography variant="h4">Desempenho</Typography>
                                     </Grid>
                                     <Grid item>
                                         <MoreHorizOutlinedIcon
@@ -80,7 +151,7 @@ const PopularCard = ({ isLoading }) => {
                                 </Grid>
                             </Grid>
                             <Grid item xs={12} sx={{ pt: '16px !important' }}>
-                                <BajajAreaChartCard />
+                                <BajajAreaChartCard chartData={chartData} />
                             </Grid>
                             <Grid item xs={12}>
                                 <Grid container direction="column">

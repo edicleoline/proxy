@@ -17,6 +17,7 @@ import { FormattedMessage } from 'react-intl';
 import IntlMessageFormat from 'intl-messageformat';
 import { locale, messages } from 'i18n';
 import { useEffect } from 'react';
+import setServerState from 'store/actions/setServerState';
 
 socket.on('modems', (modems) => {
     const pendingReloads = pendingReloadModemsInQueue();
@@ -32,6 +33,7 @@ socket.on('modems', (modems) => {
 
 socket.on('server_state', (serverState) => {
     console.log(serverState);
+    store.dispatch(setServerState(serverState));
 });
 
 socket.on('server_control', (serverControl) => {
