@@ -32,7 +32,7 @@ socket.on('modems', (modems) => {
 });
 
 socket.on('server_state', (serverState) => {
-    console.log(serverState);
+    // console.log(serverState);
     store.dispatch(setServerState(serverState));
 });
 

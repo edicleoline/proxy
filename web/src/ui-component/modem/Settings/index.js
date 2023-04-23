@@ -29,6 +29,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import objectHash from 'object-hash';
 import DeviceSelector from 'ui-component/device/Selector';
 import ModemPortSelector from 'ui-component/modem-port/Selector';
+import MiddlewareParams from 'ui-component/MiddlewareParams';
 
 const SettingsDialog = (props) => {
     const { modem, open, onClose, onConfirm, ...other } = props;
@@ -161,6 +162,13 @@ const SettingsDialog = (props) => {
         _setModem(cloned);
     };
 
+    const handleMiddlewareParamsChanged = (params) => {
+        const cloned = cloneDeep(_modem);
+        cloned.modem.device.middleware.params = params;
+        _setModem(cloned);
+        console.log('changed params!!!!!', params);
+    };
+
     return (
         <Dialog
             open={open}
@@ -179,56 +187,67 @@ const SettingsDialog = (props) => {
                     <FormControl sx={{ maxWidth: 160 }}>
                         <ModemPortSelector port={_modem?.usb} onChange={handleChangePort} />
                     </FormControl>
-                    <TextField
-                        sx={{ maxWidth: 250 }}
-                        id="ip-id"
-                        label="IP-ID"
-                        variant="outlined"
-                        value={_modem ? _modem.modem?.addr_id : ''}
-                        onChange={(event) => {
-                            handleChangeModemAddrId(event.target.value);
-                        }}
-                    />
-                    <FormControl sx={{ maxWidth: 250 }}>
-                        <DeviceSelector device={_modem?.modem.device} onChange={handleChangeDevice} />
-                    </FormControl>
+                    <Divider />
+                    <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
+                        Dispositivo
+                    </Typography>
+                    <Stack spacing={2.5} sx={{ paddingTop: 1 }}>
+                        <FormControl sx={{ maxWidth: 250 }}>
+                            <DeviceSelector device={_modem?.modem.device} onChange={handleChangeDevice} />
+                        </FormControl>
+                        <TextField
+                            sx={{ maxWidth: 250 }}
+                            id="ip-id"
+                            label="IP-ID"
+                            variant="outlined"
+                            value={_modem ? _modem.modem?.addr_id : ''}
+                            onChange={(event) => {
+                                handleChangeModemAddrId(event.target.value);
+                            }}
+                        />
+                        <FormControl sx={{ maxWidth: 300 }}>
+                            <MiddlewareParams params={_modem?.modem?.device?.middleware?.params} onChange={handleMiddlewareParamsChanged} />
+                        </FormControl>
+                    </Stack>
                     <Divider />
                     <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
                         Proxy
                     </Typography>
-                    <TextField
-                        sx={{ maxWidth: 250 }}
-                        id="proxy-ipv4-http-port"
-                        label="Porta HTTP/HTTPS"
-                        variant="outlined"
-                        value={_modem ? _modem.proxy?.ipv4?.http?.port : ''}
-                        onChange={(event) => {
-                            handleChangeProxyIpv4Http(event.target.value);
-                        }}
-                    />
-                    <TextField
-                        sx={{ maxWidth: 250 }}
-                        id="proxy-ipv4-http-socks"
-                        label="Porta SOCKS"
-                        variant="outlined"
-                        value={_modem ? _modem.proxy?.ipv4?.socks?.port : ''}
-                        onChange={(event) => {
-                            handleChangeProxyIpv4Socks(event.target.value);
-                        }}
-                    />
-                    <FormControl sx={{ maxWidth: 300 }}>
-                        <InputLabel id="auth-type-label">Tipo de autenticação</InputLabel>
-                        <Select
-                            labelId="auth-type-label"
-                            id="auth-type-select"
-                            value={_modem ? _modem.proxy?.auth_type : ''}
-                            label="Tipo de autenticação"
-                            onChange={(event) => handleChangeProxyAuthType(event.target.value)}
-                        >
-                            <MenuItem value="none">Nenhuma</MenuItem>
-                            <MenuItem value="user_password">Usuário e senha</MenuItem>
-                        </Select>
-                    </FormControl>
+                    <Stack spacing={2.5} sx={{ paddingTop: 1 }}>
+                        <TextField
+                            sx={{ maxWidth: 250 }}
+                            id="proxy-ipv4-http-port"
+                            label="Porta HTTP/HTTPS"
+                            variant="outlined"
+                            value={_modem ? _modem.proxy?.ipv4?.http?.port : ''}
+                            onChange={(event) => {
+                                handleChangeProxyIpv4Http(event.target.value);
+                            }}
+                        />
+                        <TextField
+                            sx={{ maxWidth: 250 }}
+                            id="proxy-ipv4-http-socks"
+                            label="Porta SOCKS"
+                            variant="outlined"
+                            value={_modem ? _modem.proxy?.ipv4?.socks?.port : ''}
+                            onChange={(event) => {
+                                handleChangeProxyIpv4Socks(event.target.value);
+                            }}
+                        />
+                        <FormControl sx={{ maxWidth: 300 }}>
+                            <InputLabel id="auth-type-label">Tipo de autenticação</InputLabel>
+                            <Select
+                                labelId="auth-type-label"
+                                id="auth-type-select"
+                                value={_modem ? _modem.proxy?.auth_type : ''}
+                                label="Tipo de autenticação"
+                                onChange={(event) => handleChangeProxyAuthType(event.target.value)}
+                            >
+                                <MenuItem value="none">Nenhuma</MenuItem>
+                                <MenuItem value="user_password">Usuário e senha</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Stack>
                     <Divider />
                     <Typography variant="h4" component="span" sx={{ fontWeight: '500' }}>
                         Rotacionamento

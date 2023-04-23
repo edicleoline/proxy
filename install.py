@@ -293,6 +293,7 @@ if __name__ == '__main__':
 
     try:
         middleware_params = [
+            { 'middleware_id': 1, 'name': 'username', 'name_translate': 'username', 'type': 'str', 'required': True },
             { 'middleware_id': 1, 'name': 'password', 'name_translate': 'password', 'type': 'str', 'required': True }            
         ]
         for d in middleware_params:

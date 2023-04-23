@@ -36,12 +36,12 @@ const DeviceSelector = ({ device, onChange }) => {
 
     return (
         <React.Fragment>
-            <InputLabel id="device-label">Dispositivo</InputLabel>
+            <InputLabel id="device-label">Modelo</InputLabel>
             <Select
                 labelId="device-label"
                 id="device-select"
                 value={devices && devices.length > 0 && device ? device.id : ''}
-                label="Dispositivo"
+                label="Modelo"
                 onChange={(event) => {
                     handleChange(event.target.value);
                 }}
