@@ -1,6 +1,7 @@
 import sys
 from framework.enum.proxyauthtype import ProxyAuthType
 from framework.models.middleware import MiddlewareModel
+from framework.models.middlewareparam import MiddlewareParamModel
 from framework.models.server import ServerModel
 from framework.models.user import UserModel
 from framework.models.device import DeviceModel
@@ -79,6 +80,23 @@ if __name__ == '__main__':
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
             PRIMARY KEY (id),
             UNIQUE (class_name)
+            )
+            """)
+    except SQLError:
+        pass
+
+    try:
+        conn.execute("""
+            CREATE TABLE middleware_param (
+            id INTEGER NOT NULL, 
+            middleware_id INTEGER,
+            name VARCHAR(40),
+            name_translate VARCHAR(80), 
+            type VARCHAR(20),
+            required INTEGER NOT NULL DEFAULT 1,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+            PRIMARY KEY (id),
+            FOREIGN KEY(middleware_id) REFERENCES middleware (id)
             )
             """)
     except SQLError:
@@ -270,6 +288,16 @@ if __name__ == '__main__':
         for d in middlewares:
             middleware_model = MiddlewareModel(name = d['name'], class_name = d['class_name'])
             middleware_model.save_to_db()
+    except ConstraintError:
+        pass
+
+    try:
+        middleware_params = [
+            { 'middleware_id': 1, 'name': 'password', 'name_translate': 'password', 'type': 'str', 'required': True }            
+        ]
+        for d in middleware_params:
+            middleware_param_model = MiddlewareParamModel(middleware_id = d['middleware_id'], name = d['name'], name_translate = d['name_translate'], type = d['type'], required = d['required'])
+            middleware_param_model.save_to_db()
     except ConstraintError:
         pass
 

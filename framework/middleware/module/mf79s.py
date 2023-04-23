@@ -6,6 +6,7 @@ import json
 import sys
 from framework.error.exception import MiddlewareAuthenticationException, MiddlewareCarrierConnectionException, MiddlewareException
 from framework.infra.netiface import NetIface
+from framework.middleware.factoryparam import FactoryParam
 from framework.settings import Settings
 
 sys.path.append('..')
@@ -16,8 +17,26 @@ class mf79s:
         self.iface = iface
         self.params = params
         self.settings = settings
-        self.wan = Wan(settings = settings, interface = iface.interface)
-        self.session = requests.Session()
+        self._wan = None
+        self._session = None
+
+    @classmethod
+    def factory_params(cls):
+        return [
+            FactoryParam('password', 'str', True)
+        ]
+    
+    @property
+    def wan(self):
+        if self._wan: return self._wan
+        self._wan = Wan(settings = self.settings, interface = self.iface.interface)
+        return self._wan
+    
+    @property
+    def wan(self):
+        if self._session: return self._session
+        self._session = requests.Session()
+        return self._session
 
     @property
     def password(self):

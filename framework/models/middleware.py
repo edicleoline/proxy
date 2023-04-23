@@ -1,6 +1,8 @@
+from typing import List
 from db import connection
 from dataclasses import dataclass
 from dataclasses_json import dataclass_json
+from framework.models.middlewareparam import MiddlewareParamModel
 
 @dataclass_json
 @dataclass
@@ -8,6 +10,7 @@ class MiddlewareModel():
     id: int
     name: str
     class_name: str  
+    params: List[MiddlewareParamModel]
     def __init__(self, id = None, name = None, class_name = None, created_at = None):
         self.id = id
         self.name = name
@@ -24,6 +27,10 @@ class MiddlewareModel():
             return None
 
         return MiddlewareModel(id = row[0], name = row[1], class_name = row[2], created_at = row[3])
+    
+    @property
+    def params(self):
+        return MiddlewareParamModel.find_by_middleware_id(self.id)
     
     @classmethod
     def all(cls):
