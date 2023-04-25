@@ -77,6 +77,7 @@ if __name__ == '__main__':
             id INTEGER NOT NULL, 
             name VARCHAR(80), 
             class_name VARCHAR(80), 
+            description VARCHAR(80), 
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
             PRIMARY KEY (id),
             UNIQUE (class_name)
@@ -283,10 +284,12 @@ if __name__ == '__main__':
 
     try:
         middlewares = [
-            { 'name': 'ZTE MF79S', 'class_name': 'mf79s' }            
+            { 'name': 'ZTE MF79S', 'class_name': 'mf79s', 'description': 'app.middleware.model.mf79s.description' },            
+            { 'name': 'Huawei E3372h', 'class_name': 'e3372h', 'description': 'app.middleware.model.e3372h.description' },
+            { 'name': 'Android', 'class_name': 'android', 'description': 'app.middleware.model.android.description' }
         ]
         for d in middlewares:
-            middleware_model = MiddlewareModel(name = d['name'], class_name = d['class_name'])
+            middleware_model = MiddlewareModel(name = d['name'], description = d['description'], class_name = d['class_name'])
             middleware_model.save_to_db()
     except ConstraintError:
         pass
@@ -294,7 +297,7 @@ if __name__ == '__main__':
     try:
         middleware_params = [
             { 'middleware_id': 1, 'name': 'username', 'name_translate': 'username', 'type': 'str', 'required': True },
-            { 'middleware_id': 1, 'name': 'password', 'name_translate': 'password', 'type': 'str', 'required': True }            
+            # { 'middleware_id': 1, 'name': 'password', 'name_translate': 'password', 'type': 'str', 'required': True }            
         ]
         for d in middleware_params:
             middleware_param_model = MiddlewareParamModel(middleware_id = d['middleware_id'], name = d['name'], name_translate = d['name_translate'], type = d['type'], required = d['required'])

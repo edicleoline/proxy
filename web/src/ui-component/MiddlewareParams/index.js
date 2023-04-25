@@ -5,6 +5,7 @@ import IntlMessageFormat from 'intl-messageformat';
 import { locale, messages } from 'i18n';
 import cloneDeep from 'lodash/cloneDeep';
 import * as React from 'react';
+import Stack from '@mui/material/Stack';
 
 const MiddlewareParam = ({ param, value, onChange }) => {
     useEffect(() => {
@@ -57,9 +58,11 @@ const MiddlewareParams = ({ params, onChange }) => {
 
     return (
         <React.Fragment>
-            {params?.map((param) => (
-                <MiddlewareParam key={param.id} param={param} value={param.value} onChange={handleParamValueChange} />
-            ))}
+            <Stack spacing={2.5} sx={{ paddingTop: 0 }}>
+                {params?.map((param) => (
+                    <MiddlewareParam key={param.id} param={param} value={param.value} onChange={handleParamValueChange} />
+                ))}
+            </Stack>
         </React.Fragment>
     );
 };

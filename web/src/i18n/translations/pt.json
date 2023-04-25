@@ -73,6 +73,8 @@
     "app.notification.modem.connect": "O modem {modemId} foi conectado",
 
     "app.middleware.model.mf79s.description": "Funciona para modem 4G ZTE MF79S\nhttps://configuraraparelhos.claro.com.br/zte/mf79s",
+    "app.middleware.model.android.description": "Funciona para celulares Android",
+    "app.middleware.model.e3372h.description": "Funciona para modem 4G Huawei E3372h",
 
     "app.middleware.params.password": "Senha",
     "app.middleware.params.username": "Usuário"
