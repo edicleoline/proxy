@@ -18,6 +18,7 @@ import IntlMessageFormat from 'intl-messageformat';
 import { locale, messages } from 'i18n';
 import { useEffect } from 'react';
 import setServerState from 'store/actions/setServerState';
+import { SET_MODEMS_ITEMS } from 'store/actions/types';
 
 socket.on('modems', (modems) => {
     const pendingReloads = pendingReloadModemsInQueue();
@@ -29,6 +30,7 @@ socket.on('modems', (modems) => {
     }
 
     store.dispatch(setModemsItems(modems, replaceItems));
+    // store.dispatch({ type: SET_MODEMS_ITEMS, items: modems, replaceItems: replaceItems });
 });
 
 socket.on('server_state', (serverState) => {
@@ -37,12 +39,12 @@ socket.on('server_state', (serverState) => {
 });
 
 socket.on('server_control', (serverControl) => {
-    addCommandInQueue(serverControl);
     console.log(serverControl);
+    addCommandInQueue(serverControl);
 });
 
 socket.on('event', (event) => {
-    console.log(event);
+    // console.log(event);
     if (event.type === SERVER_EVENT_TYPE.MODEM.LOG) {
         storeModemLog(event.data);
         return;
@@ -110,8 +112,9 @@ const App = () => {
     );
 };
 
-const mapStateToProps = (state) => ({
-    state: state
-});
+// const mapStateToProps = (state) => ({
+//     state: state
+// });
 
-export default connect(mapStateToProps)(App);
+// export default connect(mapStateToProps)(App);
+export default App;

@@ -46,7 +46,7 @@ const BajajAreaChartCard = ({ chartData }) => {
                 </Grid>
                 <Grid item xs={12}>
                     <Typography variant="subtitle2" sx={{ color: theme.palette.grey[800] }}>
-                        {chartData.series[0].data[chartData.series[0].data.length - 1]}%
+                        asd
                     </Typography>
                 </Grid>
             </Grid>

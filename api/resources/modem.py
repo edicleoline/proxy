@@ -403,7 +403,7 @@ class ModemLogs(Resource):
         cursor = args['cursor'] if 'cursor' in args else None
         limit = args['limit'] if 'limit' in args else None
         direction = PaginateDirection(args['direction']) if 'direction' in args else PaginateDirection.NEXT
-        order = PaginateOrder(args['order']) if 'order' in args else PaginateOrder.ASC
+        order = PaginateOrder(args['order']) if 'order' in args else PaginateOrder.DESC
         
         logs = ModemLogModel.paginate_by_id(id = modem_id, cursor = cursor, limit = limit, direction = direction, order = order)
 

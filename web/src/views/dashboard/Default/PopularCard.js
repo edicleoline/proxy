@@ -28,66 +28,67 @@ const PopularCard = ({ isLoading }) => {
         setAnchorEl(null);
     };
 
-    const serverState = useSelector((state) => state.serverState.state);
+    // const serverState = useSelector((state) => state.serverState.state);
 
-    const _chartData = useRef({
-        type: 'area',
-        height: 95,
-        options: {
-            chart: {
-                id: 'support-chart',
-                sparkline: {
-                    enabled: true
-                },
-                animations: {
-                    enabled: true,
-                    easing: 'linear',
-                    dynamicAnimation: {
-                        speed: 1000
-                    }
-                }
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth',
-                width: 1
-            },
-            xaxis: {
-                // type: 'datetime',
-                range: 10
-            },
-            yaxis: {
-                min: 0,
-                max: 100,
-                labels: {
-                    show: false
-                }
-            },
-            tooltip: {
-                fixed: {
-                    enabled: false
-                },
-                x: {
-                    show: false
-                },
-                y: {
-                    title: 'Ticket '
-                },
-                marker: {
-                    show: false
-                }
-            }
-        },
-        series: [
-            {
-                data: []
-            }
-        ]
-    });
+    // const _chartData = useRef({
+    //     type: 'area',
+    //     height: 95,
+    //     options: {
+    //         chart: {
+    //             id: 'support-chart',
+    //             sparkline: {
+    //                 enabled: true
+    //             },
+    //             animations: {
+    //                 enabled: true,
+    //                 easing: 'linear',
+    //                 dynamicAnimation: {
+    //                     speed: 1000
+    //                 }
+    //             }
+    //         },
+    //         dataLabels: {
+    //             enabled: false
+    //         },
+    //         stroke: {
+    //             curve: 'smooth',
+    //             width: 1
+    //         },
+    //         xaxis: {
+    //             // type: 'datetime',
+    //             range: 10
+    //         },
+    //         yaxis: {
+    //             min: 0,
+    //             max: 100,
+    //             labels: {
+    //                 show: false
+    //             }
+    //         },
+    //         tooltip: {
+    //             fixed: {
+    //                 enabled: false
+    //             },
+    //             x: {
+    //                 show: false
+    //             },
+    //             y: {
+    //                 title: 'Ticket '
+    //             },
+    //             marker: {
+    //                 show: false
+    //             }
+    //         }
+    //     },
+    //     series: [
+    //         {
+    //             data: []
+    //         }
+    //     ]
+    // });
 
-    const [chartData, setChartData] = useState(_chartData.current);
+    // const [chartData, setChartData] = useState(_chartData.current);
+    const [chartData, setChartData] = useState(null);
 
     // useEffect(() => {
     //     const clonedChartData = cloneDeep(_chartData.current);
@@ -151,7 +152,7 @@ const PopularCard = ({ isLoading }) => {
                                 </Grid>
                             </Grid>
                             <Grid item xs={12} sx={{ pt: '16px !important' }}>
-                                <BajajAreaChartCard chartData={chartData} />
+                                {/* <BajajAreaChartCard chartData={chartData} /> */}
                             </Grid>
                             <Grid item xs={12}>
                                 <Grid container direction="column">

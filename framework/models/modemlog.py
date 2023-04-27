@@ -96,7 +96,7 @@ class ModemLogModel():
         self.created_at = created_at    
 
     @classmethod
-    def paginate_by_id(cls, id, cursor = None, limit = 20, direction: PaginateDirection = PaginateDirection.NEXT, order: PaginateOrder = PaginateOrder.ASC):
+    def paginate_by_id(cls, id, cursor = None, limit = 20, direction: PaginateDirection = PaginateDirection.NEXT, order: PaginateOrder = PaginateOrder.DESC):
         conn = connection()
         cursor_sql = None
         if cursor:

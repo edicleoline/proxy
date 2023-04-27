@@ -51,7 +51,7 @@ const ModemLog = (props) => {
 
     const [emptyLog, setEmptyLog] = useState(false);
 
-    const _logs = useLiveQuery(() => modemLog.where({ modem_id: modem.id }).toArray());
+    const _logs = useLiveQuery(() => modemLog.where('modem_id').equals(modem.id).sortBy('id'));
     useEffect(() => {
         _makeContainers(_logs);
 
@@ -64,25 +64,25 @@ const ModemLog = (props) => {
         }
     }, [_logs]);
 
-    const _loadFromApi = () => {
-        logs(modem.id, 0, 50, 'next', 'desc')
-            .then(
-                (response) => {
-                    console.log(response);
-                    bulkStoreModemLog(response);
-                },
-                (err) => {
-                    const message =
-                        err.response && err.response.data && err.response.data.error && err.response.data.error.message
-                            ? err.response.data.error.message
-                            : err.message;
-                    console.log(message);
-                }
-            )
-            .finally(() => {
-                //console.log();
-            });
-    };
+    // const _loadFromApi = () => {
+    //     logs(modem.id, 0, 50, 'next', 'desc')
+    //         .then(
+    //             (response) => {
+    //                 console.log(response);
+    //                 bulkStoreModemLog(response);
+    //             },
+    //             (err) => {
+    //                 const message =
+    //                     err.response && err.response.data && err.response.data.error && err.response.data.error.message
+    //                         ? err.response.data.error.message
+    //                         : err.message;
+    //                 console.log(message);
+    //             }
+    //         )
+    //         .finally(() => {
+    //             //console.log();
+    //         });
+    // };
 
     const contentEndAnchor = createRef();
 

@@ -297,7 +297,7 @@ const Modems = () => {
                                                                             onAutoRotateIconClick={handleModemAutoRotateFlagClick}
                                                                         />
                                                                     ) : null}
-                                                                    &nbsp;&nbsp;{item.modem.modem.id}
+                                                                    &nbsp;&nbsp;{item?.modem?.modem?.id}
                                                                 </ModemIdWrapper>
                                                             </Grid>
                                                         </Grid>
@@ -393,10 +393,10 @@ const Modems = () => {
                                                     <TableCell align="left">
                                                         <Grid container justifyContent="flex-start" alignItems="start" direction="column">
                                                             {/* <Grid item>{item.modem.modem.device.type}</Grid> */}
-                                                            <Grid item>{item.modem.modem.device.model}</Grid>
+                                                            <Grid item>{item?.modem?.modem?.device?.model}</Grid>
                                                         </Grid>
                                                     </TableCell>
-                                                    <TableCell align="left">{item.modem.usb.port}</TableCell>
+                                                    <TableCell align="left">{item?.modem?.usb?.port}</TableCell>
                                                     <TableCell align="left" sx={{ position: 'relative' }}>
                                                         <ModemStatus
                                                             lock={item.lock}

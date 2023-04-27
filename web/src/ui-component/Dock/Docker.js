@@ -56,7 +56,7 @@ export const DockModemLogToolbar = ({ modem }) => {
     };
 
     const loadFromApi = () => {
-        logs(modem.id, 0, 50, 'next', 'desc')
+        logs(modem.id, 0, 200, 'next', 'desc')
             .then(
                 (response) => {
                     console.log(response);

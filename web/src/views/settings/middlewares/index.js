@@ -130,7 +130,7 @@ const Middlewares = () => {
                                                     <TableCell align="left">
                                                         <span style={{ whiteSpace: 'pre-wrap' }}>
                                                             <FormattedMessage
-                                                                id="app.middleware.model.mf79s.description"
+                                                                id={middleware.description}
                                                                 values={{ name: middleware.name }}
                                                             />
                                                         </span>

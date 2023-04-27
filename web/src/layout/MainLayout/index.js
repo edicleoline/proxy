@@ -3,12 +3,8 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { store } from 'store';
 import { Outlet } from 'react-router-dom';
-
-// material-ui
 import { styled, useTheme } from '@mui/material/styles';
 import { AppBar, Box, CssBaseline, Toolbar, useMediaQuery } from '@mui/material';
-
-// project imports
 import Breadcrumbs from 'ui-component/extended/Breadcrumbs';
 import Header from './Header';
 import Sidebar from './Sidebar';
@@ -16,17 +12,12 @@ import Customization from '../Customization';
 import navigation from 'menu-items';
 import { drawerWidth } from 'store/constant';
 import { SET_MENU, REMOVE_NOTIFICATION } from 'store/actions/types';
-
-// assets
 import { IconChevronRight } from '@tabler/icons';
-
 import Snackbar from '@mui/material/Snackbar';
 import Button from '@mui/material/IconButton';
 import MuiAlert from '@mui/material/Alert';
-
 import { Docker } from 'ui-component/Dock/Docker';
 
-// styles
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
     ...theme.typography.mainContent,
     ...(!open && {
@@ -70,7 +61,6 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({
     })
 }));
 
-// ==============================|| MAIN LAYOUT ||============================== //
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
@@ -128,7 +118,6 @@ const MainLayout = () => {
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
-            {/* header */}
             <AppBar
                 enableColorOnDark
                 position="fixed"
@@ -144,10 +133,8 @@ const MainLayout = () => {
                 </Toolbar>
             </AppBar>
 
-            {/* drawer */}
             <Sidebar drawerOpen={!matchDownMd ? leftDrawerOpened : !leftDrawerOpened} drawerToggle={handleLeftDrawerToggle} />
 
-            {/* main content */}
             <Main theme={theme} open={leftDrawerOpened}>
                 {/* breadcrumb */}
                 {/* <Breadcrumbs separator={IconChevronRight} navigation={navigation} icon title rightAlign /> */}
