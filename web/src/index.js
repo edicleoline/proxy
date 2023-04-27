@@ -1,22 +1,14 @@
 import { createRoot } from 'react-dom/client';
-
-// third party
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
-
-// project imports
 import * as serviceWorker from 'serviceWorker';
 import App from 'App';
 import { store } from 'store';
-
-// style + assets
 import 'assets/scss/style.scss';
 import config from './config';
-
 import { IntlProvider } from 'react-intl';
 import { locale, messages } from 'i18n';
-
-// ==============================|| REACT DOM RENDER  ||============================== //
+import { SnackbarProvider, useSnackbar } from 'notistack';
 
 const container = document.getElementById('root');
 const root = createRoot(container); // createRoot(container!) if you use TypeScript
@@ -24,7 +16,9 @@ root.render(
     <Provider store={store}>
         <BrowserRouter basename={config.basename}>
             <IntlProvider locale={locale()} messages={messages[locale()]}>
-                <App />
+                <SnackbarProvider preventDuplicate anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+                    <App />
+                </SnackbarProvider>
             </IntlProvider>
         </BrowserRouter>
     </Provider>
