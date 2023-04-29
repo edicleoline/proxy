@@ -35,6 +35,7 @@ import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
 import UpgradePlanCard from './UpgradePlanCard';
 import User1 from 'assets/images/users/user-round.svg';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 // assets
 import { IconLogout, IconSearch, IconSettings, IconUser } from '@tabler/icons';
@@ -101,7 +102,14 @@ const ProfileSection = () => {
                         borderColor: theme.palette.primary.main,
                         background: `${theme.palette.primary.main}!important`,
                         color: theme.palette.primary.light,
-                        '& svg': {
+                        // '& svg': {
+                        //     stroke: theme.palette.primary.light,
+                        //     color: theme.palette.primary.light
+                        // },
+                        '& .MuiAvatar-root': {
+                            color: theme.palette.primary.light
+                        },
+                        '& .MuiChip-label svg': {
                             stroke: theme.palette.primary.light
                         }
                     },
@@ -111,17 +119,20 @@ const ProfileSection = () => {
                 }}
                 icon={
                     <Avatar
-                        src={User1}
+                        // src={User1}
                         sx={{
                             ...theme.typography.mediumAvatar,
                             margin: '8px 0 8px 8px !important',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            background: 'transparent'
                         }}
                         ref={anchorRef}
                         aria-controls={open ? 'menu-list-grow' : undefined}
                         aria-haspopup="true"
                         color="inherit"
-                    />
+                    >
+                        <AccountCircleIcon fontSize="large" />
+                    </Avatar>
                 }
                 label={<IconSettings stroke={1.5} size="1.5rem" color={theme.palette.primary.main} />}
                 variant="outlined"

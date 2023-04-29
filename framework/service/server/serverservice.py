@@ -9,11 +9,13 @@ import psutil
 @dataclass_json
 @dataclass
 class ServerState():
+    internal_ip: str
     external_ip: str
     cpu_percent: float
     virtual_memory: dict
 
-    def __init__(self, external_ip: str, cpu_percent: float, virtual_memory: any):
+    def __init__(self, internal_ip: str, external_ip: str, cpu_percent: float, virtual_memory: any):
+        self.internal_ip = internal_ip
         self.external_ip = external_ip
         self.cpu_percent = cpu_percent
         self.virtual_memory = virtual_memory
@@ -28,6 +30,7 @@ class ServerObserver():
         virtual_memory = psutil.virtual_memory()
 
         server_state = ServerState(
+            internal_ip = '192.168.15.10',
             external_ip = '200.165.20.31',
             cpu_percent = psutil.cpu_percent(),
             virtual_memory = {

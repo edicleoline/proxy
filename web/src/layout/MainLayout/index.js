@@ -18,6 +18,7 @@ import Button from '@mui/material/Button';
 import MuiAlert from '@mui/material/Alert';
 import { Docker } from 'ui-component/Dock/Docker';
 import { useSnackbar } from 'notistack';
+import FixedNotification from './FixedNotification';
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
     ...theme.typography.mainContent,
@@ -62,14 +63,10 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({
     })
 }));
 
-const Alert = React.forwardRef(function Alert(props, ref) {
-    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
-
 const MainLayout = () => {
     const theme = useTheme();
     const matchDownMd = useMediaQuery(theme.breakpoints.down('md'));
-    // Handle left drawer
+
     const leftDrawerOpened = useSelector((state) => state.customization.opened);
     const dispatch = useDispatch();
     const handleLeftDrawerToggle = () => {
@@ -78,10 +75,9 @@ const MainLayout = () => {
 
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-    const _notifications = useSelector((state) => state.notifications);
+    const notifications = useSelector((state) => state.notifications);
     useEffect(() => {
-        console.log(_notifications);
-        for (const item of _notifications.items) {
+        for (const item of notifications.items) {
             enqueueSnackbar(item.message, {
                 key: item.id,
                 autoHideDuration: 10000,
@@ -99,7 +95,7 @@ const MainLayout = () => {
             });
             dispatch({ type: REMOVE_NOTIFICATION, notification: item });
         }
-    }, [_notifications]);
+    }, [notifications]);
 
     return (
         <Box sx={{ display: 'flex' }}>
@@ -122,6 +118,7 @@ const MainLayout = () => {
             <Sidebar drawerOpen={!matchDownMd ? leftDrawerOpened : !leftDrawerOpened} drawerToggle={handleLeftDrawerToggle} />
 
             <Main theme={theme} open={leftDrawerOpened}>
+                {/* <FixedNotification /> */}
                 {/* breadcrumb */}
                 {/* <Breadcrumbs separator={IconChevronRight} navigation={navigation} icon title rightAlign /> */}
                 <Outlet />

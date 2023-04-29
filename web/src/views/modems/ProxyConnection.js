@@ -30,7 +30,7 @@ const ProxyConnection = ({ type, port /*, ip, status*/ }) => {
                 <Grid item>{type}</Grid>
                 {/* <Grid item>/</Grid> */}
                 {/* <Grid item>{ip}</Grid> */}
-                <Grid item>:&nbsp;</Grid>
+                <Grid item>://</Grid>
                 <Grid item>{port}</Grid>
                 {/* <Grid item>{icon}</Grid> */}
             </Grid>
