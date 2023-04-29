@@ -3,7 +3,7 @@ import { Grid } from '@mui/material';
 // import Tooltip from '@mui/material/Tooltip';
 // import { IconCheck, IconBan } from '@tabler/icons';
 
-const ProxyConnection = ({ type, port /*, ip, status*/ }) => {
+const ProxyConnection = ({ type, port, ip, status }) => {
     // let icon = '';
 
     // if (status === 'fail') {
@@ -31,6 +31,8 @@ const ProxyConnection = ({ type, port /*, ip, status*/ }) => {
                 {/* <Grid item>/</Grid> */}
                 {/* <Grid item>{ip}</Grid> */}
                 <Grid item>://</Grid>
+                <Grid item>{ip}</Grid>
+                <Grid item>:</Grid>
                 <Grid item>{port}</Grid>
                 {/* <Grid item>{icon}</Grid> */}
             </Grid>

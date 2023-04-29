@@ -53,8 +53,6 @@ const ModemIdWrapper = styled.div`
 const Modems = () => {
     // const [isLoading, setLoading] = useState(true);
 
-    const [server, setServer] = useState([]);
-
     const [tableMaxHeight, setTableMaxHeight] = useState(null);
     const _resizeTable = () => {
         const mainElHeight = window.innerHeight;
@@ -63,13 +61,6 @@ const Modems = () => {
     };
 
     useEffect(() => {
-        getServer().then(
-            (response) => {
-                setServer(response);
-            },
-            (error) => console.log('server error', error)
-        );
-
         _resizeTable();
 
         window.addEventListener('resize', _resizeTable);
@@ -85,6 +76,25 @@ const Modems = () => {
     useEffect(() => {
         setModems(_modems.items);
     }, [_modems]);
+
+    const [serverState, setServerState] = useState();
+    const _serverState = useSelector((state) => state.serverState);
+
+    useEffect(() => {
+        setServerState(_serverState.state);
+    }, [_serverState]);
+
+    const [serverIp, setServerIp] = useState(null);
+    useEffect(() => {
+        setServerIp((prevState) => {
+            if (!serverState) return prevState;
+            const ip = serverState.external_ip || serverState.internal_ip;
+            if (prevState && prevState == ip) {
+                return prevState;
+            }
+            return ip;
+        });
+    }, [serverState]);
 
     const testProxies = (modem, ip) => {
         testModemProxyIPv4HTTP(modem, ip);
@@ -440,10 +450,10 @@ const Modems = () => {
                                                                 direction="column"
                                                             >
                                                                 <Grid item>
-                                                                    {server ? (
+                                                                    {serverIp ? (
                                                                         <ProxyConnection
                                                                             type={'http'}
-                                                                            ip={server.external_ip}
+                                                                            ip={serverIp}
                                                                             port={item.modem.proxy.ipv4.http.port}
                                                                             status={item.modem.proxy.ipv4.http.status}
                                                                         />
@@ -452,10 +462,10 @@ const Modems = () => {
                                                                     )}
                                                                 </Grid>
                                                                 <Grid item>
-                                                                    {server ? (
+                                                                    {serverIp ? (
                                                                         <ProxyConnection
                                                                             type={'socks'}
-                                                                            ip={server.external_ip}
+                                                                            ip={serverIp}
                                                                             port={item.modem.proxy.ipv4.socks.port}
                                                                             status={item.modem.proxy.ipv4.socks.status}
                                                                         />
@@ -477,10 +487,10 @@ const Modems = () => {
                                                                 direction="column"
                                                             >
                                                                 <Grid item>
-                                                                    {server ? (
+                                                                    {serverState ? (
                                                                         <ProxyConnection
                                                                             type={'http'}
-                                                                            ip={server.external_ip}
+                                                                            ip={serverState.external_ip}
                                                                             port={item.modem.proxy.ipv6.http.port}
                                                                             status={item.modem.proxy.ipv6.http.status}
                                                                         />
@@ -489,10 +499,10 @@ const Modems = () => {
                                                                     )}
                                                                 </Grid>
                                                                 <Grid item>
-                                                                    {server ? (
+                                                                    {serverState ? (
                                                                         <ProxyConnection
                                                                             type={'socks'}
-                                                                            ip={server.external_ip}
+                                                                            ip={serverState.external_ip}
                                                                             port={item.modem.proxy.ipv6.socks.port}
                                                                             status={item.modem.proxy.ipv6.socks.status}
                                                                         />

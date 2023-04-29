@@ -31,7 +31,7 @@ class ServerObserver():
 
         server_state = ServerState(
             internal_ip = '192.168.15.10',
-            external_ip = '200.165.20.31',
+            external_ip = None,#'200.165.20.31',
             cpu_percent = psutil.cpu_percent(),
             virtual_memory = {
                 'total': virtual_memory.total,
