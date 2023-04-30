@@ -160,27 +160,38 @@ class ModemsEventObserver():
                     continue  
 
     def notify(self, type: EventType, data):
-        if type == EventType.UNEXPECTED_MODEM_DISCONNECT:
-            modem_log_model = ModemLogModel(
-                modem_id=data['modem']['id'],
-                owner=ModemLogOwner.SYSTEM, 
-                type=ModemLogType.ERROR, 
-                message='app.log.modem.unexpectedDisconnect',
-                logged_at = datetime.now()
-            )
-            modem_log_model.save_to_db()
-            self.server_event.emit(ServerEvent(type = EventType.MODEM_LOG, data = modem_log_model))
+        event_message = 'app.notification.modem.unexpectedDisconnect'
+        event_log_type = ModemLogType.ERROR
 
-        elif type == EventType.MODEM_CONNECT:
-            modem_log_model = ModemLogModel(
-                modem_id=data['modem']['id'],
-                owner=ModemLogOwner.SYSTEM, 
-                type=ModemLogType.SUCCESS, 
-                message='app.log.modem.connect',
-                logged_at = datetime.now()
-            )
-            modem_log_model.save_to_db()
-            self.server_event.emit(ServerEvent(type = EventType.MODEM_LOG, data = modem_log_model))
+        if type == EventType.MODEM_CONNECT:
+            event_message = 'app.notification.modem.connect'
+            event_log_type = ModemLogType.SUCCESS
+
+        event_modem_log_model = ModemLogModel(
+            modem_id = data['modem']['id'],
+            owner = ModemLogOwner.SYSTEM, 
+            type = event_log_type, 
+            message = event_message,
+            logged_at = datetime.now()
+        )
+        self.server_event.emit(ServerEvent(type = type, data = event_modem_log_model))
+
+        modem_log_message = 'app.log.modem.unexpectedDisconnect'
+        modem_log_type = ModemLogType.ERROR
+
+        if type == EventType.MODEM_CONNECT:
+            modem_log_message = 'app.log.modem.connect'
+            modem_log_type = ModemLogType.SUCCESS
+
+        modem_log_model = ModemLogModel(
+            modem_id = data['modem']['id'],
+            owner = ModemLogOwner.SYSTEM, 
+            type = modem_log_type, 
+            message = modem_log_message,
+            logged_at = datetime.now()
+        )
+        modem_log_model.save_to_db()            
+        self.server_event.emit(ServerEvent(type = EventType.MODEM_LOG, data = modem_log_model))
 
 
 class ModemsObserver():
