@@ -71,11 +71,27 @@ class ModemConnectivity():
 
 @dataclass_json
 @dataclass
+class ModemSms():
+    total_count: int
+    unread_count: int
+
+    def __init__(
+            self,
+            total_count: int,
+            unread_count: int
+    ):
+        self.total_count = total_count
+        self.unread_count = unread_count
+
+
+@dataclass_json
+@dataclass
 class ModemState():
     modem: ServerModemModel
     lock: ModemThreadData
     is_connected: bool    
     connectivity: ModemConnectivity
+    sms: ModemSms
 
     def __init__(
             self, 
@@ -83,13 +99,15 @@ class ModemState():
             infra_modem: IModem = None, 
             lock: ModemThreadData = None,
             is_connected: bool = None,
-            connectivity: ModemConnectivity = None
+            connectivity: ModemConnectivity = None,
+            sms: ModemSms = None
     ):
         self.modem = modem
         self.infra_modem = infra_modem
         self.lock = lock
         self.is_connected = is_connected
         self.connectivity = connectivity
+        self.sms = sms
 
 
 class ModemsEventObserver():
@@ -142,8 +160,6 @@ class ModemsEventObserver():
                     continue  
 
     def notify(self, type: EventType, data):
-        self.server_event.emit(ServerEvent(type = type, data = data))
-
         if type == EventType.UNEXPECTED_MODEM_DISCONNECT:
             modem_log_model = ModemLogModel(
                 modem_id=data['modem']['id'],

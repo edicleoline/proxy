@@ -44,35 +44,31 @@ socket.on('server_control', (serverControl) => {
 });
 
 socket.on('event', (event) => {
-    // console.log(event);
-    if (event.type === SERVER_EVENT_TYPE.MODEM.LOG) {
-        storeModemLog(event.data);
-        return;
+    console.log(event);
+    let message = '';
+    switch (event.type) {
+        case SERVER_EVENT_TYPE.MODEM.LOG:
+            storeModemLog(event.data);
+            break;
+        case SERVER_EVENT_TYPE.MODEM.UNEXPECTED_DISCONNECT:
+            message = new IntlMessageFormat(messages[locale()]['app.notification.modem.unexpectedDisconnect'], locale()).format({
+                modemId: event.data.modem.id
+            });
+            break;
+        case SERVER_EVENT_TYPE.MODEM.CONNECT:
+            message = new IntlMessageFormat(messages[locale()]['app.notification.modem.unexpectedDisconnect'], locale()).format({
+                modemId: event.data.modem.id
+            });
+            break;
+        default:
+            break;
     }
 
-    if (event.type === SERVER_EVENT_TYPE.MODEM.UNEXPECTED_DISCONNECT) {
-        const translatedMessage = new IntlMessageFormat(messages[locale()]['app.notification.modem.unexpectedDisconnect'], locale());
+    if (event.type === SERVER_EVENT_TYPE.MODEM.UNEXPECTED_DISCONNECT || event.type === SERVER_EVENT_TYPE.MODEM.CONNECT) {
         store.dispatch(
             addNotification({
                 id: event.id,
-                message: translatedMessage.format({ modemId: event.data.modem.id }),
-                props: {
-                    open: true,
-                    autoHideDuration: 10000,
-                    alert: false
-                },
-                ref: event
-            })
-        );
-        return;
-    }
-
-    if (event.type === SERVER_EVENT_TYPE.MODEM.CONNECT) {
-        const translatedMessage = new IntlMessageFormat(messages[locale()]['app.notification.modem.connect'], locale());
-        store.dispatch(
-            addNotification({
-                id: event.id,
-                message: translatedMessage.format({ modemId: event.data.modem.id }),
+                message: message,
                 props: {
                     open: true,
                     autoHideDuration: 10000,
@@ -96,9 +92,9 @@ socket.on('disconnect', () => {
 const App = () => {
     const customization = useSelector((state) => state.customization);
 
-    useEffect(() => {
-        store.dispatch(setModemsItems([], []));
-    }, []);
+    // useEffect(() => {
+    //     store.dispatch(setModemsItems([], []));
+    // }, []);
 
     return (
         <StyledEngineProvider injectFirst>

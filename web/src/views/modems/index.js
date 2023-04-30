@@ -487,10 +487,10 @@ const Modems = () => {
                                                                 direction="column"
                                                             >
                                                                 <Grid item>
-                                                                    {serverState ? (
+                                                                    {serverIp ? (
                                                                         <ProxyConnection
                                                                             type={'http'}
-                                                                            ip={serverState.external_ip}
+                                                                            ip={serverIp}
                                                                             port={item.modem.proxy.ipv6.http.port}
                                                                             status={item.modem.proxy.ipv6.http.status}
                                                                         />
@@ -499,10 +499,10 @@ const Modems = () => {
                                                                     )}
                                                                 </Grid>
                                                                 <Grid item>
-                                                                    {serverState ? (
+                                                                    {serverIp ? (
                                                                         <ProxyConnection
                                                                             type={'socks'}
-                                                                            ip={serverState.external_ip}
+                                                                            ip={serverIp}
                                                                             port={item.modem.proxy.ipv6.socks.port}
                                                                             status={item.modem.proxy.ipv6.socks.status}
                                                                         />
