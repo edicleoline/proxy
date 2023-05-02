@@ -92,6 +92,7 @@ class ModemState():
     is_connected: bool    
     connectivity: ModemConnectivity
     sms: ModemSms
+    clients = None
 
     def __init__(
             self, 
@@ -100,7 +101,8 @@ class ModemState():
             lock: ModemThreadData = None,
             is_connected: bool = None,
             connectivity: ModemConnectivity = None,
-            sms: ModemSms = None
+            sms: ModemSms = None,
+            clients = None
     ):
         self.modem = modem
         self.infra_modem = infra_modem
@@ -108,6 +110,7 @@ class ModemState():
         self.is_connected = is_connected
         self.connectivity = connectivity
         self.sms = sms
+        self.clients = clients
 
 
 class ModemsEventObserver():
@@ -297,6 +300,7 @@ class ModemsObserver():
 
             if modem_state == None or modem_state.infra_modem == None or modem_state.is_connected != True: continue
 
+            modem_state.clients = modem_state.infra_modem.connected_clients()
             imodem_iface = modem_state.infra_modem.iface()
             if imodem_iface == None or imodem_iface.interface == None: continue
 
@@ -306,7 +310,7 @@ class ModemsObserver():
             device_details = device_middleware.details()
             network_type = device_details['network_type'] if device_details else None
             network_provider = device_details['network_provider'] if device_details else None
-            network_signalbar = device_details['signalbar'] if device_details else None  
+            network_signalbar = device_details['signalbar'] if device_details else None             
 
             modem_ifaddresses = imodem_iface.ifaddresses
 

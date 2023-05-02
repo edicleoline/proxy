@@ -29,6 +29,8 @@ from datetime import datetime
 
 from framework.util.format import HumanBytes
 
+import psutil
+
 CRED = '\033[91m'
 CGREEN = '\033[92m'
 CYELLOW = '\033[93m'
@@ -97,20 +99,36 @@ CEND = '\033[0m'
 #     for filter in filters:
 #         print(filter.value)
 
-def bytesToSize(bytes):
-    sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    if bytes == 0:
-        return 'n/a'
-    print(floor(log(abs(bytes)) / log(1024)), 10)
-    i = int(floor(log(abs(bytes)) / log(1024)), 10)
-    if i == 0:
-        return '{0} {1}'.format(bytes, sizes[i])
+# def bytesToSize(bytes):
+#     sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+#     if bytes == 0:
+#         return 'n/a'
+#     print(floor(log(abs(bytes)) / log(1024)), 10)
+#     i = int(floor(log(abs(bytes)) / log(1024)), 10)
+#     if i == 0:
+#         return '{0} {1}'.format(bytes, sizes[i])
     
-    # return `${(bytes / 1024 ** i).toFixed(1)} ${sizes[i]}`;
-    return sizes[i]
+#     # return `${(bytes / 1024 ** i).toFixed(1)} ${sizes[i]}`;
+#     return sizes[i]
 
-# bytesToSize(123421)
-print(HumanBytes.format(12342125, True, 0))
+# # bytesToSize(123421)
+# print(HumanBytes.format(12342125, True, 0))
+
+clients = []
+connections = psutil.net_connections()
+for connection in connections:
+    if connection.laddr.port != 1026: continue
+    if connection.status != 'ESTABLISHED': continue
+
+    client_already_exist = False
+    for client in clients:
+        if client.raddr.ip == connection.raddr.ip: client_already_exist = True
+
+    if client_already_exist == False:
+        clients.append(connection)
+
+print(clients)
+
 sys.exit(0)
 
 modem_log_model = ModemLogModel(

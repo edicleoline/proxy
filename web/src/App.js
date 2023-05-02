@@ -44,31 +44,20 @@ socket.on('server_control', (serverControl) => {
 });
 
 socket.on('event', (event) => {
-    console.log(event);
-    let message = '';
-    switch (event.type) {
-        case SERVER_EVENT_TYPE.MODEM.LOG:
-            storeModemLog(event.data);
-            break;
-        case SERVER_EVENT_TYPE.MODEM.UNEXPECTED_DISCONNECT:
-            message = new IntlMessageFormat(messages[locale()]['app.notification.modem.unexpectedDisconnect'], locale()).format({
-                modemId: event.data.modem.id
-            });
-            break;
-        case SERVER_EVENT_TYPE.MODEM.CONNECT:
-            message = new IntlMessageFormat(messages[locale()]['app.notification.modem.unexpectedDisconnect'], locale()).format({
-                modemId: event.data.modem.id
-            });
-            break;
-        default:
-            break;
+    // console.log(event);
+
+    if (event.type === SERVER_EVENT_TYPE.MODEM.LOG) {
+        storeModemLog(event.data);
+        return;
     }
 
     if (event.type === SERVER_EVENT_TYPE.MODEM.UNEXPECTED_DISCONNECT || event.type === SERVER_EVENT_TYPE.MODEM.CONNECT) {
         store.dispatch(
             addNotification({
                 id: event.id,
-                message: message,
+                message: new IntlMessageFormat(messages[locale()][event.data.message], locale()).format({
+                    modemId: event.data.modem_id
+                }),
                 props: {
                     open: true,
                     autoHideDuration: 10000,

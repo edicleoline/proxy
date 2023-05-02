@@ -18,6 +18,7 @@ from framework.proxy.factory import ProxyService
 from framework.settings import Settings
 from framework.util.wan import Wan
 from datetime import datetime, timedelta
+import psutil
 
 class Error(Enum):
     IP_NOT_CHANGED  = 300
@@ -651,6 +652,25 @@ class Modem:
     def is_connected(self):
         inframodem_iface = self.iface()
         return True if inframodem_iface != None else False
+    
+    def connected_clients(self):
+        clients = []
+        connections = psutil.net_connections()
+        for connection in connections:
+            if connection.laddr.port != self.server_modem_model.proxy_ipv4_http_port \
+                or connection.laddr.port != self.server_modem_model.proxy_ipv4_socks_port \
+                or connection.laddr.port != self.server_modem_model.proxy_ipv6_http_port \
+                or connection.laddr.port != self.server_modem_model.proxy_ipv6_socks_port: continue
+            if connection.status != 'ESTABLISHED': continue
+
+            client_already_exist = False
+            for client in clients:
+                if client.raddr.ip == connection.raddr.ip: client_already_exist = True
+
+            if client_already_exist == False: clients.append(connection)
+
+        return clients
+
 
     def ussd(self):
         """Send USSD to SIM card.

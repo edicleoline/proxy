@@ -276,6 +276,7 @@ const Modems = () => {
                                                 <TableCell align="left">Proxy IPv4</TableCell>
                                                 <TableCell align="left">Proxy IPv6</TableCell>
                                                 <TableCell align="right">Uso de dados</TableCell>
+                                                <TableCell align="right">Clientes</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -525,6 +526,7 @@ const Modems = () => {
                                                             <span>-</span>
                                                         )}
                                                     </TableCell>
+                                                    <TableCell align="right">{item.is_connected ? <span>0</span> : <>-</>}</TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
