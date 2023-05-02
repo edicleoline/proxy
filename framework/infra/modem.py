@@ -3,6 +3,7 @@ import requests
 from threading import Event
 from framework.error.exception import TimeoutException
 from framework.middleware.factory import MiddlewareFactory
+from framework.models.client import Addr, Client
 from framework.models.modemdiagnose import ModemDiagnoseModel, ModemDiagnoseOwner, ModemDiagnoseType
 from framework.models.modemthreadtask import TaskWizard, TaskWizardStep, TaskWizardStepType
 from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
@@ -658,18 +659,18 @@ class Modem:
         connections = psutil.net_connections()
         for connection in connections:
             if connection.laddr.port != self.server_modem_model.proxy_ipv4_http_port \
-                or connection.laddr.port != self.server_modem_model.proxy_ipv4_socks_port \
-                or connection.laddr.port != self.server_modem_model.proxy_ipv6_http_port \
-                or connection.laddr.port != self.server_modem_model.proxy_ipv6_socks_port: continue
+                and connection.laddr.port != self.server_modem_model.proxy_ipv4_socks_port \
+                and connection.laddr.port != self.server_modem_model.proxy_ipv6_http_port \
+                and connection.laddr.port != self.server_modem_model.proxy_ipv6_socks_port: continue
             if connection.status != 'ESTABLISHED': continue
 
             client_already_exist = False
             for client in clients:
                 if client.raddr.ip == connection.raddr.ip: client_already_exist = True
 
-            if client_already_exist == False: clients.append({
-                'raddr': { 'ip': connection.raddr.ip, 'port': connection.raddr.port }
-            })
+            if client_already_exist == False: clients.append(
+                Client(addr = Addr(ip = connection.raddr.ip, port = connection.raddr.port))
+            )
 
         return clients
 

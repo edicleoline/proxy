@@ -1,5 +1,6 @@
 import copy
 from datetime import datetime, timedelta
+from typing import List
 from framework.error.exception import TimeoutException
 from framework.manager.modem import ModemManager, ModemThreadData
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
