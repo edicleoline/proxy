@@ -1,4 +1,5 @@
 import time
+from typing import List
 import requests
 from threading import Event
 from framework.error.exception import TimeoutException
@@ -655,7 +656,7 @@ class Modem:
         return True if inframodem_iface != None else False
     
     def connected_clients(self):
-        clients = []
+        clients: List[Client] = []
         connections = psutil.net_connections()
         for connection in connections:
             if connection.laddr.port != self.server_modem_model.proxy_ipv4_http_port \

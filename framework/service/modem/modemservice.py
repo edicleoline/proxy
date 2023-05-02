@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import List
 from framework.error.exception import TimeoutException
 from framework.manager.modem import ModemManager, ModemThreadData
+from framework.models.client import Client
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 from framework.models.server import ServerModel, ServerModemModel
 from framework.models.schedule import ModemsAutoRotateAgendaItem
@@ -93,7 +94,7 @@ class ModemState():
     is_connected: bool    
     connectivity: ModemConnectivity
     sms: ModemSms
-    clients = None
+    clients: List[Client] = None
 
     def __init__(
             self, 
@@ -103,7 +104,7 @@ class ModemState():
             is_connected: bool = None,
             connectivity: ModemConnectivity = None,
             sms: ModemSms = None,
-            clients = None
+            clients: List[Client] = None
     ):
         self.modem = modem
         self.infra_modem = infra_modem
