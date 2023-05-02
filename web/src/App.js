@@ -21,6 +21,7 @@ import setServerState from 'store/actions/setServerState';
 import { SET_MODEMS_ITEMS } from 'store/actions/types';
 
 socket.on('modems', (modems) => {
+    console.log(modems);
     const pendingReloads = pendingReloadModemsInQueue();
     const replaceItems = pendingReloads.map((replaceItem) => {
         return { modem: { id: replaceItem.data.modem.id } };
@@ -30,7 +31,6 @@ socket.on('modems', (modems) => {
     }
 
     store.dispatch(setModemsItems(modems, replaceItems));
-    // store.dispatch({ type: SET_MODEMS_ITEMS, items: modems, replaceItems: replaceItems });
 });
 
 socket.on('server_state', (serverState) => {

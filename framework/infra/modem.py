@@ -667,7 +667,9 @@ class Modem:
             for client in clients:
                 if client.raddr.ip == connection.raddr.ip: client_already_exist = True
 
-            if client_already_exist == False: clients.append(connection)
+            if client_already_exist == False: clients.append({
+                'raddr': { 'ip': connection.raddr.ip, 'port': connection.raddr.port }
+            })
 
         return clients
 
