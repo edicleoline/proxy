@@ -26,7 +26,7 @@ class CommonServiceObserver():
         self.subscribers = subscribers
 
     def main(self):
-        pass
+        self.proxy_clients()
 
     def proxy_clients(self):
         state = 123
