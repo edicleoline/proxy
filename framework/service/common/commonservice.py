@@ -32,7 +32,7 @@ class CommonServiceObserver():
         state = 123
 
         for subscriber in self.subscribers:
-            if subscriber.type == CommonServiceSubscribeType.PROXY_CLIENTS: subscriber(state)
+            if subscriber.type == CommonServiceSubscribeType.PROXY_CLIENTS: subscriber.callback(state)
 
 
 class CommonServiceObserveThread(Thread):
