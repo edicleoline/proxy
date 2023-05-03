@@ -4,6 +4,7 @@ from framework.manager.modem import ModemManager
 from framework.models.server import ServerModel
 from framework.proxy.factory import ProxyService
 from framework.service.Cloacker import CloackerService
+from framework.service.common.commonservice import CommonService, CommonServiceSubscribeType
 from framework.service.modem.modemservice import ModemsEventObserver, ModemsService, ModemsAutoRotateService
 from framework.service.route.routeservice import RouteService
 from framework.service.server.servereventservice import ServerEvent
@@ -68,3 +69,7 @@ app.modems_auto_rotate_service = ModemsAutoRotateService(
     settings = app.settings
 )
 #app.modems_auto_rotate_service.observe()
+
+app.common_service = CommonService(settings = app.settings)
+app.common_service.subscribe(CommonServiceSubscribeType.PROXY_CLIENTS, lambda state: print(state))
+app.common_service.observe()
