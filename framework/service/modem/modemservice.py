@@ -214,7 +214,7 @@ class ModemsObserver():
         self.reload_modems()
 
         self.modems_manager.subscribe_rotate(self.on_rotate_event)
-        self.common_service.subscribe(CommonServiceSubscribeType.NET_CONNECTIONS, lambda connections: print(connections))
+        self.common_service.subscribe(CommonServiceSubscribeType.NET_CONNECTIONS, lambda connections: self.on_net_connections_callback(connections))
 
     def subscribe_modems_states(self, callback):
         self.modems_states_subscribers.append(callback)
@@ -270,6 +270,9 @@ class ModemsObserver():
         for index, modem_state in enumerate(modems_states): 
             if modem_state.modem.id == server_modem_id: return index
         return -1       
+    
+    def on_net_connections_callback(self, connections):
+        print(connections)
 
     def observe_status(self):
         if not self.server_modems: return []
