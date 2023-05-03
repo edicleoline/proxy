@@ -667,14 +667,14 @@ class Modem:
 
             client_already_exist = False
             for client in clients:
-                if client.laddr.ip == connection.raddr.ip:
+                if client.ip == connection.raddr.ip:
                     client_already_exist = True
                     client.instances.append(
                         Instance(raddr = Addr(ip = connection.raddr.ip, port = connection.raddr.port))
                     )
 
             if client_already_exist == False: clients.append(
-                Client(laddr = Addr(ip = connection.laddr.ip, port = connection.laddr.port))
+                Client(ip = connection.raddr.ip, port = connection.laddr.port)
             )
 
         return clients

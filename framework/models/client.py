@@ -25,10 +25,12 @@ class Instance():
 @dataclass_json
 @dataclass
 class Client():
-    laddr: Addr = None
+    ip: str = None
+    port: int = None
     instances: List[Instance] = None
 
-    def __init__(self, laddr: Addr = None):
-        self.laddr = laddr
+    def __init__(self, ip: str = None, port: int = None):
+        self.ip = ip
+        self.port = port
         self.instances = []
 
