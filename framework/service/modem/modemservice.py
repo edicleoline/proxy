@@ -201,11 +201,12 @@ class ModemsEventObserver():
 
 
 class ModemsObserver():
-    def __init__(self, server: ServerModel, modems_manager: ModemManager, settings: Settings, cloacker_service: CloackerService):       
+    def __init__(self, server: ServerModel, modems_manager: ModemManager, settings: Settings, cloacker_service: CloackerService, common_service: CommonService):       
         self.server = server        
         self.modems_manager = modems_manager  
         self.settings = settings
         self.cloacker_service = cloacker_service
+        self.common_service = common_service
         self.server_modems = []
         self.modems_states = []
         self.modems_states_subscribers = []
@@ -213,6 +214,7 @@ class ModemsObserver():
         self.reload_modems()
 
         self.modems_manager.subscribe_rotate(self.on_rotate_event)
+        self.common_service.subscribe(CommonServiceSubscribeType.NET_CONNECTIONS, lambda connections: print(connections))
 
     def subscribe_modems_states(self, callback):
         self.modems_states_subscribers.append(callback)
@@ -409,7 +411,7 @@ class ModemsService():
         self.settings = settings
         self.cloacker_service = cloacker_service
         self.common_service = common_service
-        self.modems_observer = ModemsObserver(server = server, modems_manager = modems_manager, settings = settings, cloacker_service = cloacker_service)        
+        self.modems_observer = ModemsObserver(server = server, modems_manager = modems_manager, settings = settings, cloacker_service = cloacker_service, common_service = common_service)        
 
         self._modems_observe_status_lock = Lock()
         self._modems_observe_status_stop_event = Event()
@@ -417,9 +419,7 @@ class ModemsService():
 
         self._modems_observe_connectivity_lock = Lock()
         self._modems_observe_connectivity_stop_event = Event()
-        self._modems_observe_connectivity_thread = None
-
-        self.common_service.subscribe(CommonServiceSubscribeType.NET_CONNECTIONS, lambda connections: print(connections))
+        self._modems_observe_connectivity_thread = None        
 
     def observe(self):
         with self._modems_observe_status_lock:
