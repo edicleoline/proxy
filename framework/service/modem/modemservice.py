@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import List
 from framework.error.exception import TimeoutException
 from framework.manager.modem import ModemManager, ModemThreadData
-from framework.models.client import Client
+from framework.models.client import Addr, Client, Instance
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 from framework.models.server import ServerModel, ServerModemModel
 from framework.models.schedule import ModemsAutoRotateAgendaItem
@@ -272,7 +272,35 @@ class ModemsObserver():
         return -1       
     
     def on_net_connections_callback(self, connections):
-        print(connections)
+        if not self.server_modems: return []
+
+        for server_modem in self.server_modems:
+            modem_state_index = self.modem_state_index_by_server_modem_id(self.modems_states, server_modem.id)
+            modem_state = self.modems_states[modem_state_index] if modem_state_index > -1 else None
+
+            if modem_state == None: continue
+
+            clients: List[Client] = []
+            for connection in connections:
+                if connection.laddr.port != modem_state.modem.proxy_ipv4_http_port \
+                    and connection.laddr.port != modem_state.modem.proxy_ipv4_socks_port \
+                    and connection.laddr.port != modem_state.modem.proxy_ipv6_http_port \
+                    and connection.laddr.port != modem_state.modem.proxy_ipv6_socks_port: continue
+                if connection.status != 'ESTABLISHED': continue
+
+                client_already_exist = False
+                for client in clients:
+                    if client.ip == connection.raddr.ip:
+                        client_already_exist = True
+                        client.instances.append(
+                            Instance(raddr = Addr(ip = connection.raddr.ip, port = connection.raddr.port))
+                        )
+
+                if client_already_exist == False: clients.append(
+                    Client(ip = connection.raddr.ip, port = connection.laddr.port)
+                )
+
+            modem_state.clients = clients
 
     def observe_status(self):
         if not self.server_modems: return []
@@ -308,7 +336,7 @@ class ModemsObserver():
 
             if modem_state == None or modem_state.infra_modem == None or modem_state.is_connected != True: continue
 
-            modem_state.clients = modem_state.infra_modem.connected_clients()
+            # modem_state.clients = modem_state.infra_modem.connected_clients()
             imodem_iface = modem_state.infra_modem.iface()
             if imodem_iface == None or imodem_iface.interface == None: continue
 
