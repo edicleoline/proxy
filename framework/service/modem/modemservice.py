@@ -336,7 +336,6 @@ class ModemsObserver():
 
             if modem_state == None or modem_state.infra_modem == None or modem_state.is_connected != True: continue
 
-            # modem_state.clients = modem_state.infra_modem.connected_clients()
             imodem_iface = modem_state.infra_modem.iface()
             if imodem_iface == None or imodem_iface.interface == None: continue
 

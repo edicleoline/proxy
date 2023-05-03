@@ -1,10 +1,8 @@
 import time
-from typing import List
 import requests
 from threading import Event
 from framework.error.exception import TimeoutException
 from framework.middleware.factory import MiddlewareFactory
-from framework.models.client import Addr, Client, Instance
 from framework.models.modemdiagnose import ModemDiagnoseModel, ModemDiagnoseOwner, ModemDiagnoseType
 from framework.models.modemthreadtask import TaskWizard, TaskWizardStep, TaskWizardStepType
 from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
@@ -20,7 +18,6 @@ from framework.proxy.factory import ProxyService
 from framework.settings import Settings
 from framework.util.wan import Wan
 from datetime import datetime, timedelta
-import psutil
 
 class Error(Enum):
     IP_NOT_CHANGED  = 300
@@ -654,31 +651,6 @@ class Modem:
     def is_connected(self):
         inframodem_iface = self.iface()
         return True if inframodem_iface != None else False
-    
-    def connected_clients(self):
-        clients: List[Client] = []
-        connections = psutil.net_connections()
-        for connection in connections:
-            if connection.laddr.port != self.server_modem_model.proxy_ipv4_http_port \
-                and connection.laddr.port != self.server_modem_model.proxy_ipv4_socks_port \
-                and connection.laddr.port != self.server_modem_model.proxy_ipv6_http_port \
-                and connection.laddr.port != self.server_modem_model.proxy_ipv6_socks_port: continue
-            if connection.status != 'ESTABLISHED': continue
-
-            client_already_exist = False
-            for client in clients:
-                if client.ip == connection.raddr.ip:
-                    client_already_exist = True
-                    client.instances.append(
-                        Instance(raddr = Addr(ip = connection.raddr.ip, port = connection.raddr.port))
-                    )
-
-            if client_already_exist == False: clients.append(
-                Client(ip = connection.raddr.ip, port = connection.laddr.port)
-            )
-
-        return clients
-
 
     def ussd(self):
         """Send USSD to SIM card.
