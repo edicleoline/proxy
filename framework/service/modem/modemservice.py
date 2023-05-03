@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from dataclasses_json import dataclass_json
 from threading import Thread, Event, Lock
 from framework.service.Cloacker import Cloacker, CloackerService
-from framework.service.common.commonservice import CommonService
+from framework.service.common.commonservice import CommonService, CommonServiceSubscribeType
 from framework.service.server.servereventservice import EventType, Event as ServerEvent
 from framework.util.format import HumanBytes
 from time import sleep
@@ -419,6 +419,8 @@ class ModemsService():
         self._modems_observe_connectivity_stop_event = Event()
         self._modems_observe_connectivity_thread = None
 
+        self.common_service.subscribe(CommonServiceSubscribeType.NET_CONNECTIONS, lambda connections: print(connections))
+
     def observe(self):
         with self._modems_observe_status_lock:
             if not self._modems_observe_status_thread or not self._modems_observe_status_thread.is_alive():
@@ -428,7 +430,7 @@ class ModemsService():
                 )
                 self._modems_observe_status_thread.start()
 
-        sleep(0.5)
+        sleep(0.2)
 
         with self._modems_observe_connectivity_lock:
             if not self._modems_observe_connectivity_thread or not self._modems_observe_connectivity_thread.is_alive():
