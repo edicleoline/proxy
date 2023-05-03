@@ -45,6 +45,7 @@ import SignalBar from './SignalBar';
 import { useDispatch, useSelector } from 'react-redux';
 import { ADD_DOCK } from 'store/actions/types';
 import { DOCK_TYPE, addDock, Docker } from 'ui-component/Dock/Docker';
+import Clients from './Clients';
 
 const ModemIdWrapper = styled.div`
     position: relative;
@@ -526,7 +527,9 @@ const Modems = () => {
                                                             <span>-</span>
                                                         )}
                                                     </TableCell>
-                                                    <TableCell align="right">{item.is_connected ? <span>0</span> : <>-</>}</TableCell>
+                                                    <TableCell align="right">
+                                                        {item.is_connected ? <Clients clients={item.clients} /> : <>-</>}
+                                                    </TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>

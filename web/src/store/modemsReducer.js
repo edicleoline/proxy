@@ -69,6 +69,13 @@ const merge = (oldState, newItems = [], replaceItems = []) => {
                 oldItem.lock = newItem.lock;
             }
 
+            const oldItemClientsHash = oldItem.clients != null ? objectHash(oldItem.clients) : objectHash({});
+            const newItemClientsHash = newItem.clients != null ? objectHash(newItem.clients) : objectHash({});
+            if (oldItemClientsHash !== newItemClientsHash) {
+                updated = true;
+                oldItem.clients = newItem.clients;
+            }
+
             if (
                 oldItem.modem.schedule != newItem.modem.schedule ||
                 objectHash.MD5(oldItem.modem.schedule) != objectHash.MD5(newItem.modem.schedule)

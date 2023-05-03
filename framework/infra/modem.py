@@ -4,7 +4,7 @@ import requests
 from threading import Event
 from framework.error.exception import TimeoutException
 from framework.middleware.factory import MiddlewareFactory
-from framework.models.client import Addr, Client
+from framework.models.client import Addr, Client, Instance
 from framework.models.modemdiagnose import ModemDiagnoseModel, ModemDiagnoseOwner, ModemDiagnoseType
 from framework.models.modemthreadtask import TaskWizard, TaskWizardStep, TaskWizardStepType
 from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
@@ -667,10 +667,14 @@ class Modem:
 
             client_already_exist = False
             for client in clients:
-                if client.raddr.ip == connection.raddr.ip: client_already_exist = True
+                if client.laddr.ip == connection.raddr.ip:
+                    client_already_exist = True
+                    client.instances.append(
+                        Instance(raddr = Addr(ip = connection.raddr.ip, port = connection.raddr.port))
+                    )
 
             if client_already_exist == False: clients.append(
-                Client(addr = Addr(ip = connection.raddr.ip, port = connection.raddr.port))
+                Client(laddr = Addr(ip = connection.laddr.ip, port = connection.laddr.port))
             )
 
         return clients
