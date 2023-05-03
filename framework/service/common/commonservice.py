@@ -9,7 +9,7 @@ from enum import Enum
 import psutil
 
 class CommonServiceSubscribeType(Enum):
-    PROXY_CLIENTS  = 'proxy_clients'
+    NET_CONNECTIONS = 'net_connections'
 
 
 class CommonServiceSubscribe():
@@ -32,7 +32,7 @@ class CommonServiceObserver():
     def net_connections(self):
         connections = psutil.net_connections()
         for subscriber in self.subscribers:
-            if subscriber.type == CommonServiceSubscribeType.PROXY_CLIENTS: subscriber.callback(connections)
+            if subscriber.type == CommonServiceSubscribeType.NET_CONNECTIONS: subscriber.callback(connections)
 
 
 class CommonServiceObserveThread(Thread):

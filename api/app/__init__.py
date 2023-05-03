@@ -71,5 +71,5 @@ app.modems_auto_rotate_service = ModemsAutoRotateService(
 #app.modems_auto_rotate_service.observe()
 
 app.common_service = CommonService(settings = app.settings)
-app.common_service.subscribe(CommonServiceSubscribeType.PROXY_CLIENTS, lambda state: print(state))
+app.common_service.subscribe(CommonServiceSubscribeType.NET_CONNECTIONS, lambda state: print(state))
 app.common_service.observe()
