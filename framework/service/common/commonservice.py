@@ -6,6 +6,7 @@ from threading import Thread, Event, Lock
 from time import sleep
 from framework.settings import Settings
 from enum import Enum
+import psutil
 
 class CommonServiceSubscribeType(Enum):
     PROXY_CLIENTS  = 'proxy_clients'
@@ -26,13 +27,12 @@ class CommonServiceObserver():
         self.subscribers = subscribers
 
     def main(self):
-        self.proxy_clients()
+        self.net_connections()
 
-    def proxy_clients(self):
-        state = 123
-
+    def net_connections(self):
+        connections = psutil.net_connections()
         for subscriber in self.subscribers:
-            if subscriber.type == CommonServiceSubscribeType.PROXY_CLIENTS: subscriber.callback(state)
+            if subscriber.type == CommonServiceSubscribeType.PROXY_CLIENTS: subscriber.callback(connections)
 
 
 class CommonServiceObserveThread(Thread):
