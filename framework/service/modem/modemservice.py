@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from dataclasses_json import dataclass_json
 from threading import Thread, Event, Lock
 from framework.service.Cloacker import Cloacker, CloackerService
+from framework.service.common.commonservice import CommonService
 from framework.service.server.servereventservice import EventType, Event as ServerEvent
 from framework.util.format import HumanBytes
 from time import sleep
@@ -402,11 +403,12 @@ class ModemsObserveConnectivityThread(Thread):
 
 
 class ModemsService():
-    def __init__(self, server: ServerModel, modems_manager: ModemManager, settings: Settings, cloacker_service: CloackerService):                
+    def __init__(self, server: ServerModel, modems_manager: ModemManager, settings: Settings, cloacker_service: CloackerService, common_service: CommonService):                
         self.server = server        
         self.modems_manager = modems_manager
         self.settings = settings
         self.cloacker_service = cloacker_service
+        self.common_service = common_service
         self.modems_observer = ModemsObserver(server = server, modems_manager = modems_manager, settings = settings, cloacker_service = cloacker_service)        
 
         self._modems_observe_status_lock = Lock()

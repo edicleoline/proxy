@@ -33,6 +33,8 @@ app.server_service.subscribe(lambda server_state: app.socketio.emit('server_stat
 
 server = ServerModel.find_by_id(1)
 
+app.common_service = CommonService(settings = app.settings)
+
 app.proxy_service = ProxyService(server = server, settings = app.settings)
 
 app.route_service = RouteService(server = server, settings = app.settings)
@@ -44,7 +46,8 @@ app.modems_service = ModemsService(
     server = server, 
     modems_manager = app.modems_manager,
     settings = app.settings,
-    cloacker_service = app.cloacker_service
+    cloacker_service = app.cloacker_service,
+    common_service = app.common_service
 )
 #app.modems_service.observe()
 
@@ -70,6 +73,5 @@ app.modems_auto_rotate_service = ModemsAutoRotateService(
 )
 #app.modems_auto_rotate_service.observe()
 
-app.common_service = CommonService(settings = app.settings)
 app.common_service.subscribe(CommonServiceSubscribeType.NET_CONNECTIONS, lambda state: print(state))
 app.common_service.observe()
