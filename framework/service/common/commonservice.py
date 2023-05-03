@@ -71,7 +71,7 @@ class CommonService():
                 self._service_observe_thread = CommonServiceObserveThread(
                     service_observer = self.service_observer, 
                     stop_event = self._service_observe_stop_event,
-                    delay = self.settings.server_service_state_update_interval         
+                    delay = self.settings.common_service_interval         
                 )
                 self._service_observe_thread.start()
 

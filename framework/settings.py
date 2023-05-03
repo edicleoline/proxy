@@ -8,3 +8,4 @@ class Settings():
         self.external_ip_url = 'https://ipecho.net/plain'
         # self.external_ip_url = 'https://api.ipify.org/',
         self.server_service_state_update_interval = 1
+        self.common_service_interval = 1
