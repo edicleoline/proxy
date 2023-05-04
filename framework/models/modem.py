@@ -1,7 +1,7 @@
 from db import connection
 from dataclasses import dataclass
 from dataclasses_json import dataclass_json
-from framework.models.modemdevicemodel import ModemDeviceModel
+from framework.models.modemdevice import ModemDeviceModel
 
 @dataclass_json
 @dataclass
@@ -9,7 +9,7 @@ class ModemModel():
     id: int
     imei: str
     addr_id: str
-    device: ModemDeviceModel    
+    device: ModemDeviceModel  
 
     def __init__(self, id = None, imei = None, device_id = None, addr_id = None, created_at = None):
         self.id = id
