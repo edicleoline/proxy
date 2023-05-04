@@ -133,9 +133,8 @@ class Modem:
     def log_diagnose(self, log: ModemDiagnoseModel):
         if self.callback: self.callback(log)
 
-    def resolve_proxy(self):
-        if self.proxy_service:
-            self.proxy_service.resolve(self.server_modem_model)
+    # def resolve_proxy(self):
+    #     if self.proxy_service: self.proxy_service.resolve()
 
     def resolve_route(self):
         inframodem_iface = self.iface()
@@ -145,7 +144,7 @@ class Modem:
         route.resolve_route()        
 
     def resolve_connectivity(self):
-        self.resolve_proxy()
+        # self.resolve_proxy()
         self.resolve_route()
 
     def reboot(self, hard_reset = False, write_params = True):

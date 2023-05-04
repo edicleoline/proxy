@@ -61,7 +61,7 @@ class RouteService():
         self.modems_states = modems_states
         self.observer = RouteServiceObserver(self.modems_states)
 
-    def update_modems(self, modems_states):
+    def set_modems(self, modems_states):
         self.modems_states = modems_states
         self.observer.update_modems(self.modems_states)
 

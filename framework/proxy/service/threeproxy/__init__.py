@@ -1,7 +1,7 @@
 from typing import List
 from framework.models.server import ServerModel, ServerModemModel
 
-class _3Proxy():
+class Proxy():
     service_config_path: str = '/usr/local/3proxy/conf/3proxy.cfg'
     nscache: int = 65536
     nservers: List[str] = ['8.8.8.8', '8.8.4.4']
