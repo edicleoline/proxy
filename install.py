@@ -346,7 +346,10 @@ if __name__ == '__main__':
 
         for m in modems:
             modem = ModemModel(imei = m['imei'], device_id = m['device_id'], addr_id = m['addr_id'])
-            modem.save_to_db()
+            modem.save_to_db()            
+            params = modem.device.middleware.params
+            params[0].value = 'vivo'
+            params[0].save_to_db()
     except ConstraintError:
         pass
 

@@ -10,14 +10,10 @@ from framework.models.modemmiddlewareparam import ModemMiddlewareParamModel
 class ModemMiddlewareModel(MiddlewareModel):
     params: List[ModemMiddlewareParamModel]
 
-    def __init__(self, id = None, name = None, description = None, class_name = None, created_at = None):
-        super().__init__(id = id, name = name, description = description, class_name = class_name, created_at = created_at)
+    def __init__(self, id = None, name = None, description = None, class_name = None, created_at = None):        
+        super().__init__(id = id, name = name, description = description, class_name = class_name, created_at = created_at)        
         self.modem_id: int = None
 
     @property
-    def params(self):
-        _params = ModemMiddlewareParamModel.find_by_middleware_id(self.id)
-        if _params:
-            for param in _params: param.modem_id = self.modem_id
-        
-        return _params
+    def params(self) -> List[ModemMiddlewareParamModel]:
+        return ModemMiddlewareParamModel.find_by_middleware_id(self.id, self.modem_id)

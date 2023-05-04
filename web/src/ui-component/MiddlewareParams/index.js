@@ -42,7 +42,9 @@ const MiddlewareParams = ({ params, onChange }) => {
     useEffect(() => {
         if (params) {
             params.map((param) => {
-                param.value = '';
+                if (!('value' in param)) {
+                    param.value = '';
+                }
                 return param;
             });
         }

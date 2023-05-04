@@ -8,8 +8,8 @@ from dataclasses_json import dataclass_json
 class ModemDeviceModel(DeviceModel):
     middleware: ModemMiddlewareModel    
 
-    def __init__(self, id = None, model = None, type = None, middleware_id = None, created_at = None):
-        super().__init__(id = id, model = model, type = type, middleware_id = middleware_id, created_at = created_at)
+    def __init__(self, id = None, model = None, type = None, middleware_id = None, created_at = None):        
+        super().__init__(id = id, model = model, type = type, middleware_id = middleware_id, created_at = created_at)        
         self.modem_id: int = None
 
     @classmethod
