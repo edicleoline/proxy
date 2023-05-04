@@ -1,6 +1,10 @@
 from framework.models.device import DeviceModel
 from framework.models.modemmiddleware import ModemMiddlewareModel
+from dataclasses import dataclass
+from dataclasses_json import dataclass_json
 
+@dataclass_json
+@dataclass
 class ModemDeviceModel(DeviceModel):
     middleware: ModemMiddlewareModel
     modem_id: int = None
