@@ -33,7 +33,7 @@ class ModemModel():
     @property
     def device(self):
         if self._device: return self._device
-        self._device = None if self.device_id == None else ModemDeviceModel.find_by_id(self.device_id)
+        self._device = None if self.device_id == None else ModemDeviceModel.find_by_id(self.device_id, self.id)
         return self._device
 
     def save_to_db(self):
