@@ -10,7 +10,8 @@ class MiddlewareParamModel():
     name_translate: str
     type: str
     required: bool
-    
+    test: str = None
+
     def __init__(
         self, id:int = None, 
         middleware_id:int = None, 
