@@ -45,6 +45,5 @@ class ModemMiddlewareParamModel(MiddlewareParamModel):
         conn.execute("INSERT INTO modem_middleware_param (modem_id, middleware_param_id, value) VALUES (?, ?, ?)", (
             self.modem_id, self.id, self.value
             ))
-        self.id = conn.last_insert_rowid()
 
         conn.close(True)

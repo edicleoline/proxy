@@ -130,6 +130,17 @@ class Modem(Resource):
                 
             server_modem.modem.save_to_db()
 
+
+        data_params = data_modem['device']['middleware']['params']
+        params = server_modem.modem.device.middleware.params
+        if params and data_params:
+            for param in params:
+                for data_param in data_params:
+                    if data_param['id'] == param.id:
+                        param.value = data_param['value']
+                        param.save_to_db()
+
+
         data_proxy = data['proxy']
         if data_proxy != None:
             if 'ipv4' in data_proxy and 'http' in data_proxy['ipv4'] and 'port' in data_proxy['ipv4']['http'] and data_proxy['ipv4']['http']['port'] != None:
