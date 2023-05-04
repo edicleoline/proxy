@@ -56,7 +56,7 @@ class MiddlewareParamModel():
         params = []
         for row in rows:
             params.append(
-                MiddlewareParamModel.find_by_id(row[0])
+                cls.find_by_id(row[0])
             )
 
         return params
