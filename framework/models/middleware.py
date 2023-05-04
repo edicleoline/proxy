@@ -12,7 +12,7 @@ class MiddlewareModel():
     description: str
     class_name: str  
     params: List[MiddlewareParamModel]
-    
+
     def __init__(self, id = None, name = None, description = None, class_name = None, created_at = None):
         self.id = id
         self.name = name
@@ -29,7 +29,7 @@ class MiddlewareModel():
         if row == None:
             return None
 
-        return MiddlewareModel(id = row[0], name = row[1], description = row[2], class_name = row[3], created_at = row[4])
+        return cls(id = row[0], name = row[1], description = row[2], class_name = row[3], created_at = row[4])
     
     @property
     def params(self):

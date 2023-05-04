@@ -10,3 +10,9 @@ class ModemDeviceModel(DeviceModel):
         device_model = super(ModemDeviceModel, cls).find_by_id(id)
         device_model.modem_id = modem_id
         return device_model
+    
+    @property
+    def middleware(self):
+        if self._middleware: return self._middleware
+        self._middleware = ModemMiddlewareModel.find_by_id(self.middleware_id)
+        return self._middleware
