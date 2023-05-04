@@ -37,7 +37,7 @@ class MiddlewareParamModel():
         if row == None:
             return None
 
-        return MiddlewareParamModel(
+        return cls(
             id = row[0], 
             middleware_id = row[1],
             name = row[2], 
