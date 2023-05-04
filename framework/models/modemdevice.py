@@ -22,4 +22,5 @@ class ModemDeviceModel(DeviceModel):
     def middleware(self):
         if self._middleware: return self._middleware
         self._middleware = ModemMiddlewareModel.find_by_id(self.middleware_id)
+        self._middleware.modem_id = self.modem_id
         return self._middleware

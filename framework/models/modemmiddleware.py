@@ -12,9 +12,10 @@ class ModemMiddlewareModel(MiddlewareModel):
 
     def __init__(self, id = None, name = None, description = None, class_name = None, created_at = None):
         super().__init__(id = id, name = name, description = description, class_name = class_name, created_at = created_at)
+        self.modem_id: int = None
 
     @property
     def params(self):
         _params = ModemMiddlewareParamModel.find_by_middleware_id(self.id)
-        print('called from ext')
+        print('called from ext modem_id = {0}'.format(self.modem_id))
         return _params
