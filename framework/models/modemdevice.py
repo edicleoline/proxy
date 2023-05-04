@@ -6,11 +6,11 @@ from dataclasses_json import dataclass_json
 @dataclass_json
 @dataclass
 class ModemDeviceModel(DeviceModel):
-    middleware: ModemMiddlewareModel
-    modem_id: int = None
+    middleware: ModemMiddlewareModel    
 
     def __init__(self, id = None, model = None, type = None, middleware_id = None, created_at = None):
         super().__init__(id = id, model = model, type = type, middleware_id = middleware_id, created_at = created_at)
+        self.modem_id: int = None
 
     @classmethod
     def find_by_id(cls, id: int, modem_id: int):
