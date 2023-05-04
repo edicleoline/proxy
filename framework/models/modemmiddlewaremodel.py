@@ -10,4 +10,4 @@ class ModemMiddlewareModel(MiddlewareModel):
     @property
     def params(self):
         print('called from ext')
-        return super(ModemMiddlewareModel, self).find_by_middleware_id(self.id)
+        return None
