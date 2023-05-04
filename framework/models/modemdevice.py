@@ -9,6 +9,9 @@ class ModemDeviceModel(DeviceModel):
     middleware: ModemMiddlewareModel
     modem_id: int = None
 
+    def __init__(self, id = None, model = None, type = None, middleware_id = None, created_at = None):
+        super().__init__(id = id, model = model, type = type, middleware_id = middleware_id, created_at = created_at)
+
     @classmethod
     def find_by_id(cls, id: int, modem_id: int):
         device_model = super(ModemDeviceModel, cls).find_by_id(id)
