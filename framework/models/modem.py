@@ -1,4 +1,3 @@
-# from framework.models.device import DeviceModel
 from db import connection
 from dataclasses import dataclass
 from dataclasses_json import dataclass_json

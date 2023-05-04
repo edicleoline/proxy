@@ -11,7 +11,7 @@ class DeviceModel():
     model: str
     type: str  
     middleware: MiddlewareModel
-    
+
     def __init__(self, id = None, model = None, type = None, middleware_id = None, created_at = None):
         self.id = id
         self.model = model
@@ -29,7 +29,7 @@ class DeviceModel():
         if row == None:
             return None
 
-        return DeviceModel(id = row[0], model = row[1], type = row[2], middleware_id = row[3], created_at = row[4])
+        return cls(id = row[0], model = row[1], type = row[2], middleware_id = row[3], created_at = row[4])
     
     @classmethod
     def all(cls):

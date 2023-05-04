@@ -9,7 +9,7 @@ import Stack from '@mui/material/Stack';
 
 const MiddlewareParam = ({ param, value, onChange }) => {
     useEffect(() => {
-        console.log('param!!!', param);
+        // console.log('param!!!', param);
     }, [param]);
 
     const handleChange = (v) => {
@@ -46,7 +46,7 @@ const MiddlewareParams = ({ params, onChange }) => {
                 return param;
             });
         }
-        console.log('params!!!', params);
+        // console.log('params!!!', params);
     }, [params]);
 
     const handleParamValueChange = (p, v) => {
