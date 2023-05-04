@@ -8,21 +8,25 @@ from db import connection
 class ModemMiddlewareParamModel(MiddlewareParamModel):
     value: str
 
-    def __init__(self, id: int = None, middleware_id: int = None, name: str = None, name_translate: str = None, type: str = None, required: bool = True, created_at=None):                
-        super().__init__(id, middleware_id, name, name_translate, type, required, created_at)                
-        self.modem_id: int = None
-        self.value = None
+    def __init__(self, id: int = None, middleware_id: int = None, name: str = None, name_translate: str = None, type: str = None, required: bool = True, created_at=None):                               
+        super().__init__(id, middleware_id, name, name_translate, type, required, created_at)                              
+        self.modem_id: int = None  
+        self._value = None 
 
     @property
     def value(self):
-        conn = connection()
-        row = conn.execute("SELECT value FROM modem_middleware_param WHERE modem_id=? AND middleware_param_id=?", (self.modem_id, self.id)).fetchone()
-        conn.close(True)
+        if self._value == None:
+            conn = connection()
+            row = conn.execute("SELECT value FROM modem_middleware_param WHERE modem_id=? AND middleware_param_id=?", (self.modem_id, self.id)).fetchone()
+            conn.close(True)
+            if row == None: return None
+            self._value = row[0]
 
-        if row == None:
-            return None
-
-        return row[0]
+        return self._value
+    
+    @value.setter
+    def value(self, value):
+        self._value = value
 
     @classmethod
     def find_by_middleware_id(cls, middleware_id, modem_id):
