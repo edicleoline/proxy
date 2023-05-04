@@ -8,10 +8,6 @@ import * as React from 'react';
 import Stack from '@mui/material/Stack';
 
 const MiddlewareParam = ({ param, value, onChange }) => {
-    useEffect(() => {
-        // console.log('param!!!', param);
-    }, [param]);
-
     const handleChange = (v) => {
         if (onChange) {
             onChange(param, v);
@@ -42,13 +38,12 @@ const MiddlewareParams = ({ params, onChange }) => {
     useEffect(() => {
         if (params) {
             params.map((param) => {
-                if (!('value' in param)) {
+                if (!('value' in param) || !param.value) {
                     param.value = '';
                 }
                 return param;
             });
         }
-        // console.log('params!!!', params);
     }, [params]);
 
     const handleParamValueChange = (p, v) => {

@@ -30,7 +30,6 @@ const DeviceSelector = ({ device, onChange }) => {
     }, []);
 
     const handleChange = (deviceId) => {
-        console.log(deviceId);
         if (onChange) onChange(devices.find((device) => device.id === deviceId));
     };
 

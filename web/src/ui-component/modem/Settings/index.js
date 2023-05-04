@@ -155,10 +155,8 @@ const SettingsDialog = (props) => {
     };
 
     const handleChangeDevice = (device) => {
-        const modem = { ..._modem.modem };
-        modem.modem.device = { id: device.id };
         const cloned = cloneDeep(_modem);
-        cloned.device = modem.device;
+        cloned.modem.device = device;
         _setModem(cloned);
     };
 
@@ -166,7 +164,6 @@ const SettingsDialog = (props) => {
         const cloned = cloneDeep(_modem);
         cloned.modem.device.middleware.params = params;
         _setModem(cloned);
-        console.log('changed params!!!!!', params);
     };
 
     return (

@@ -79,8 +79,7 @@ if __name__ == '__main__':
             class_name VARCHAR(80), 
             description VARCHAR(80), 
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
-            PRIMARY KEY (id),
-            UNIQUE (class_name)
+            PRIMARY KEY (id)
             )
             """)
     except SQLError:
@@ -301,7 +300,8 @@ if __name__ == '__main__':
 
     try:
         middlewares = [
-            { 'name': 'ZTE MF79S', 'class_name': 'mf79s', 'description': 'app.middleware.model.mf79s.description' },            
+            { 'name': 'ZTE MF79S', 'class_name': 'mf79s', 'description': 'app.middleware.model.mf79s.description' },
+            { 'name': 'ZTE MF79S 2', 'class_name': 'mf79s', 'description': 'app.middleware.model.mf79s.description' },            
             { 'name': 'Huawei E3372h', 'class_name': 'e3372h', 'description': 'app.middleware.model.e3372h.description' },
             { 'name': 'Android', 'class_name': 'android', 'description': 'app.middleware.model.android.description' }
         ]
@@ -312,9 +312,10 @@ if __name__ == '__main__':
         pass
 
     try:
-        middleware_params = [
-            # { 'middleware_id': 1, 'name': 'username', 'name_translate': 'username', 'type': 'str', 'required': True },
-            { 'middleware_id': 1, 'name': 'password', 'name_translate': 'password', 'type': 'str', 'required': True }            
+        middleware_params = [            
+            { 'middleware_id': 1, 'name': 'password', 'name_translate': 'password', 'type': 'str', 'required': True },
+            { 'middleware_id': 2, 'name': 'username', 'name_translate': 'username', 'type': 'str', 'required': True },
+            { 'middleware_id': 2, 'name': 'password', 'name_translate': 'password', 'type': 'str', 'required': True },
         ]
         for d in middleware_params:
             middleware_param_model = MiddlewareParamModel(middleware_id = d['middleware_id'], name = d['name'], name_translate = d['name_translate'], type = d['type'], required = d['required'])
@@ -324,7 +325,8 @@ if __name__ == '__main__':
 
     try:
         devices = [
-            { 'model': 'MF79S', 'type': '4G_DONGLE', 'middleware_id': 1 }            
+            { 'model': 'MF79S', 'type': '4G_DONGLE', 'middleware_id': 1 },
+            { 'model': 'MF79S 2', 'type': '4G_DONGLE', 'middleware_id': 2 }            
         ]
         for d in devices:
             device_model = DeviceModel(model = d['model'], type = d['type'], middleware_id = d['middleware_id'])
@@ -334,7 +336,7 @@ if __name__ == '__main__':
 
     try:
         modems = [
-            { 'imei': '499981121636715', 'device_id': 1, 'addr_id': '10.56.70' },
+            { 'imei': '499981121636715', 'device_id': 2, 'addr_id': '10.56.70' },
             { 'imei': '535189163974632', 'device_id': 1, 'addr_id': '10.56.71' },
             { 'imei': '998381769962604', 'device_id': 1, 'addr_id': '10.56.72' },
             { 'imei': '331972696716018', 'device_id': 1, 'addr_id': '10.56.73' },
@@ -346,10 +348,18 @@ if __name__ == '__main__':
 
         for m in modems:
             modem = ModemModel(imei = m['imei'], device_id = m['device_id'], addr_id = m['addr_id'])
-            modem.save_to_db()            
-            params = modem.device.middleware.params
-            params[0].value = 'vivo2'
-            params[0].save_to_db()
+            modem.save_to_db()      
+            if m['device_id'] == 1:
+                params = modem.device.middleware.params
+                params[0].value = 'vivo'
+                params[0].save_to_db()
+            elif m['device_id'] == 2:
+                params = modem.device.middleware.params
+                params[0].value = 'claro'
+                params[0].save_to_db()
+                params[1].value = 'claro_pass'
+                params[1].save_to_db()
+
     except ConstraintError:
         pass
 
