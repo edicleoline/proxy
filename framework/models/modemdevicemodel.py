@@ -1,4 +1,5 @@
 from framework.models.device import DeviceModel
+from framework.models.modemmiddlewaremodel import ModemMiddlewareModel
 
 class ModemDeviceModel(DeviceModel):
-    pass
+    middleware: ModemMiddlewareModel
