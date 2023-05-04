@@ -137,6 +137,23 @@ if __name__ == '__main__':
 
     try:
         conn.execute("""
+            CREATE TABLE modem_middleware_param (
+            id INTEGER NOT NULL, 
+            modem_id INTEGER, 
+            middleware_param_id INTEGER,   
+            value VARCHAR(240),
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+            PRIMARY KEY (id), 
+            UNIQUE (modem_id, middleware_param_id)
+            FOREIGN KEY(modem_id) REFERENCES modem (id),
+            FOREIGN KEY(middleware_param_id) REFERENCES middleware_param (id)
+            )
+            """)
+    except SQLError:
+        pass
+
+    try:
+        conn.execute("""
             CREATE TABLE modem_server (
             id INTEGER NOT NULL, 
             server_id INTEGER, 

@@ -12,6 +12,7 @@ class MiddlewareModel():
     description: str
     class_name: str  
     params: List[MiddlewareParamModel]
+    
     def __init__(self, id = None, name = None, description = None, class_name = None, created_at = None):
         self.id = id
         self.name = name

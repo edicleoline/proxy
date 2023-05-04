@@ -1,7 +1,8 @@
-from framework.models.device import DeviceModel
+# from framework.models.device import DeviceModel
 from db import connection
 from dataclasses import dataclass
 from dataclasses_json import dataclass_json
+from framework.models.modemdevicemodel import ModemDeviceModel
 
 @dataclass_json
 @dataclass
@@ -9,7 +10,7 @@ class ModemModel():
     id: int
     imei: str
     addr_id: str
-    device: DeviceModel    
+    device: ModemDeviceModel    
 
     def __init__(self, id = None, imei = None, device_id = None, addr_id = None, created_at = None):
         self.id = id
@@ -33,7 +34,7 @@ class ModemModel():
     @property
     def device(self):
         if self._device: return self._device
-        self._device = None if self.device_id == None else DeviceModel.find_by_id(self.device_id)
+        self._device = None if self.device_id == None else ModemDeviceModel.find_by_id(self.device_id)
         return self._device
 
     def save_to_db(self):

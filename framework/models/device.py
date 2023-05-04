@@ -11,6 +11,7 @@ class DeviceModel():
     model: str
     type: str  
     middleware: MiddlewareModel
+    
     def __init__(self, id = None, model = None, type = None, middleware_id = None, created_at = None):
         self.id = id
         self.model = model
