@@ -79,10 +79,9 @@ class Modem:
         if params:
             for param in params: params_transformed[param.name] = param.value
         
-        print(params_transformed)
         middleware_factory = MiddlewareFactory(
             middleware = self.modem().device.middleware,
-            params = { 'password': 'vivo' },
+            params = params_transformed,
             iface = self.iface(),
             settings = self.settings
         )
