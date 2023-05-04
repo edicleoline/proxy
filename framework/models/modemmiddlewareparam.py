@@ -13,6 +13,17 @@ class ModemMiddlewareParamModel(MiddlewareParamModel):
         self.modem_id: int = None
         self.value = None
 
+    @property
+    def value(self):
+        conn = connection()
+        row = conn.execute("SELECT value FROM modem_middleware_param WHERE modem_id=? AND middleware_param_id=?", (self.modem_id, self.id)).fetchone()
+        conn.close(True)
+
+        if row == None:
+            return None
+
+        return row[0]
+
     @classmethod
     def find_by_middleware_id(cls, middleware_id, modem_id):
         params = super(ModemMiddlewareParamModel, cls).find_by_middleware_id(middleware_id)
