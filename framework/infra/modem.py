@@ -51,15 +51,11 @@ class Modem:
 
 
     def modem(self):
-        if not self._modem:
-            self._modem = self.server_modem_model.modem
-
+        if not self._modem: self._modem = self.server_modem_model.modem
         return self._modem
 
     def usb_port(self):
-        if not self._usb_port:
-            self._usb_port = self.server_modem_model.usb
-
+        if not self._usb_port: self._usb_port = self.server_modem_model.usb
         return self._usb_port
 
     def iface(self):
@@ -77,7 +73,13 @@ class Modem:
         if iface == None or iface.ifaddresses == None: return None
         return Wan(settings = self.settings, interface = iface.interface)
 
-    def get_device_middleware(self):        
+    def get_device_middleware(self):            
+        params_transformed = {}
+        params = self.server_modem_model.modem.device.middleware.params
+        if params:
+            for param in params: params_transformed[param.name] = param.value
+        
+        print(params_transformed)
         middleware_factory = MiddlewareFactory(
             middleware = self.modem().device.middleware,
             params = { 'password': 'vivo' },
