@@ -17,5 +17,7 @@ class ModemMiddlewareModel(MiddlewareModel):
     @property
     def params(self):
         _params = ModemMiddlewareParamModel.find_by_middleware_id(self.id)
-        print('called from ext modem_id = {0}'.format(self.modem_id))
+        if _params:
+            for param in _params: param.modem_id = self.modem_id
+        
         return _params
