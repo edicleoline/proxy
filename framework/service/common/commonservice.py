@@ -8,15 +8,15 @@ from framework.settings import Settings
 from enum import Enum
 import psutil
 
-class CommonServiceSubscribeType(Enum):
-    NET_CONNECTIONS = 'net_connections'
+class CommonServiceSubscriberEvent(Enum):
+    ON_NET_CONNECTIONS_UPDATED = 'on_net_connections_updated'
 
 
 class CommonServiceSubscribe():
-    type: CommonServiceSubscribeType
+    type: CommonServiceSubscriberEvent
     callback = None
 
-    def __init__(self, type: CommonServiceSubscribeType, callback):
+    def __init__(self, type: CommonServiceSubscriberEvent, callback):
         self.type = type
         self.callback = callback
 
@@ -32,7 +32,7 @@ class CommonServiceObserver():
     def net_connections(self):
         connections = psutil.net_connections()
         for subscriber in self.subscribers:
-            if subscriber.type == CommonServiceSubscribeType.NET_CONNECTIONS: subscriber.callback(connections)
+            if subscriber.type == CommonServiceSubscriberEvent.ON_NET_CONNECTIONS_UPDATED: subscriber.callback(connections)
 
 
 class CommonServiceObserveThread(Thread):
@@ -75,5 +75,5 @@ class CommonService():
                 )
                 self._service_observe_thread.start()
 
-    def subscribe(self, type: CommonServiceSubscribeType, callback):
+    def subscribe(self, type: CommonServiceSubscriberEvent, callback):
         self.subscribers.append(CommonServiceSubscribe(type = type, callback = callback))

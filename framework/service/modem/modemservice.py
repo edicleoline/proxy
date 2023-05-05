@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from dataclasses_json import dataclass_json
 from threading import Thread, Event, Lock
 from framework.service.Cloacker import Cloacker, CloackerService
-from framework.service.common.commonservice import CommonService, CommonServiceSubscribeType
+from framework.service.common.commonservice import CommonService, CommonServiceSubscriberEvent
 from framework.service.server.servereventservice import EventType, Event as ServerEvent
 from framework.util.format import HumanBytes
 from time import sleep
@@ -232,8 +232,8 @@ class ModemsObserver():
         self.server_modems = []
         self.modems_states = []
         self.subscribers = subscribers        
-        self.modems_manager.subscribe_rotate(self.on_rotate_event)
-        self.common_service.subscribe(CommonServiceSubscribeType.NET_CONNECTIONS, lambda connections: self.on_net_connections_callback(connections))
+        self.modems_manager.subscribe_rotate(self.on_modems_manager_rotate)
+        self.common_service.subscribe(CommonServiceSubscriberEvent.ON_NET_CONNECTIONS_UPDATED, lambda connections: self.on_net_connections_callback(connections))
         self.reload_modems()
 
     def notify_subscribers(self, event: ModemServiceSubscriberEvent = None):
@@ -241,7 +241,7 @@ class ModemsObserver():
             for subscriber in self.subscribers:
                 if subscriber.event == event: subscriber.callback(self.modems_states)    
 
-    def on_rotate_event(self, status, data):
+    def on_modems_manager_rotate(self, status, data):
         if data and 'connectivity' in data:
             if self.modems_states:
                 modem_state = None

@@ -4,7 +4,7 @@ from framework.manager.modem import ModemManager
 from framework.models.server import ServerModel
 from framework.proxy.factory import ProxyService
 from framework.service.Cloacker import CloackerService
-from framework.service.common.commonservice import CommonService, CommonServiceSubscribeType
+from framework.service.common.commonservice import CommonService, CommonServiceSubscriberEvent
 from framework.service.modem.modemservice import ModemServiceSubscriber, ModemServiceSubscriberEvent, ModemsEventObserver, ModemsService, ModemsAutoRotateService
 from framework.service.route.routeservice import RouteService
 from framework.service.server.servereventservice import ServerEvent
@@ -57,20 +57,11 @@ app.modems_service = ModemsService(
 )
 #app.modems_service.observe()
 
-# app.modems_service.subscribe(ModemServiceSubscriberEvent.ON_MODEMS_RELOAD, lambda modems_states: print(modems_states))
-
-#app.modems_states = []
-#def set_modems_states(modems_states): app.modems_states = modems_states
-#app.modems_service.subscribe_status(lambda modems_states: set_modems_states(modems_states))
-#app.modems_service.subscribe_connectivity(lambda modems_states: set_modems_states(modems_states))
-
 app.modems_event_observer = ModemsEventObserver(
     server_event = app.server_event, 
     settings = app.settings,
     cloacker_service = app.cloacker_service
 )
-# app.modems_service.subscribe_status(lambda modems_states: app.modems_event_observer.observe(modems_states))
-# app.modems_service.subscribe_status(lambda modems_states: app.route_service.set_modems(modems_states))
 
 app.modems_service.subscribe(ModemServiceSubscriberEvent.ON_MODEMS_STATUS_UPDATED, lambda modems_states: app.modems_event_observer.observe(modems_states))
 app.modems_service.subscribe(ModemServiceSubscriberEvent.ON_MODEMS_STATUS_UPDATED, lambda modems_states: app.route_service.set_modems(modems_states))
