@@ -7,7 +7,7 @@ from framework.manager.subscriber import ModemManagerSubscriber, ModemManagerSub
 from framework.middleware.factory import MiddlewareFactory
 from framework.models.modemdiagnose import ModemDiagnoseModel, ModemDiagnoseOwner, ModemDiagnoseType
 from framework.models.modemthreadtask import TaskWizard, TaskWizardStep, TaskWizardStepType
-from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
+from framework.models.iplabelfilter import IpLabelFilterModel
 from framework.models.server import ServerModemModel
 from framework.models.modemiphistory import ModemIPHistoryModel
 from framework.models.proxyuseriphistory import ProxyUserIPHistoryModel
@@ -346,7 +346,7 @@ class Modem:
             params={
                 'hard_reset': hard_reset,
                 'proxy_username': proxy_username,
-                'filters': ProxyUserIPFilterModel.schema().dump(filters, many=True) if filters else None                
+                'filters': IpLabelFilterModel.schema().dump(filters, many=True) if filters else None                
             },
             logged_at = datetime.now()
         )
@@ -511,7 +511,7 @@ class Modem:
                             message='app.log.modem.rotate.ip.new.filter_not_match',
                             params={
                                 'ipv4': new_ip,
-                                'filters': ProxyUserIPFilterModel.schema().dump(filters, many=True)
+                                'filters': IpLabelFilterModel.schema().dump(filters, many=True)
                             },
                             logged_at = datetime.now()
                         )

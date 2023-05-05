@@ -14,7 +14,7 @@ from framework.infra.netiface import NetIface
 from framework.infra.modem import Modem as InfraModem
 from framework.infra.route import Route
 from framework.models.modemiphistory import ModemIPHistoryModel
-from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
+from framework.models.iplabelfilter import IpLabelFilterModel
 
 from framework.models.server import ServerModel, ServerModemModel, USBPortModel, USBPortStatus
 from framework.models.modem import ModemModel
@@ -22,7 +22,7 @@ from framework.models.modem import ModemModel
 from framework.models.proxyuseriphistory import ProxyUserIPHistoryModel
 from framework.models.installation import InstallationModel
 from framework.models.user import UserModel
-from framework.models.proxyuser import ProxyUserModel
+from framework.models.iplabel import IpLabelModel
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 
 from datetime import datetime
@@ -86,15 +86,15 @@ CEND = '\033[0m'
 # is_ip_reserved_for_other = ProxyUserIPHistoryModel.is_ip_reserved_for_other('177.10.11.123', 2)
 # print(is_ip_reserved_for_other)
 
-# proxy_user_ip_filter_model = ProxyUserIPFilterModel(proxy_user_id = 1, modem_id = 1, type = 'ip', value = '179.')
+# proxy_user_ip_filter_model = IpLabelFilterModel(proxy_user_id = 1, modem_id = 1, type = 'ip', value = '179.')
 # proxy_user_ip_filter_model.save_to_db()
-# proxy_user_ip_filter_model = ProxyUserIPFilterModel(proxy_user_id = 1, modem_id = 2, type = 'ip', value = '200.173')
+# proxy_user_ip_filter_model = IpLabelFilterModel(proxy_user_id = 1, modem_id = 2, type = 'ip', value = '200.173')
 # proxy_user_ip_filter_model.save_to_db()
 
-# print(ProxyUserIPFilterModel.find_by_id(2).filter_value)
+# print(IpLabelFilterModel.find_by_id(2).filter_value)
 
-# filters = ProxyUserIPFilterModel.find_by_proxy_user(1)
-# filters = ProxyUserIPFilterModel.find_by_proxy_user_and_modem(1, 2)
+# filters = IpLabelFilterModel.find_by_proxy_user(1)
+# filters = IpLabelFilterModel.find_by_proxy_user_and_modem(1, 2)
 # if filters:
 #     for filter in filters:
 #         print(filter.value)

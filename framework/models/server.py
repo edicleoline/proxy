@@ -3,7 +3,7 @@ import json
 from framework.enum.proxyauthtype import ProxyAuthType
 from framework.enum.proxyauthtype import proxy_auth_type_field
 from framework.models.installation import InstallationModel
-from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
+from framework.models.iplabelfilter import IpLabelFilterModel
 import psutil
 from framework.models.modem import ModemModel
 from dataclasses import dataclass, field
@@ -176,7 +176,7 @@ class ServerModemModel():
     auto_rotate: bool = None
     auto_rotate_time: int = None
     auto_rotate_hard_reset: bool = None
-    auto_rotate_filter: ProxyUserIPFilterModel = None
+    auto_rotate_filter: IpLabelFilterModel = None
     schedule: ModemsAutoRotateAgendaItem = None    
     proxy: dict = None    
 
@@ -261,7 +261,7 @@ class ServerModemModel():
             auto_rotate=True if row[9] and int(row[9]) == 1 else False,
             auto_rotate_time=row[10],
             auto_rotate_hard_reset=True if row[11] and int(row[11]) == 1 else False,
-            auto_rotate_filter=ProxyUserIPFilterModel.schema().loads(row[12], many=True) if row[12] != None else None,
+            auto_rotate_filter=IpLabelFilterModel.schema().loads(row[12], many=True) if row[12] != None else None,
             proxy_auth_type=ProxyAuthType(row[13]) if row[13] else ProxyAuthType.NONE 
             # created_at=row[11]
         )
@@ -351,7 +351,7 @@ class ServerModemModel():
                     1 if self.auto_rotate == True else 0,
                     int(self.auto_rotate_time) if self.auto_rotate_time else None,
                     1 if self.auto_rotate_hard_reset == True else 0,
-                    ProxyUserIPFilterModel.schema().dumps(self.auto_rotate_filter, many=True) if self.auto_rotate_filter else None,
+                    IpLabelFilterModel.schema().dumps(self.auto_rotate_filter, many=True) if self.auto_rotate_filter else None,
                     self.proxy_auth_type.value if self.proxy_auth_type else ProxyAuthType.NONE
                 )
             )
@@ -378,7 +378,7 @@ class ServerModemModel():
                     1 if self.auto_rotate == True else 0,
                     int(self.auto_rotate_time) if self.auto_rotate_time else None,
                     1 if self.auto_rotate_hard_reset == True else 0,
-                    ProxyUserIPFilterModel.schema().dumps(self.auto_rotate_filter, many=True) if self.auto_rotate_filter else None,
+                    IpLabelFilterModel.schema().dumps(self.auto_rotate_filter, many=True) if self.auto_rotate_filter else None,
                     self.proxy_auth_type.value if self.proxy_auth_type else ProxyAuthType.NONE,
                     self.id
                 )

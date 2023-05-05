@@ -17,8 +17,8 @@ import json
 from app import app
 from datetime import datetime
 from framework.manager.error.exception import ModemLockedByOtherThreadException, NoTaskRunningException
-from framework.models.proxyuser import ProxyUserModel
-from framework.models.proxyuseripfilter import ProxyUserIPFilterModel
+from framework.models.iplabel import IpLabelModel
+from framework.models.iplabelfilter import IpLabelFilterModel
 
 def filters_type(value, name):
     full_json_data = request.get_json()
@@ -27,7 +27,7 @@ def filters_type(value, name):
     if(not isinstance(filters_json, (list))):
         raise ValueError("The parameter " + name + " is not a valid array")
     
-    filters = ProxyUserIPFilterModel.schema().load(filters_json, many=True)
+    filters = IpLabelFilterModel.schema().load(filters_json, many=True)
     return filters
 
 class Modems(Resource):
@@ -295,11 +295,11 @@ class ModemRotate(Resource):
         proxy_username = data['proxy_username']
         proxy_user_id = None
         if proxy_username:
-            proxy_user = ProxyUserModel.find_by_username(proxy_username)
+            proxy_user = IpLabelModel.find_by_username(proxy_username)
             if proxy_user:
                 proxy_user_id = proxy_user.id
             else:
-                proxy_user_model = ProxyUserModel(username = proxy_username)
+                proxy_user_model = IpLabelModel(username = proxy_username)
                 proxy_user_model.save_to_db()
                 proxy_user_id = proxy_user_model.id
 

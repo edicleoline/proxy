@@ -197,12 +197,29 @@ if __name__ == '__main__':
 
     try:
         conn.execute("""
-            CREATE TABLE proxy_user (
+            CREATE TABLE ip_label (
             id INTEGER NOT NULL, 
-            username VARCHAR(90) NOT NULL, 
+            label VARCHAR(90) NOT NULL, 
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
             PRIMARY KEY (id),
-            UNIQUE (username)
+            UNIQUE (label)
+            )
+            """)
+    except SQLError:
+        pass
+
+    try:
+        conn.execute("""
+            CREATE TABLE ip_label_filter (
+            id INTEGER NOT NULL, 
+            ip_label_id INTEGER NOT NULL, 
+            modem_id INTEGER NOT NULL, 
+            filter_type VARCHAR(15) NOT NULL,    
+            filter_value VARCHAR(90) NOT NULL,    
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,                    
+            PRIMARY KEY (id), 
+            FOREIGN KEY(ip_label_id) REFERENCES ip_label (id),
+            FOREIGN KEY(modem_id) REFERENCES modem (id)
             )
             """)
     except SQLError:
@@ -220,24 +237,7 @@ if __name__ == '__main__':
             )
             """)
     except SQLError:
-        pass
-
-    try:
-        conn.execute("""
-            CREATE TABLE proxy_user_ip_filter (
-            id INTEGER NOT NULL, 
-            proxy_user_id INTEGER NOT NULL, 
-            modem_id INTEGER NOT NULL, 
-            filter_type VARCHAR(15) NOT NULL,    
-            filter_value VARCHAR(90) NOT NULL,    
-            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,                    
-            PRIMARY KEY (id), 
-            FOREIGN KEY(proxy_user_id) REFERENCES proxy_user (id),
-            FOREIGN KEY(modem_id) REFERENCES modem (id)
-            )
-            """)
-    except SQLError:
-        pass
+        pass    
 
     try:
         conn.execute("""
