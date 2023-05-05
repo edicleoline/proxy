@@ -293,39 +293,45 @@ class ModemRotate(Resource):
         filters = data['filters']
 
         ip_label = data['proxy_username']
-        ip_label_id = None
+        ip_label_model = None
         if ip_label:
             ip_label_model = IpLabelModel.find_by_label(ip_label)
-            if ip_label_model:
-                ip_label_id = ip_label_model.id
-            else:
+            if not ip_label_model:
                 ip_label_model = IpLabelModel(ip_label)
                 ip_label_model.save_to_db()
-                ip_label_id = ip_label_model.id
 
-        if ip_label_id and filters:
+        if ip_label_model and filters:
             for filter in filters:
-                filter.ip_label_id = ip_label_id
+                filter.ip_label_id = ip_label_model.id
                 filter.modem_id = modem_id
                 filter.save_to_db()
         
-        try:
-            app.modems_manager.rotate(
-                infra_modem = imodem, 
-                proxy_user_id = ip_label_id,
-                proxy_username = ip_label,
-                filters = filters, 
-                hard_reset = data['hard_reset'], 
-                not_changed_try_count = 3, 
-                not_ip_try_count = 3
-            )     
-        except ModemLockedByOtherThreadException as err:
-            return {
-                "error": {
-                    "code": 780,
-                    "message": str(err)
-                }                
-            }, 400        
+        app.modems_manager.rotate(
+            infra_modem = imodem, 
+            proxy_user_id = ip_label_model.id,
+            proxy_username = ip_label,
+            filters = filters, 
+            hard_reset = data['hard_reset'], 
+            not_changed_try_count = 3, 
+            not_ip_try_count = 3
+        )     
+        # try:
+        #     app.modems_manager.rotate(
+        #         infra_modem = imodem, 
+        #         proxy_user_id = ip_label_model.id,
+        #         proxy_username = ip_label,
+        #         filters = filters, 
+        #         hard_reset = data['hard_reset'], 
+        #         not_changed_try_count = 3, 
+        #         not_ip_try_count = 3
+        #     )     
+        # except ModemLockedByOtherThreadException as err:
+        #     return {
+        #         "error": {
+        #             "code": 780,
+        #             "message": str(err)
+        #         }                
+        #     }, 400        
 
         return {"message": "OK"}, 200
 
