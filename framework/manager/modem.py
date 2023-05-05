@@ -51,8 +51,7 @@ class ModemManager():
     def rotate(
             self, 
             infra_modem: IModem, 
-            proxy_user_id = None, 
-            proxy_username = None,
+            ip_label_model = None, 
             filters = None, 
             hard_reset = False, 
             not_changed_try_count = 3, 
@@ -63,7 +62,7 @@ class ModemManager():
         if thread_running:
             raise ModemLockedByOtherThreadException('We could running this task now because this modem is locked by another thread.')
 
-        self.remove_thread_from_list(infra_modem=infra_modem)
+        self.remove_thread_from_list(infra_modem = infra_modem)
 
         event_stop = Event()
         infra_modem.event_stop = event_stop
@@ -73,8 +72,7 @@ class ModemManager():
             target=infra_modem.rotate, 
             args=(
                 filters, 
-                proxy_user_id, 
-                proxy_username,
+                ip_label_model,
                 hard_reset, 
                 not_changed_try_count, 
                 not_ip_try_count,
