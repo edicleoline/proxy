@@ -1,9 +1,11 @@
 from datetime import datetime
+from typing import List
 from framework.infra.modem import Modem as IModem
 from threading import Thread
 from threading import Event
 from enum import Enum
 from framework.manager.error.exception import ModemLockedByOtherThreadException, ModemRebootException, NoTaskRunningException
+from framework.manager.subscriber import ModemManagerSubscriber, ModemManagerSubscriberEvent
 from framework.models.modemthreadtask import TaskWizard
 from framework.proxy.factory import ProxyService
 from dataclasses import dataclass, field
@@ -17,13 +19,10 @@ class ModemManager():
         self.proxy_service = proxy_service
         self.settings = settings
         self.threads = []
-        self.rotate_subscribers = []
+        self.subscribers: List[ModemManagerSubscriber] = []
 
-    def subscribe_rotate(self, callback):
-        self.rotate_subscribers.append(callback)
-
-    def notify_rotate_subscribers(self, status, data):
-        for callback in self.rotate_subscribers: callback(status, data)
+    def subscribe(self, event: ModemManagerSubscriberEvent, callback):
+        self.subscribers.append(ModemManagerSubscriber(event, callback))
 
     def reboot(self, infra_modem: IModem, hard_reset = False):
         thread_running = self.running(infra_modem)
@@ -79,7 +78,7 @@ class ModemManager():
                 hard_reset, 
                 not_changed_try_count, 
                 not_ip_try_count,
-                lambda status, data: self.notify_rotate_subscribers(status, data)
+                self.subscribers
             )
         )
         process_thread.start()

@@ -1,7 +1,9 @@
 import time
+from typing import List
 import requests
 from threading import Event
 from framework.error.exception import TimeoutException
+from framework.manager.subscriber import ModemManagerSubscriber, ModemManagerSubscriberEvent
 from framework.middleware.factory import MiddlewareFactory
 from framework.models.modemdiagnose import ModemDiagnoseModel, ModemDiagnoseOwner, ModemDiagnoseType
 from framework.models.modemthreadtask import TaskWizard, TaskWizardStep, TaskWizardStepType
@@ -327,14 +329,14 @@ class Modem:
 
         
     def rotate(
-            self, 
-            filters = None, 
-            proxy_user_id = None, 
-            proxy_username = None,
-            hard_reset = False, 
-            not_changed_try_count = 3, 
-            not_ip_try_count = 3,
-            callback = None
+        self, 
+        filters = None, 
+        proxy_user_id = None, 
+        proxy_username = None,
+        hard_reset = False, 
+        not_changed_try_count = 3, 
+        not_ip_try_count = 3,
+        subscribers: List[ModemManagerSubscriber] = []
     ):
         modem_log_model = ModemLogModel(
             modem_id=self.modem().id, 
@@ -543,7 +545,7 @@ class Modem:
                     modem_log_model.save_to_db()
                     self.log(modem_log_model)
 
-                    if callback: callback('success', {
+                    ModemManagerSubscriber.notify(subscribers, ModemManagerSubscriberEvent.ON_ROTATE_SUCCESS, {
                         'modem': {
                             'id': self.server_modem_model.id
                         },
@@ -553,7 +555,7 @@ class Modem:
                             'network_provider': network_provider,
                             'signalbar': signalbar
                         }
-                    })
+                    })                    
 
                     break
 

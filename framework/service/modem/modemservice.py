@@ -2,7 +2,7 @@ import copy
 from datetime import datetime, timedelta
 from typing import List
 from framework.error.exception import TimeoutException
-from framework.manager.modem import ModemManager, ModemThreadData
+from framework.manager.modem import ModemManager, ModemManagerSubscriberEvent, ModemThreadData
 from framework.models.client import Addr, Client, Instance
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 from framework.models.server import ServerModel, ServerModemModel
@@ -232,7 +232,7 @@ class ModemsObserver():
         self.server_modems = []
         self.modems_states = []
         self.subscribers = subscribers        
-        self.modems_manager.subscribe_rotate(self.on_modems_manager_rotate)
+        self.modems_manager.subscribe(ModemManagerSubscriberEvent.ON_ROTATE_SUCCESS, self.on_modems_manager_rotate)
         self.common_service.subscribe(CommonServiceSubscriberEvent.ON_NET_CONNECTIONS_UPDATED, lambda connections: self.on_net_connections_updated_callback(connections))
         self.reload_modems()
 
@@ -241,7 +241,7 @@ class ModemsObserver():
             for subscriber in self.subscribers:
                 if subscriber.event == event: subscriber.callback(self.modems_states)    
 
-    def on_modems_manager_rotate(self, status, data):
+    def on_modems_manager_rotate(self, data):
         if data and 'connectivity' in data:
             if self.modems_states:
                 modem_state = None
