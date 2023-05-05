@@ -300,6 +300,7 @@ class ModemRotate(Resource):
                 ip_label_model = IpLabelModel(ip_label)
                 ip_label_model.save_to_db()
 
+        print(ip_label_model)
         if ip_label_model and filters:
             for filter in filters:
                 filter.ip_label_id = ip_label_model.id
