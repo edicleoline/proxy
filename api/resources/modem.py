@@ -297,7 +297,7 @@ class ModemRotate(Resource):
         if ip_label:
             ip_label_model = IpLabelModel.find_by_label(ip_label)
             if not ip_label_model:
-                ip_label_model = IpLabelModel(ip_label)
+                ip_label_model = IpLabelModel(label = ip_label)
                 ip_label_model.save_to_db()
 
         print(ip_label_model)
