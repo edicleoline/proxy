@@ -2,20 +2,18 @@ from flask_restful import Resource, reqparse
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt
 from framework.models.iplabel import IpLabelModel
 from framework.models.iplabelfilter import IpLabelFilterModel
-
 from framework.models.server import ServerModel
 from models.serverstatus import ServerStatus as ServerStatusModel
+from resources.restresource import RestResource
 
 class ProxyUser(Resource):
     pass
 
-class ProxyUsers(Resource):
+class ProxyUsers(RestResource):
     def get(self):
-        proxy_users = IpLabelModel.all()
-        items = [item.json() for item in proxy_users]
-
-        return {"items": items}, 200
-
+        ip_labels = IpLabelModel.all()
+        return self.dumps(IpLabelModel, ip_labels), 200
+    
 
 class ProxyUserByUsername(Resource):
     def get(self, username):
