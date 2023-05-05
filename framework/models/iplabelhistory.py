@@ -12,14 +12,14 @@ class IpLabelHistoryModel():
                 SELECT COUNT(*) 
                     FROM modem_ip_history mih 
                     LEFT JOIN ip_label_history puih ON (puih.modem_ip_history_id = mih.id) 
-                        WHERE mih.ip = ? AND puih.proxy_user_id <> ?
+                        WHERE mih.ip = ? AND puih.ip_label_id <> ?
             """, (ip, ip_label_id)).fetchone()
         conn.close(True)
         return True if int(row[0]) > 0 else False
 
     def save_to_db(self):
         conn = connection()
-        conn.execute("INSERT INTO ip_label_history (proxy_user_id, modem_ip_history_id) VALUES (?, ?)", (
+        conn.execute("INSERT INTO ip_label_history (ip_label_id, modem_ip_history_id) VALUES (?, ?)", (
             self.ip_label_id, self.modem_ip_history_id
             ))
         self.id = conn.last_insert_rowid()
