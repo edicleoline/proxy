@@ -227,13 +227,13 @@ if __name__ == '__main__':
 
     try:
         conn.execute("""
-            CREATE TABLE proxy_user_ip_history (
+            CREATE TABLE ip_label_history (
             id INTEGER NOT NULL, 
-            proxy_user_id INTEGER NOT NULL, 
+            ip_label_id INTEGER NOT NULL, 
             modem_ip_history_id INTEGER NOT NULL,                         
             PRIMARY KEY (id), 
             FOREIGN KEY(modem_ip_history_id) REFERENCES modem_ip_history (id),
-            FOREIGN KEY(proxy_user_id) REFERENCES proxy_user (id)
+            FOREIGN KEY(ip_label_id) REFERENCES ip_label (id)
             )
             """)
     except SQLError:

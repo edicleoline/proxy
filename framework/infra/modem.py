@@ -10,7 +10,7 @@ from framework.models.modemthreadtask import TaskWizard, TaskWizardStep, TaskWiz
 from framework.models.iplabelfilter import IpLabelFilterModel
 from framework.models.server import ServerModemModel
 from framework.models.modemiphistory import ModemIPHistoryModel
-from framework.models.proxyuseriphistory import ProxyUserIPHistoryModel
+from framework.models.iplabelhistory import IpLabelHistoryModel
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 from framework.infra.netiface import NetIface
 from framework.infra.usb import USB
@@ -475,7 +475,7 @@ class Modem:
                 modem_gateway = NetIface.get_gateway_from_ipv4(ipv4 = modem_ifaddress['addr'])
 
                 if ip_label_model and self.server_modem_model.prevent_same_ip_users == True:
-                    is_ip_reserved_for_other = ProxyUserIPHistoryModel.is_ip_reserved_for_other(ip = new_ip, ip_label_id = ip_label_model.id)
+                    is_ip_reserved_for_other = IpLabelHistoryModel.is_ip_reserved_for_other(ip = new_ip, ip_label_id = ip_label_model.id)
 
                     if self.event_stop_is_set() == True: break
 
@@ -523,7 +523,7 @@ class Modem:
             
                 if done == True:
                     if ip_label_model:
-                        proxy_user_ip_history_model = ProxyUserIPHistoryModel(ip_label_id = ip_label_model.id, modem_ip_history_id = modem_ip_history.id)
+                        proxy_user_ip_history_model = IpLabelHistoryModel(ip_label_id = ip_label_model.id, modem_ip_history_id = modem_ip_history.id)
                         proxy_user_ip_history_model.save_to_db()
 
                     self.resolve_connectivity()
