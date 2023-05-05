@@ -305,16 +305,7 @@ class ModemRotate(Resource):
                 filter.ip_label_id = ip_label_model.id
                 filter.modem_id = modem_id
                 filter.save_to_db()
-        
-        app.modems_manager.rotate(
-            infra_modem = imodem, 
-            proxy_user_id = ip_label_model.id,
-            proxy_username = ip_label,
-            filters = filters, 
-            hard_reset = data['hard_reset'], 
-            not_changed_try_count = 3, 
-            not_ip_try_count = 3
-        )     
+                
         # try:
         #     app.modems_manager.rotate(
         #         infra_modem = imodem, 
