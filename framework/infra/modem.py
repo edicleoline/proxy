@@ -331,8 +331,7 @@ class Modem:
     def rotate(
         self, 
         filters = None, 
-        proxy_user_id = None, 
-        proxy_username = None,
+        ip_label_model = None,
         hard_reset = False, 
         not_changed_try_count = 3, 
         not_ip_try_count = 3,
@@ -345,7 +344,7 @@ class Modem:
             message='app.log.modem.rotate.starting',
             params={
                 'hard_reset': hard_reset,
-                'proxy_username': proxy_username,
+                'ip_label': ip_label_model.label,
                 'filters': IpLabelFilterModel.schema().dump(filters, many=True) if filters else None                
             },
             logged_at = datetime.now()
@@ -475,8 +474,8 @@ class Modem:
                 modem_ifaddress = inframodem_iface.ifaddresses[0]
                 modem_gateway = NetIface.get_gateway_from_ipv4(ipv4 = modem_ifaddress['addr'])
 
-                if proxy_user_id and self.server_modem_model.prevent_same_ip_users == True:
-                    is_ip_reserved_for_other = ProxyUserIPHistoryModel.is_ip_reserved_for_other(ip=new_ip, proxy_user_id=proxy_user_id)
+                if ip_label_model and self.server_modem_model.prevent_same_ip_users == True:
+                    is_ip_reserved_for_other = ProxyUserIPHistoryModel.is_ip_reserved_for_other(ip = new_ip, ip_label_id = ip_label_model.id)
 
                     if self.event_stop_is_set() == True: break
 
@@ -523,8 +522,8 @@ class Modem:
                     done = True
             
                 if done == True:
-                    if proxy_user_id:
-                        proxy_user_ip_history_model = ProxyUserIPHistoryModel(proxy_user_id = proxy_user_id, modem_ip_history_id = modem_ip_history.id)
+                    if ip_label_model:
+                        proxy_user_ip_history_model = ProxyUserIPHistoryModel(ip_label_id = ip_label_model.id, modem_ip_history_id = modem_ip_history.id)
                         proxy_user_ip_history_model.save_to_db()
 
                     self.resolve_connectivity()

@@ -300,30 +300,28 @@ class ModemRotate(Resource):
                 ip_label_model = IpLabelModel(label = ip_label)
                 ip_label_model.save_to_db()
 
-        print(ip_label_model)
         if ip_label_model and filters:
             for filter in filters:
                 filter.ip_label_id = ip_label_model.id
                 filter.modem_id = modem_id
                 filter.save_to_db()
                 
-        # try:
-        #     app.modems_manager.rotate(
-        #         infra_modem = imodem, 
-        #         proxy_user_id = ip_label_model.id,
-        #         proxy_username = ip_label,
-        #         filters = filters, 
-        #         hard_reset = data['hard_reset'], 
-        #         not_changed_try_count = 3, 
-        #         not_ip_try_count = 3
-        #     )     
-        # except ModemLockedByOtherThreadException as err:
-        #     return {
-        #         "error": {
-        #             "code": 780,
-        #             "message": str(err)
-        #         }                
-        #     }, 400        
+        try:
+            app.modems_manager.rotate(
+                infra_modem = imodem, 
+                ip_label_model = ip_label_model,
+                filters = filters, 
+                hard_reset = data['hard_reset'], 
+                not_changed_try_count = 3, 
+                not_ip_try_count = 3
+            )     
+        except ModemLockedByOtherThreadException as err:
+            return {
+                "error": {
+                    "code": 780,
+                    "message": str(err)
+                }                
+            }, 400        
 
         return {"message": "OK"}, 200
 

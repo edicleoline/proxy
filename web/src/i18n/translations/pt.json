@@ -36,7 +36,7 @@
     "app.log.modem.params.ipv4": "IPv4",
     "app.log.modem.params.hard_reset": "Hard-reset",
     "app.log.modem.params.times": "Tentativas",
-    "app.log.modem.params.proxy_username": "Usuário",
+    "app.log.modem.params.ip_label": "Rótulo",
     "app.log.modem.params.hard_reset.true": "ativado",
     "app.log.modem.params.hard_reset.false": "desativado",
     "app.log.modem.params.value.none": "não informado",
