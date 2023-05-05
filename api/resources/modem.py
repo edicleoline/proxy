@@ -292,28 +292,28 @@ class ModemRotate(Resource):
 
         filters = data['filters']
 
-        proxy_username = data['proxy_username']
-        proxy_user_id = None
-        if proxy_username:
-            proxy_user = IpLabelModel.find_by_username(proxy_username)
-            if proxy_user:
-                proxy_user_id = proxy_user.id
+        ip_label = data['proxy_username']
+        ip_label_id = None
+        if ip_label:
+            ip_label_model = IpLabelModel.find_by_label(ip_label)
+            if ip_label_model:
+                ip_label_id = ip_label_model.id
             else:
-                proxy_user_model = IpLabelModel(username = proxy_username)
-                proxy_user_model.save_to_db()
-                proxy_user_id = proxy_user_model.id
+                ip_label_model = IpLabelModel(ip_label)
+                ip_label_model.save_to_db()
+                ip_label_id = ip_label_model.id
 
-        if proxy_user_id and filters:
+        if ip_label_id and filters:
             for filter in filters:
-                filter.proxy_user_id = proxy_user_id
+                filter.ip_label_id = ip_label_id
                 filter.modem_id = modem_id
                 filter.save_to_db()
         
         try:
             app.modems_manager.rotate(
                 infra_modem = imodem, 
-                proxy_user_id = proxy_user_id,
-                proxy_username = proxy_username,
+                proxy_user_id = ip_label_id,
+                proxy_username = ip_label,
                 filters = filters, 
                 hard_reset = data['hard_reset'], 
                 not_changed_try_count = 3, 
