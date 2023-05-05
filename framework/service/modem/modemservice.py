@@ -233,7 +233,7 @@ class ModemsObserver():
         self.modems_states = []
         self.subscribers = subscribers        
         self.modems_manager.subscribe_rotate(self.on_modems_manager_rotate)
-        self.common_service.subscribe(CommonServiceSubscriberEvent.ON_NET_CONNECTIONS_UPDATED, lambda connections: self.on_net_connections_callback(connections))
+        self.common_service.subscribe(CommonServiceSubscriberEvent.ON_NET_CONNECTIONS_UPDATED, lambda connections: self.on_net_connections_updated_callback(connections))
         self.reload_modems()
 
     def notify_subscribers(self, event: ModemServiceSubscriberEvent = None):
@@ -284,7 +284,7 @@ class ModemsObserver():
             if modem_state.modem.id == server_modem_id: return index
         return -1       
     
-    def on_net_connections_callback(self, connections):
+    def on_net_connections_updated_callback(self, connections):
         if not self.server_modems: return []
 
         for server_modem in self.server_modems:
