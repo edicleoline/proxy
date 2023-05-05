@@ -17,8 +17,22 @@ from framework.service.server.servereventservice import EventType, Event as Serv
 from framework.util.format import HumanBytes
 from time import sleep
 from framework.settings import Settings
+from enum import Enum
 
 EXTERNAL_IP_CLACKER_ID = 'modem_observer.modem_state.modem.id.{0}'
+
+class ModemServiceSubscriberEvent(Enum):
+    ON_MODEMS_RELOAD                = 'on_modems_reload'
+    ON_MODEMS_STATUS_UPDATED        = 'on_modems_status_updated'
+    ON_MODEMS_CONNECTIVITY_UPDATED  = 'on_modems_connectivity_updated'
+
+class ModemServiceSubscriber:
+    event: ModemServiceSubscriberEvent
+    callback: None
+
+    def __init__(self, event: ModemServiceSubscriberEvent, callback):
+        self.event = event
+        self.callback = callback
 
 @dataclass_json
 @dataclass
@@ -201,7 +215,15 @@ class ModemsEventObserver():
 
 
 class ModemsObserver():
-    def __init__(self, server: ServerModel, modems_manager: ModemManager, settings: Settings, cloacker_service: CloackerService, common_service: CommonService):       
+    def __init__(
+        self, 
+        server: ServerModel, 
+        modems_manager: ModemManager, 
+        settings: Settings, 
+        cloacker_service: CloackerService, 
+        common_service: CommonService,
+        subscribers: List[ModemServiceSubscriber]
+    ):       
         self.server = server        
         self.modems_manager = modems_manager  
         self.settings = settings
@@ -209,24 +231,15 @@ class ModemsObserver():
         self.common_service = common_service
         self.server_modems = []
         self.modems_states = []
-        self.modems_states_subscribers = []
-        self.modems_connectivity_subscribers = []
-        self.reload_modems()
-
+        self.subscribers = subscribers        
         self.modems_manager.subscribe_rotate(self.on_rotate_event)
         self.common_service.subscribe(CommonServiceSubscribeType.NET_CONNECTIONS, lambda connections: self.on_net_connections_callback(connections))
+        self.reload_modems()
 
-    def subscribe_modems_states(self, callback):
-        self.modems_states_subscribers.append(callback)
-
-    def subscribe_modems_connectivity(self, callback):
-        self.modems_connectivity_subscribers.append(callback)
-
-    def notify_modems_states_subscribers(self):
-        for callback in self.modems_states_subscribers: callback(self.modems_states)
-
-    def notify_modems_connectivity_subscribers(self):
-        for callback in self.modems_connectivity_subscribers: callback(self.modems_states)
+    def notify_subscribers(self, event: ModemServiceSubscriberEvent = None):
+        if event:
+            for subscriber in self.subscribers:
+                if subscriber.event == event: subscriber.callback(self.modems_states)    
 
     def on_rotate_event(self, status, data):
         if data and 'connectivity' in data:
@@ -257,7 +270,7 @@ class ModemsObserver():
 
         self.modems_states = modems_states
         self.invert_external_ip_cloackers()
-        self.notify_modems_states_subscribers()
+        self.notify_subscribers(ModemServiceSubscriberEvent.ON_MODEMS_RELOAD)
 
     def invert_external_ip_cloackers(self):
         for modem_state in self.modems_states:
@@ -320,7 +333,7 @@ class ModemsObserver():
             if modem_state.is_connected != True:
                 modem_state.connectivity = None
 
-        self.notify_modems_connectivity_subscribers()
+        self.notify_subscribers(ModemServiceSubscriberEvent.ON_MODEMS_STATUS_UPDATED)
 
         return self.modems_states
     
@@ -330,6 +343,7 @@ class ModemsObserver():
     def observe_connectivity(self):
         if not self.server_modems: return []
 
+        any_updated = False
         for server_modem in self.server_modems:
             modem_state_index = self.modem_state_index_by_server_modem_id(self.modems_states, server_modem.id)
             modem_state = self.modems_states[modem_state_index] if modem_state_index > -1 else None
@@ -342,6 +356,7 @@ class ModemsObserver():
             device_middleware = modem_state.infra_modem.get_device_middleware()
             if device_middleware == None: continue
 
+            any_updated = True
             device_details = device_middleware.details()
             network_type = device_details['network_type'] if device_details else None
             network_provider = device_details['network_provider'] if device_details else None
@@ -383,7 +398,8 @@ class ModemsObserver():
                 )
             )  
 
-        self.notify_modems_states_subscribers()
+        if any_updated == True:
+            self.notify_subscribers(ModemServiceSubscriberEvent.ON_MODEMS_CONNECTIVITY_UPDATED)
     
     def modem_state_index_by_id(self, server_modem_model_id):
         if not self.modems_states: return -1
@@ -435,21 +451,28 @@ class ModemsObserveConnectivityThread(Thread):
 
 
 class ModemsService():
-    def __init__(self, server: ServerModel, modems_manager: ModemManager, settings: Settings, cloacker_service: CloackerService, common_service: CommonService):                
+    def __init__(
+        self, 
+        server: ServerModel, 
+        modems_manager: ModemManager, 
+        settings: Settings, 
+        cloacker_service: CloackerService, 
+        common_service: CommonService,
+        subscribers: List[ModemServiceSubscriber] = []
+    ):                
         self.server = server        
         self.modems_manager = modems_manager
         self.settings = settings
         self.cloacker_service = cloacker_service
         self.common_service = common_service
-        self.modems_observer = ModemsObserver(server = server, modems_manager = modems_manager, settings = settings, cloacker_service = cloacker_service, common_service = common_service)        
-
+        self.subscribers = subscribers
+        self.modems_observer = ModemsObserver(server, modems_manager, settings, cloacker_service, common_service, self.subscribers)        
         self._modems_observe_status_lock = Lock()
         self._modems_observe_status_stop_event = Event()
         self._modems_observe_status_thread = None
-
         self._modems_observe_connectivity_lock = Lock()
         self._modems_observe_connectivity_stop_event = Event()
-        self._modems_observe_connectivity_thread = None        
+        self._modems_observe_connectivity_thread = None          
 
     def observe(self):
         with self._modems_observe_status_lock:
@@ -474,14 +497,11 @@ class ModemsService():
         self._modems_observe_status_stop_event.set()
         self._modems_observe_connectivity_stop_event.set()
 
-    def subscribe_status(self, callback):
-        self.modems_observer.subscribe_modems_states(callback)
-
-    def subscribe_connectivity(self, callback):
-        self.modems_observer.subscribe_modems_connectivity(callback)
-
     def reload_modems(self):
         self.modems_observer.reload_modems()
+    
+    def subscribe(self, event: ModemServiceSubscriberEvent, callback):
+        self.subscribers.append(ModemServiceSubscriber(event, callback))
         
 
 class ModemsAutoRotateSchedule():
