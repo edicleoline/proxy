@@ -13,7 +13,7 @@ from framework.models.installation import InstallationModel
 from framework.infra.netiface import NetIface
 from framework.infra.modem import Modem as InfraModem
 from framework.infra.route import Route
-from framework.models.modemiphistory import ModemIPHistoryModel
+from framework.models.modemiphistory import ModemIpHistoryModel
 from framework.models.iplabelfilter import IpLabelFilterModel
 
 from framework.models.server import ServerModel, ServerModemModel, USBPortModel, USBPortStatus

@@ -9,7 +9,7 @@ from framework.models.modemdiagnose import ModemDiagnoseModel, ModemDiagnoseOwne
 from framework.models.modemthreadtask import TaskWizard, TaskWizardStep, TaskWizardStepType
 from framework.models.iplabelfilter import IpLabelFilterModel
 from framework.models.server import ServerModemModel
-from framework.models.modemiphistory import ModemIPHistoryModel
+from framework.models.modemiphistory import ModemIpHistoryModel
 from framework.models.iplabelhistory import IpLabelHistoryModel
 from framework.models.modemlog import ModemLogModel, ModemLogOwner, ModemLogType
 from framework.infra.netiface import NetIface
@@ -467,7 +467,7 @@ class Modem:
             signalbar = modem_details['signalbar'] if modem_details else None
 
             if new_ip != None and new_ip != old_ip:
-                modem_ip_history = ModemIPHistoryModel(modem_id = self.modem().id, ip = new_ip, network_type = network_type, network_provider = network_provider, signalbar = signalbar)
+                modem_ip_history = ModemIpHistoryModel(modem_id = self.modem().id, ip = new_ip, network_type = network_type, network_provider = network_provider, signalbar = signalbar)
                 modem_ip_history.save_to_db()
 
                 inframodem_iface = self.iface()
