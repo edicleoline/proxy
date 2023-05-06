@@ -178,7 +178,7 @@ const RotateDialog = (props) => {
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
-                                    label="Usuário"
+                                    label="Rótulo"
                                     variant="outlined"
                                     InputProps={{
                                         ...params.InputProps,
