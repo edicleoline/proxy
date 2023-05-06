@@ -292,7 +292,7 @@ class ModemRotate(Resource):
 
         filters = data['filters']
 
-        ip_label = data['proxy_username']
+        ip_label = data['ip_label']
         ip_label_model = None
         if ip_label:
             ip_label_model = IpLabelModel.find_by_label(ip_label)

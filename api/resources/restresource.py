@@ -12,3 +12,6 @@ class RestResource(Resource):
         return {
             "items": json.loads(items_json)
         }
+    
+    def dump(self, data: any):
+        return data.to_json()

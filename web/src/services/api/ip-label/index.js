@@ -1,6 +1,6 @@
-import api from '../../api';
+import api from '..';
 
-export function getProxyUsers() {
+export function getIpLabels() {
     return new Promise((resolve, reject) => {
         api.get('/proxy-users').then(
             (response) => {
@@ -13,9 +13,9 @@ export function getProxyUsers() {
     });
 }
 
-export function getProxyUserByUsername(username) {
+export function getIpLabel(label) {
     return new Promise((resolve, reject) => {
-        api.get(`/proxy-user/by-username/${username}`).then(
+        api.get(`/proxy-user/by-username/${label}`).then(
             (response) => {
                 resolve(response.data);
             },
@@ -26,9 +26,9 @@ export function getProxyUserByUsername(username) {
     });
 }
 
-export function getProxyUserFilters(proxyUserId, modemId) {
+export function getIpLabelFilters(ipLabelId, modemId) {
     return new Promise((resolve, reject) => {
-        api.get(`proxy-user/${proxyUserId}/modem/${modemId}/filters`).then(
+        api.get(`proxy-user/${ipLabelId}/modem/${modemId}/filters`).then(
             (response) => {
                 resolve(response.data);
             },

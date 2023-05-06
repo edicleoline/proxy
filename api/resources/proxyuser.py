@@ -17,13 +17,8 @@ class ProxyUsers(RestResource):
 
 class ProxyUserByUsername(Resource):
     def get(self, username):
-        proxy_user = IpLabelModel.find_by_label(username)
-
-        if proxy_user == None:
-            return {"items": []}, 200
-
-        return proxy_user.json()
-
+        return self.dump(IpLabelModel.find_by_label(username)), 200
+    
 
 class ProxyUserModemFilters(Resource):
     def get(self, proxy_user_id, modem_id):
