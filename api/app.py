@@ -109,7 +109,7 @@ api.add_resource(ModemLogs, "/modem/<int:modem_id>/log")
 api.add_resource(ModemScheduleAutoRotate, "/modem/<int:modem_id>/schedule/auto-rotate")
 
 api.add_resource(IpLabels, "/ip-labels")
-api.add_resource(IpLabelByLabel, "/ip-label/by-label/<string:label>")
+api.add_resource(IpLabelByLabel, "/ip-label/by-label/<string:ip_label>")
 api.add_resource(IpLabelModemFilters, "/ip-labels/<int:ip_label_id>/modem/<int:modem_id>/filters")
 
 api.add_resource(Devices, "/devices")
