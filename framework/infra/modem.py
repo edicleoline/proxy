@@ -344,7 +344,7 @@ class Modem:
             message='app.log.modem.rotate.starting',
             params={
                 'hard_reset': hard_reset,
-                'ip_label': ip_label_model.label,
+                'ip_label': ip_label_model.label if ip_label_model else None,
                 'filters': IpLabelFilterModel.schema().dump(filters, many=True) if filters else None                
             },
             logged_at = datetime.now()

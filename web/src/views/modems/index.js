@@ -25,6 +25,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Popover from '@mui/material/Popover';
 import { FormattedMessage } from 'react-intl';
 import { IconDotsVertical } from '@tabler/icons';
+import SettingsIcon from '@mui/icons-material/Settings';
 import RotateDialog from 'ui-component/modem/Rotate';
 import AutoRotateInfo from 'ui-component/modem/AutoRotateInfo';
 import RebootDialog from 'ui-component/modem/Reboot';
@@ -46,6 +47,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ADD_DOCK } from 'store/actions/types';
 import { DOCK_TYPE, addDock, Docker } from 'ui-component/Dock/Docker';
 import Clients from './Clients';
+import Pagination from '@mui/material/Pagination';
+import PaginationItem from '@mui/material/PaginationItem';
+import Title from './Title';
+import SearchIcon from '@mui/icons-material/Search';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import Tooltip from '@mui/material/Tooltip';
 
 const ModemIdWrapper = styled.div`
     position: relative;
@@ -253,8 +260,56 @@ const Modems = () => {
 
     return (
         <MainCard
-            title="Modems"
-            secondary={<SecondaryAction link="https://next.material-ui.com/system/typography/" />}
+            title={<Title modems={modems} />}
+            secondary={
+                <Grid container direction="column" alignItems="end">
+                    {/* <Grid item>
+                        <SecondaryAction link="https://next.material-ui.com/system/typography/" />
+                    </Grid> */}
+                    <Grid item>
+                        <Grid container direction="row" alignItems="center">
+                            <Grid item>
+                                <Pagination
+                                    count={1}
+                                    size="small"
+                                    disabled
+                                    renderItem={(item) => <PaginationItem sx={{ background: 'transparent !important' }} {...item} />}
+                                />
+                            </Grid>
+                            <Grid item>
+                                <Divider sx={{ height: 18, m: 0.5 }} orientation="vertical" />
+                            </Grid>
+                            <Grid item>
+                                <Tooltip title="Adicionar um modem">
+                                    <IconButton
+                                        size="small"
+                                        color="primary"
+                                        // onClick={handleModemOpenMenuClick(item.modem.id)}
+                                    >
+                                        <AddCircleIcon fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Buscar dispositivo, IP, provedor">
+                                    <IconButton
+                                        size="small"
+                                        // onClick={handleModemOpenMenuClick(item.modem.id)}
+                                    >
+                                        <SearchIcon fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Preferências">
+                                    <IconButton
+                                        size="small"
+                                        // onClick={handleModemOpenMenuClick(item.modem.id)}
+                                    >
+                                        <SettingsIcon fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            }
             contentSX={{ padding: '0 !important' }}
         >
             <Grid container spacing={0}>
@@ -277,7 +332,7 @@ const Modems = () => {
                                                 <TableCell align="left">Proxy IPv4</TableCell>
                                                 <TableCell align="left">Proxy IPv6</TableCell>
                                                 <TableCell align="right">Uso de dados</TableCell>
-                                                <TableCell align="right">Clientes</TableCell>
+                                                <TableCell align="right">Conexões</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
