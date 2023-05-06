@@ -15,7 +15,7 @@ class ProxyUsers(RestResource):
         return self.dumps(IpLabelModel, ip_labels), 200
     
 
-class ProxyUserByUsername(Resource):
+class ProxyUserByUsername(RestResource):
     def get(self, username):
         return self.dump(IpLabelModel.find_by_label(username)), 200
     

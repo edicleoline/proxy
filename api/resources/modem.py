@@ -238,7 +238,7 @@ _server_modem_rotate_parser.add_argument(
     "hard_reset", type=bool, required=True, help=""
 )
 _server_modem_rotate_parser.add_argument(
-    "proxy_username", type=str, required=False, help=""
+    "ip_label", type=str, required=False, help=""
 )
 _server_modem_rotate_parser.add_argument(
     "filters", type=filters_type, location="json", required=False, help=""

@@ -19,7 +19,7 @@ from framework.models.iplabelfilter import IpLabelFilterModel
 from framework.models.server import ServerModel, ServerModemModel, USBPortModel, USBPortStatus
 from framework.models.modem import ModemModel
 
-from framework.models.proxyuseriphistory import IpLabelHistoryModel
+from framework.models.iplabelhistory import IpLabelHistoryModel
 from framework.models.installation import InstallationModel
 from framework.models.user import UserModel
 from framework.models.iplabel import IpLabelModel
