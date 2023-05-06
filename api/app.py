@@ -6,7 +6,7 @@ from flask_cors import CORS
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from resources.modem import ModemDiagnose, ModemLockWizardStepResponse, ModemReboot, ModemRotate, ModemScheduleAutoRotate, Modems, Modem, ModemLogs
-from resources.proxyuser import ProxyUserByUsername, ProxyUserModemFilters, ProxyUsers
+from api.resources.iplabel import IpLabelByLabel, IpLabelModemFilters, IpLabels
 from resources.device import Devices
 from resources.middleware import Middlewares
 from blocklist import BLOCKLIST
@@ -108,9 +108,9 @@ api.add_resource(ModemLockWizardStepResponse, "/modem/<int:modem_id>/lock/<strin
 api.add_resource(ModemLogs, "/modem/<int:modem_id>/log")
 api.add_resource(ModemScheduleAutoRotate, "/modem/<int:modem_id>/schedule/auto-rotate")
 
-api.add_resource(ProxyUsers, "/proxy-users")
-api.add_resource(ProxyUserByUsername, "/proxy-user/by-username/<string:username>")
-api.add_resource(ProxyUserModemFilters, "/proxy-user/<int:proxy_user_id>/modem/<int:modem_id>/filters")
+api.add_resource(IpLabels, "/ip-labels")
+api.add_resource(IpLabelByLabel, "/ip-label/by-label/<string:label>")
+api.add_resource(IpLabelModemFilters, "/ip-labels/<int:ip_label_id>/modem/<int:modem_id>/filters")
 
 api.add_resource(Devices, "/devices")
 api.add_resource(Middlewares, "/middlewares")

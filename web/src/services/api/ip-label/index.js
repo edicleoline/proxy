@@ -2,7 +2,7 @@ import api from '..';
 
 export function getIpLabels() {
     return new Promise((resolve, reject) => {
-        api.get('/proxy-users').then(
+        api.get('/ip-labels').then(
             (response) => {
                 resolve(response.data);
             },
@@ -15,7 +15,7 @@ export function getIpLabels() {
 
 export function getIpLabel(label) {
     return new Promise((resolve, reject) => {
-        api.get(`/proxy-user/by-username/${label}`).then(
+        api.get(`/ip-label/by-label/${label}`).then(
             (response) => {
                 resolve(response.data);
             },
@@ -28,7 +28,7 @@ export function getIpLabel(label) {
 
 export function getIpLabelFilters(ipLabelId, modemId) {
     return new Promise((resolve, reject) => {
-        api.get(`proxy-user/${ipLabelId}/modem/${modemId}/filters`).then(
+        api.get(`/ip-label/${ipLabelId}/modem/${modemId}/filters`).then(
             (response) => {
                 resolve(response.data);
             },
